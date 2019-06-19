@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>修改密码</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+	<script src="../../../common/fontclass/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/modifyThePassword.css">
+</head>
+
+<body>
+	<div style="display: none;" id="pwd_mask">
+		<div class="pwd_mask">
+			<div>
+				<div class="pwd_popup">
+					<div class="pwd_popup_t"></div>
+					<div id="tanchuang_box"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="password_m" class="password_m">
+		<span id="password_return">
+			<svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-fanhui"></use>
+            </svg>
+            <span style="padding-left: 1.6rem;font-weight: 800;">修改密码</span>
+		</span>
+	</div>
+	<div class="password_b">
+		<div class="x_pwd">
+			<div class="x_pwd_t">
+				<span>
+					<span>旧密码</span>
+				<div class="inp_box">
+					<input id="oldPwd" type="password" />
+				</div>
+				</span>
+				<span id="userOldPwd"></span>
+			</div>
+			<div class="x_pwd_t">
+				<span>
+					<span>新密码</span>
+				<div class="inp_box" style="display: inline-block;position: relative;">
+					<input id="userNewPwd" type="password" />
+				</div>
+				</span>
+				<span id="userNewPwd"></span>
+			</div>
+		</div>
+		<div id="pwdSubmint" class="pwdSubmint">提交修改</div>
+		<!--<div class="forgetPwd">忘记密码</div>-->
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+		bindEvent();
+	};
+
+	function bindEvent() {
+		$api.byId('password_return').addEventListener('touchend', function() {
+			api.closeFrame();
+		});
+		$api.byId('pwdSubmint').addEventListener('touchend', function() {
+		    if ($api.byId('oldPwd').value && $api.byId('oldPwd').value !== '' && $api.byId('userNewPwd').value && $api.byId('userNewPwd').value !== '') {
+		        if ($api.byId('oldPwd').value && $api.byId('oldPwd').value === $api.byId('userNewPwd').value && $api.byId('userNewPwd').value) {
+		            return toast.fail({
+                        title: '新密码和旧密码不能设置相同'
+					})
+				}
+                $myCenter.my_ChangePwd($api.byId('oldPwd').value, $api.byId('userNewPwd').value, funPwdSubmit, funErr);
+			} else {
+		        toast.fail({
+					title: '请完善密码信息'
+				})
+			}
+		});
+	}
+
+	function funPwdSubmit(resp) {
+		if (resp.errCode == 0) {
+			toast.fail({
+				title: '修改成功！'
+			});
+			$api.byId('oldPwd').value = '';
+			$api.byId('userNewPwd').value = '';
+		} else if (resp.errCode == 1) {
+			toast.fail({
+				title: resp.errMsg
+			})
+		} else if (resp.errCode == 600) {
+			toast.fail({
+				title: '旧密码错误'
+			});
+		} else if (resp.errCode == 601) {
+			toast.fail({
+				title: '请查看网络'
+			});
+		} else {
+			$api.byId('tanchuang_box').innerHTML = '<div class="pwdw">密码格式错误</div>' +
+				'<div class="pwdw">仅支持6-12位字母和数字</div>' +
+				'<div class="pwd_popup_b">' +
+				'<div ontouchend="pwdpopup_btn()">知道了</div>' +
+				'</div>';
+		}
+	}
+
+	function funErr(resp) {
+		toast.fail({
+			title: resp.errMsg,
+			duration: "2000"
+		})
+	}
+
+	function pwdpopup_btn() {
+		$api.byId('pwd_mask').style.display = "none";
+	}
+</script>
+
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>name</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/recommended_books_frm.css">
+</head>
+
+<body id="body">
+    <div class="title-text">根据你的挑战成绩，为你定制了几本适合的图书。</div>
+    <div class="icon-wrap">
+        <span class="span">嘀嗒精选书单根据你的阅读能力精心搭配，来源优质版本，要成长就要读好书！</span>
+        <svg id="changeBooks" class="icon icon-change" aria-hidden="true">
+            <use xlink:href="#icon-tuijianshuji_morenanniu"></use>
+        </svg>
+    </div>
+    <div id="bookContent" class="books-content">
+    </div>
+    <div id="startReadingBtn" class="start-reading-wrap">
+        开始阅读之旅
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    apiready = function() {
+        adaptationModel();
+        loadRecommendBooks();
+        bindEvent();
+    };
+
+    function bindEvent() {
+        // $analysis.bindZhuge('开始选书_进入选书页面b');
+
+        $analysis.bindEvent($api.byId('startReadingBtn'), 'touchend', function () {
+            goToHomePage()
+        }, '开始选书_开始阅读b');
+        $analysis.bindEvent($api.byId('changeBooks'), 'touchend', function () {
+            loadRecommendBooks();
+        }, '开始选书_换一换b');
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function loadRecommendBooks() {
+        $GradingTest.recommendBook(4, funSucBooks, funErr)
+    }
+
+    function funSucBooks(resp) {
+        if (resp.errCode === 0) {
+            if (resp.books && resp.books.length > 1) {
+                $api.html($api.byId('bookContent'), '');
+                console.log(JSON.stringify(resp));
+                resp.books.forEach(function(item, index) {
+                    var bookDom = document.createElement('div');
+                    var imgDom = document.createElement('img');
+                    $api.attr(imgDom, 'src', $comm.resUri + item.bcover);
+                    $api.attr(imgDom, 'class', 'book');
+                    $api.attr(bookDom, 'class', 'book-wrap');
+                    var iconDom;
+                    if (item.powerlevel === -1) {
+                        iconDom = '<svg class="icon icon-book" aria-hidden="true">\n' +
+                            '            <use xlink:href="#icon-tuijianshuji_bijiaorongyi"></use>\n' +
+                            '        </svg>';
+                    } else if (item.powerlevel === 0) {
+                        iconDom = '<svg class="icon icon-book" aria-hidden="true">\n' +
+                            '            <use xlink:href="#icon-tuijianshuji_shiheyuedu"></use>\n' +
+                            '        </svg>';
+                    } else {
+                        iconDom = '<svg class="icon icon-book" aria-hidden="true">\n' +
+                            '            <use xlink:href="#icon-tuijianshuji_juyoutiaozhan"></use>\n' +
+                            '        </svg>';
+                    }
+                    bookDom.appendChild(imgDom);
+                    $api.append(bookDom, iconDom);
+                    $api.byId('bookContent').appendChild(bookDom);
+                })
+            } else {
+                $api.html($api.byId('bookContent'), '未找到适合你的读书')
+            }
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+    }
+
+    function goToHomePage() {
+        $GradingTest.startReadingTravel(funSucTravel, funErr);
+    }
+
+    function funSucTravel(resp) {
+        if (resp.errCode === 0) {
+            api.openWin({
+                name: 'indexHomePage',
+                url: '../homePage/index_home_win.html',
+                pageParam: {
+                    name: 'home_page'
+                },
+                bounces: false,
+                slidBackEnabled: false
+            })
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+
+    }
+
+    function funErr() {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        })
+    }
+
+    function goback() {
+        api.closeFrame({});
+    }
+</script>
+
+</html>

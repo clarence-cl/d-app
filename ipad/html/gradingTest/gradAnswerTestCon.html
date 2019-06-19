@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>阅读能力测评-阅读选择题</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/gradAnswerTest.css">
+</head>
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="box">
+        <!-- 题目 -->
+        <div class="content" style="padding-top:0;">
+          <h2 v-if="questionsData.passages?true:false">阅读材料<span v-if="questionsData.source?true:false">选自：{{questionsData.source}}</span></h2>
+          <p style="margin:0;"  v-if="questionsData.passages?true:false" class="text"  v-for="item in passages">{{item}}</p>
+          <h2>单选题 </h2>
+          <!-- {{question.title}} -->
+          <h3 v-html="question.title"></h3>
+          <ul class="select" id="select">
+            <li :style="{backgroundColor:(selIndex==index?'#00b596':'#fff'),
+    color:selIndex==index?'#fff':'#708782'}" :class="item.answer && right?'right':!item.answer && item.isWrong?'wrong':''" v-for="(item,index) in options" @touchend="select(index,item.answer,questionsData.score)" >
+    <svg class="icon" aria-hidden="true" v-if="item.answer && right">
+        <use xlink:href="#icon-zhengque"></use>
+    </svg>
+    <svg class="icon" aria-hidden="true" v-if="!item.answer && item.isWrong">
+        <use xlink:href="#icon-cuowu"></use>
+    </svg>
+    {{item.text}}
+  </li>
+              <!-- <li class="right">
+              selIndex==index?answer==true?'sel right':'sel wrong':''
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-zhengque"></use>
+                </svg>回族
+              </li>
+              <li class="wrong">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-cuowu"></use>
+                </svg>回族
+              </li>
+              <li class="sel">回族</li>
+              <li>回族</li> -->
+          </ul>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript">
+apiready = function() {
+        // var readingAloudTime = null;
+        var readingTime = null;
+        var app = new Vue({
+                    el: '#box',
+                    data: {
+                      passages:[],
+                      testID:api.pageParam.testID,
+                      testType:api.pageParam.testType,
+                      questionId:null,
+                      questionsData:{},
+                      question:{},
+                      options:[],
+                      selIndex:-1,
+                      oldIndex:-1,//记录选择的哪一线，防止selIndex丢失断网重链
+                      answer:false,
+                      right:false,
+                      wrong:false,
+                      nowcount:0,
+                      total:0,
+                      questionType:0,
+                      toast:null,
+                      score:0,
+                      selSwitch: true,
+                      T:0
+                    },
+                    filters:{
+                      rep(value){
+                        return value.replace(/\\n/g,'<br>').replace(/\n/g,'<br>')
+                      }
+                    },
+                    mounted(){
+                      this.initData()
+                      this.getData()
+                      this.listener()
+                      this.toast = new customToast();
+                      this.time()
+                    },
+                    methods: {
+                      initData(){
+                        this.selIndex=-1
+                        this.answer=false
+                        this.right=false
+                        this.wrong=false
+                        this.score=0
+                        this.T=0
+                      },
+                        listener() {
+                          api.addEventListener({
+                              name: 'endTime'
+                          }, (ret, err)=>{
+                            this.tip("答题结束",2000)
+                          });
+                          api.addEventListener({ //监听朗读页面跳过时结束热身测弹窗显示
+                              name: 'skipMask'
+                          }, (ret, err)=>{
+                              if( ret ){
+                                this.end()
+                                api.sendEvent({ //同时显示朗读页灰色蒙层
+                                    name: 'mask',
+                                    extra: {
+                                        key: true,
+                                    }
+                                });
+                              }
+                          });
+
+                          api.addEventListener({ //监听朗读页面传递过来的数据
+                            name: 'data'
+                          },(ret, err)=>{
+                            this.gainData(ret.value.data)
+                            this.testID=ret.value.testID
+                            this.testType=ret.value.testType
+
+                          })
+                            api.addEventListener({  //监听退出时并显示弹窗显示
+                                name: 'exit'
+                            }, (ret, err)=>{
+                              api.sendEvent({
+                                  name: 'mask',
+                                  extra: {
+                                      key: true,
+                                  }
+                              });
+                                this.outTip()
+                            });
+                            api.addEventListener({ //监听选择按钮是否可选
+                                name: 'selSwitch'
+                            }, (ret, err)=>{
+                              this.selSwitch = false
+                              this.initData()
+                            });
+                        },
+                        select(index,answer,score){
+                            if(this.selSwitch){
+                              this.selIndex=index
+                              this.oldIndex=index
+                              this.right = false
+                              this.wrong = false
+                              this.answer = answer
+                              if(answer){
+                                this.score = score
+                              }else{
+                                this.score=0
+                              }
+                              this.send(true)
+                            }
+                            console.log("答案选择的序号==========="+this.selIndex)
+                            console.log("选择的答案==========="+answer)
+                            console.log("选择答案的分数==========="+this.score)
+                        },
+                        gainData(Data){
+                          if(Data){
+                            console.log("题目***************"+JSON.stringify(Data))
+                            //this.initData()
+                            this.selSwitch = true
+                            this.questionsData = JSON.parse(Data.question)
+                            if((this.questionsData.passages).indexOf("<br/>")!=-1){
+                              this.passages = (this.questionsData.passages).split("<br/>")
+                            }else{
+                              this.passages= [this.questionsData.passages]
+                            }
+                            //this.passages = this.questionsData.passages.replace(/\\n/g,'<br>').replace(/\n/g,'<br>')
+                            // this.question =  JSON.parse(Data.question).question
+                            // this.options = this.question.options
+                            this.total = Data.totalTestCount
+                            this.nowcount = Data.nowCount
+                            this.questionType = Data.questionType
+                            this.questionId = JSON.parse(Data.question).qid
+                            this.score = JSON.parse(Data.question).score
+                            api.sendEvent({
+                                name: 'headInfo',
+                                extra: {
+                                    nowcount: this.nowcount,
+                                    total: this.total,
+                                    questionType:this.questionType,
+                                    questionId:this.questionId,
+                                }
+                              })
+                            if(Data.questionType==1){
+                              api.sendEvent({
+                                  name: 'foot',
+                                  extra: {
+                                      data: Data,
+                                      key1:true
+                                  }
+                              });
+                                api.closeFrame({
+                                  name: 'gradAnswerTestCon'
+                                })
+
+                              // this.footFn(false)
+                            }else{
+                              this.question =  JSON.parse(Data.question).question||{}
+                              this.options = this.question.options||[]
+                              this.send(false)
+                          }
+                          //控制跳过颜色
+                          this.skip(true)
+                          this.selSwitch=true
+                          this.answer=false
+                          this.right=false
+                          this.wrong=false
+                          }
+
+                        // if(this.total == this.nowcount){
+                        //   this.skip(false)
+                        // }else{
+                        //   this.skip(true)
+                        // }
+
+                          // for (var i = 0; i < this.options.length; i++) {
+                          //   this.options[i].isWrong = false
+                          // }
+                          console.log("问题类型-------"+this.questionType)
+                          console.log("测试类型-------"+this.testType)
+                          console.log("问题总数+++++++"+this.total)
+                          console.log("当前问题数----"+this.nowcount)
+                          console.log("回答答案----"+this.answer)
+                          console.log("得分+++"+this.score)
+                          console.log("题目--------"+this.question.title)
+                        },
+                        getData(){
+                          if(api.pageParam.data!=0){
+                            var Data = api.pageParam.data
+                            this.gainData(api.pageParam.data)
+                          }else{
+                            var data = {
+                              testID:this.testID
+                            }
+                            $comm.socket(8003,data,(res)=>{
+                              if(res){
+                                let ret = JSON.parse(res)
+                                if(ret.error==0){
+                                let  Data = JSON.parse(ret.datas)
+                                this.gainData(Data)
+                                }else{
+                                  api.toast({
+                                      msg: res.errorMsg,
+                                      duration: 2000,
+                                      location: 'middle'
+                                  });
+                                }
+                              }
+                            })
+                          }
+                        },
+                        list(){
+                          console.log("选择的答案————————"+this.answer)
+                          console.log("选择的序号======="+this.selIndex)
+                          console.log("选项——+————+——++——+——+——++——"+this.options)
+                            this.right = true
+                            if(this.selIndex!=-1){
+                              this.$set(this.options[this.selIndex],"isWrong",true)
+                            }else{
+                              this.$set(this.options[this.oldIndex],"isWrong",true)
+                            }
+                            this.selIndex = -1
+                        },
+                        //答题时间
+                        time(){
+                          var timer = setInterval(()=>{
+                            this.T++
+                          },1000)
+                          api.addEventListener({
+                              name: 'refer'
+                          }, (ret, err)=> {
+                            console.log("监听到提交--------")
+                            console.log("答题时间====="+this.T)
+                              if(this.T<10){
+                                this.tip("答题时间太短了,请认真看题",3000)
+                              }else{
+                                this.selSwitch=false
+                                this.skip(false)
+                                this.list()
+                                this.submit()
+                                api.pageParam.data=0
+                                // if(this.nowcount==this.total){
+                                //   this.skip(true)
+                                //   if(this.testType==1){
+                                //     this.end()
+                                //   }else{
+                                //     this.finish()
+                                //     // api.sendEvent({
+                                //     //     name: 'finish',
+                                //     // });
+                                //   }
+                                // }else{
+                                //     console.log("提交时selIndex的值--------"+this.selIndex)
+                                //   console.log("下一个题目=========")
+                                //   setTimeout(()=>{
+                                //     // this.answer=false
+                                //     // this.right=false
+                                //     // this.wrong=false
+                                //     this.getData()
+                                //   },3000)
+                                //   // this.getData()
+                                // }
+                              }
+
+                              // $api.addCls(el, 'newclass')
+                          });
+                        },
+                        skip(key){
+                          api.sendEvent({
+                              name: 'skipColor',
+                              extra: {
+                                  key: key,
+                              }
+                          });
+
+                        },
+                        tip(con,time){
+                          api.toast({
+                              msg: con,
+                              duration: time,
+                              location: 'middle'
+                          });
+                        },
+                        //退出正式测试提示
+                        outTip(){
+                          this.toast.alert({
+                              title: '退出测评',
+                              msg: '选择离开，将计算当前成绩，并且消耗1次剩余次数',
+                              buttons: [{
+                                  name: '继续测试',
+                                  onclick: ()=>{
+                                      this.toast.hide();
+                                      api.sendEvent({
+                                          name: 'mask',
+                                          extra: {
+                                              key: false,
+                                          }
+                                      });
+                                  }
+                              },
+                              {
+                                  name: '我要离开',
+                                  onclick: ()=>{
+                                      this.finish()
+                                      this.toast.hide()
+                                      api.sendEvent({
+                                          name: 'mask',
+                                          extra: {
+                                              key: false,
+                                          }
+                                      });
+                                      // api.sendEvent({
+                                      //     name: 'GMask',
+                                      //     extra: {
+                                      //         key: 'interrupt'
+                                      //     }
+                                      // });
+                                      // api.closeToWin({
+                                      //     name: 'startTest'
+                                      // });
+                                      //退出并结束
+                                      // api.sendEvent({
+                                      //     name: 'finish',
+                                      // });
+                                  }
+                              }]
+                          });
+                        },
+                        interrupt(){ //定级测中途退出提交默认兴趣选择
+                          var data = {
+                              DimensionIds: []
+                          }
+                          $comm.socket(8007, data, (res) => {
+                              console.log(res)
+                              if (res) {
+                                  ret = JSON.parse(res)
+                                  if (ret.error == 0) {
+                                      Data = JSON.parse(ret.datas)
+                                      console.log("中途退出___________"+res)
+                                  }else{
+                                    api.toast({
+                                        msg: res.errorMsg,
+                                        duration: 2000,
+                                        location: 'middle'
+                                    });
+                                  }
+                              }
+                          })
+                        },
+                        end(){
+                          api.sendEvent({
+                              name: 'mask',
+                              extra: {
+                                  key: true,
+                              }
+                          });
+                          this.toast.alert({
+                              title: '热身结束',
+                              msg: '小提示：可以去正式测评啦！',
+                              buttons: [{
+                                  name: '确定',
+                                  onclick: ()=>{
+                                      this.finish()
+                                      api.sendEvent({ //隐藏朗读页灰色蒙层
+                                          name: 'mask',
+                                          extra: {
+                                              key: false,
+                                          }
+                                      });
+                                      this.toast.hide()
+                                      api.closeToWin({
+                                          name: 'startTest'
+                                      });
+                                  }
+                              }]
+                          });
+                        },
+                        // footFn(key){
+                        //   api.sendEvent({
+                        //       name: 'foot',
+                        //       extra: {
+                        //            key1: key,
+                        //       }
+                        //   });
+                        // },
+                        //提交答题信息
+                        send(key){
+                          api.sendEvent({
+                              name: 'sel',
+                              extra: {
+                                   key1: key,
+                              }
+                          });
+                        },
+                        submit(){
+                          console.log("这是提交+++++++++++++")
+                            //this.T = 0
+                          var json = {
+                            testID:this.testID,
+                            questionResult:{
+                            qID:this.questionId,
+                            status:this.answer,
+                            score:this.score,
+                            questionType:this.questionType,
+                            questionResult:''
+                            }
+                          }
+                          console.log("提交结果++++++++++++"+JSON.stringify(json))
+                        $comm.socket(8004,json,(res)=>{
+                          //this.selSwitch = true
+                          console.log("最后提交8004返回结果"+res)
+                          if(res){
+                            this.T = 0
+                            this.send(false)
+                            // this.send(true)
+                            ret = JSON.parse(res)
+                            if(ret.error==0){
+                              this.oldIndex = -1 //提交成功之后重置所选择项防止断网重新提交数据报错
+                              Data = JSON.parse(ret.datas)
+                              if(this.nowcount!=this.total){
+                                console.log("提交返回信息————————————"+Data.step+"测试类型"+this.testType)
+                                if(Data.step>0){
+                                //  this.tip("下一题提高难度",3000)
+                                api.toast({
+                                    msg: "下一题提高难度",
+                                    duration: 3000,
+                                    location: 'middle'
+                                });
+                                }else if(Data.step<0){
+                                //  this.tip("下一题降低难度",3000)
+                                api.toast({
+                                    msg: "下一题降低难度",
+                                    duration: 3000,
+                                    location: 'middle'
+                                });
+                              }
+                              setTimeout(()=>{
+                                  this.getData()
+                                },3000)
+                            }else{
+                                this.skip(true)
+                                if(this.testType==1){
+                                  this.end()
+                                }else{
+                                  this.finish()
+                                  // api.sendEvent({
+                                  //     name: 'finish',
+                                  // });
+                                }
+                            }
+                          }else{
+                            api.toast({
+                                msg: ret.errorMsg,
+                                duration: 2000,
+                                location: 'middle'
+                            });
+                            if(ret.error==1010){ //错误提示测试结束
+                              this.finish()
+                            }
+                          }
+                          }
+                        })
+                        },
+                        //结束测评
+                        finish(){
+                          var data = {
+                            testID:this.testID
+                          }
+                          $comm.socket(8005,data,(res)=>{
+                            console.log("结束测试--------"+res)
+                            if(res){
+                              ret = JSON.parse(res)
+                              if(ret.error==0){
+                                req = JSON.parse(ret.datas)
+                                Data = req.abilityCard
+                                var slelectGrade = req.abilityCard.grade //缓存定级测年级书房使用，中途离开
+                                $storage.setStorage('slelectGrade',slelectGrade)
+                                api.openWin({
+                                    name: 'testResult',
+                                    url: './testResult.html',
+                                    slidBackEnabled:false,
+                                    reload:true,
+                                    pageParam: {
+                                        result: Data
+                                    }
+                                });
+                                api.closeWin();
+                              }else{
+                                api.toast({
+                                    msg: res.errorMsg,
+                                    duration: 2000,
+                                    location: 'middle'
+                                });
+                              }
+                            }
+
+                          })
+                        },
+                        //结果页面
+                        keepOn(){
+                          this.initData()
+                          api.openWin({
+                              slidBackEnabled:false,
+                              name: 'testResult',
+                              url: './testResult.html',
+                              slidBackEnabled: false,
+                              reload:true
+                          });
+                        }
+                    }
+                })
+            }
+
+</script>
+
+</html>

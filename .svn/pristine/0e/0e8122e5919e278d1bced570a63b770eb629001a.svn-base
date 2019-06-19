@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的朗读</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/myRead.css">
+	<style media="screen">
+		audio {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<!-- 返回 -->
+		<div class="content" ref="conBox">
+			<div class="read" v-if="resultList.length==0?false:true" v-for="(item, index) in resultList" v-if="">
+				<p class="unit">内容选自：{{item.chapterName}}</p>
+				<div class="delete"><span style="margin-right:1.75rem;color:#98aca8;">721人听过</span><span data-id="item.rraID" @click="del(item.rraID,index)">删除</span></div>
+				<div class="tape" style="position:relative;">
+					<div class="progress-box" style="height: 3.8rem;width:100%;position: absolute;z-index: 0;left:0;padding:0 1rem;box-sizing:border-box;">
+						<div class="progress" style="width:0%;height: 3.8rem;background: #fff;max-width:100%;border-radius: .5rem;"></div>
+					</div>
+					<audio class="my-audio" preload="auto" controls=“controls” :src="resUrl+item.audioUri">
+					</audio>
+					<div class="svg-box" style="position: absolute;">
+						<svg class="icon" aria-hidden="true" v-if="!item.playSwitch" @touchend="playControl(index,0)">
+								<use :xlink:href="[ false? '#icon-tz_-1' : '#icon-bf_1']"></use>
+						 </svg>
+						<svg class="icon" aria-hidden="true" v-if="item.playSwitch" @touchend="playControl(index,1)">
+								 <use xlink:href="#icon-tz_-"></use>
+						 </svg>
+					</div>
+					<div class="soundWave"></div>
+					<span style="position: absolute;right:1.8rem; display:none;">03:30</span>
+				</div>
+				<div class="book" :author="item.author" :sty="item.readAloudContentWithStyle" :bookCover="resUrl+item.smallCoverUri" :chapterName="item.chapterName" :bookName="item.bookName" :txt="item.readAloudContent" :url="item.audioUri" :publishtime="item.publishDateTime" :heart="item.heartCount" :score="item.readScore" :time="item.waveTime" :rId="item.rraID" @touchstart="start($event)"  @touchend="toDetail($event,index)">
+					<div class="text">
+						<p v-html="item.readAloudContent">
+							<!-- {{item.readAloudContent|rep}} -->
+						</p>
+					</div>
+					<div class="details">
+						<img :src="resUrl+item.smallCoverUri">
+						<div class="title">
+							<h2>{{item.bookName}}</h2>
+							<h3>{{item.author}}</h3>
+						</div>
+					</div>
+				</div>
+				<div class="record">
+					<div>
+						<svg style="visibility: hidden;" class="icon" aria-hidden="true">
+ 							 <use xlink:href="#icon-xqfx_-1"></use>
+ 					 </svg>
+						<span></span>
+					</div>
+					<div class="like">
+						<svg class="icon" aria-hidden="true" v-show="item.heartCount==0?true:false">
+							<use xlink:href="#icon-geiwoyigehaoping"></use>
+						</svg>
+						<svg class="icon" aria-hidden="true" v-show="item.heartCount==1?true:false">
+							<use xlink:href="#icon-geiwoyigehaoping-red"></use>
+						</svg>
+						<span :style="item.heartCount==0 ? 'color:#708782' : 'color:#f8615d'">{{item.heartCount}}</span>
+					</div>
+					<div>
+						<span>发表于  {{item.publishDateTime}}</span>
+					</div>
+				</div>
+			</div>
+			<!-- <p class="Tips" style="position:absolute;top:40%;left:50%;margin-left:-16rem;width:32rem;color:#a3a3a3;font-size:1.6rem;">网络连接情况不太好，点击<span @click="pullDownFresh" style="color:#00b596;">重新加载</span>一下吧</p> -->
+		</div>
+		<p v-if="tips" style="text-align: center;margin-top: 30%;color: #98aca8;font-size:1.6rem;">在这里将记录你的朗读录音</p>
+		<p v-if="onoff" class="loading" style="text-align:center;height:1rem;color: #98aca8;">加载中</p>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+			var app = new Vue({
+						el: '#app',
+						data: {
+							userInfo: JSON.parse($storage.getStorage('user-info')),
+							gradeName: '',
+							userImage: '',
+							placeholder: '',
+							onoff: false,
+							haoping:false,
+							pages: 1,
+							tips: false,
+							resUrl: $comm.resUri,
+							resultList: [],
+							prev:0,
+							playIndex:-1
+						},
+						filters:{
+							rep(value){
+								return value.replace(/\\\\n/g,'').replace(/\\n/g,'').replace(/\\n\\n/g,'')
+							}
+						},
+						mounted: function() {
+							this.toast = new customToast();
+							this.pullDownFresh()
+							this.scroll()
+								// this.init(1)
+								// toast.networkAnomaly(this.pullDownFresh) //点击重新加载
+						},
+						methods: {
+							start(e){
+								this.x1 = event.touches[0].pageX
+								this.y1 = event.touches[0].pageY
+							},
+							toDetail(e,index){
+								var calX = event.changedTouches[0].pageX - this.x1||0
+								var calY = event.changedTouches[0].pageY - this.y1||0
+							 if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+								 this.playControl(index, 1)
+								 jsonData = {
+									 txt:e.currentTarget.getAttribute('txt'),
+									 url:e.currentTarget.getAttribute('url'),
+									 publishtime:e.currentTarget.getAttribute('publishtime'),
+									 time:e.currentTarget.getAttribute('time'),
+									 heart:e.currentTarget.getAttribute('heart'),
+									 score:e.currentTarget.getAttribute('score'),
+									 rid:e.currentTarget.getAttribute('rId'),
+									 bookName: e.currentTarget.getAttribute('bookName'),
+									 chapterName: e.currentTarget.getAttribute('chapterName'),
+									 author:e.currentTarget.getAttribute('author'),
+									 bookCover: e.currentTarget.getAttribute('bookCover'),
+									 sty: e.currentTarget.getAttribute('sty')
+								 }
+								 api.openWin({
+										 name: 'readDetail',
+										 url: '../myBookshelf/Readresults_detail.html',
+										 slidBackEnabled: false,
+										 pageParam: {
+												 readObj: jsonData,
+												 bookName: jsonData.bookName,
+												 chapterName: jsonData.chapterName,
+												 author: jsonData.author,
+												 bookCover: jsonData.bookCover,
+												 txt:jsonData.txt
+										 }
+								 });
+								 api.closeWin({})
+							 }
+
+							},
+							init(pages) {
+								$myCenter.myRead({
+									PageSize: 4,
+									PageIndex: pages
+								}, (res) => {
+									res = res?JSON.parse(res):{}
+									ret = JSON.parse(res.datas)
+										if(pages!=1){
+											this.resultList = (this.resultList).concat(ret.resultList)
+										}else{
+											this.resultList = ret.resultList
+											ret.resultList.length==0?this.tips=true:this.tips=false
+										}
+										this.resultList.map((v,i)=>{
+											v.readAloudContent = v.readAloudContent.replace(/\\n/g,'').replace(/\\/g,'')
+										})
+										this.onoff = false
+								})
+							},
+							// progress: function(index, control) {
+							// 	var pro = document.getElementsByClassName('progress')[index]
+							// 	var star = 0;
+							// 	var end = 100;
+							// 	var timer = setInterval(function() {
+							// 			if (star++ >= end) {
+							// 				clearInterval(timer)
+							// 			} else {
+							// 				pro.style.width = ((star++/end)*100)+"%"
+							// 					}
+							// 				}, 1000)
+							//
+							// 		},
+									playControl(index, control) {
+										var oldAudio = document.getElementsByClassName('my-audio')[this.prev]
+										var Audio = document.getElementsByClassName('my-audio')[index]
+										if (control == 0) {
+											  this.playIndex = index
+												if(this.prev!=index){
+													oldAudio.load()
+													oldAudio.pause()
+													this.$set(this.resultList[this.prev], 'playSwitch', false)
+												}
+												this.prev = index
+											   Audio.play()
+											this.$set(this.resultList[index], 'playSwitch', true)
+											Audio.addEventListener('ended', ()=> {
+												this.$set(this.resultList[index], 'playSwitch', false)
+											}, false)
+										} else {
+											Audio.pause()
+											this.$set(this.resultList[index], 'playSwitch', false)
+										}
+
+									},
+									scroll() {
+										var that = this
+										api.addEventListener({
+											name: 'scrolltobottom',
+											extra: {
+												threshold: 0 //设置距离底部多少距离时触发，默认值为0，数字类型
+											}
+										}, function(ret, err) {
+											that.onoff = true
+											that.init(that.pages++)
+										});
+										api.addEventListener({
+											name: 'offline'
+										}, function(ret, err) {
+											api.toast({
+												msg: '网络链接不太好',
+												duration: 2000,
+												location: 'bottom'
+											});
+										});
+										api.addEventListener({
+										    name: 'readNetBack'
+										}, function(ret, err){
+										    if( ret ){
+										         that.pullDownFresh()
+										    }else{
+										         alert( JSON.stringify( err ) );
+										    }
+										});
+									},
+									goback: function() {
+										api.closeWin({});
+									},
+									pullDownFresh: function() {
+										var that = this;
+										var bounce = true;
+										// api.setFrameAttr({
+										//     name: 'grow_up_frm',
+										//     bounces: true,
+										// });
+										api.refreshHeaderLoading()
+										api.setRefreshHeaderInfo({
+											visible: true,
+											loadingImg: '../image/timg.gif',
+											bgColor: '#fff',
+											textColor: '#ccc',
+											textDown: '下拉更新...',
+											textUp: '松开刷新...',
+											showTime: true
+										}, function(ret, err) {
+											// _this.taskListWait();
+											// console.log('下拉刷新')
+											if(that.playIndex!=-1){
+												that.playControl(that.playIndex,1) //下拉暂停
+											}
+
+											that.init(1)
+											// that.loadData();
+											// that.loadRadar("readRadar02");
+											setTimeout('api.refreshHeaderLoadDone()', '1000');
+											// api.setFrameAttr({
+											//     name: 'grow_up_frm',
+											//     bounces: false,
+											// });
+										});
+										setTimeout(function() {
+											that.tips = that.resultList.length!=0?false:true
+										}, 500)
+									},
+									del(id, index) {
+										var that = this
+										toast.alert({
+						            title: '确定要删除这条录音吗？',
+						            msg: '',
+						            buttons: [{
+						                name: '取消',
+						                onclick: function() {
+						                    toast.hide();
+						                }
+						            }, {
+						                name: '确定',
+						                onclick: function() {
+						                    toast.hide();
+																(that.resultList).splice(index, 1)
+																if(that.resultList.length==0){
+																	that.tips =true
+																}
+																$myCenter.DelmyRead({
+																	rraID: id
+																}, (res) => {
+																	res = JSON.parse(res)
+																	ret = JSON.parse(res.datas)
+																})
+						                }
+						            }]
+						        });
+
+									},
+									changePassWord: function() {
+										api.openWin({
+											name: 'modifyThePassword.html',
+											url: '../personalCenter/modifyThePassword.html',
+											//          pageParam: {},
+											bounces: false,
+											bgColor: '#fff',
+											slidBackEnabled: false,
+											animation: {
+												type: "flip", //动画类型（详见动画类型常量）
+												subType: "from_right", //动画子类型（详见动画子类型常量）
+												duration: 600 //动画过渡时间，默认300毫秒
+											}
+										});
+									},
+									funErr: function() {
+										// this.toast.fail({
+										// 	title: "网络异常，请检查网络链接"
+										// });
+										api.toast({
+		                  msg: "网络异常，请检查网络链接",
+		                  duration: 2000,
+		                  location: 'middle'
+		                });
+									}
+								}
+							});
+					};
+</script>
+
+</html>

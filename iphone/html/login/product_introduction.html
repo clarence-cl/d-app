@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>注册新账号</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <style>
+        .button {
+            position: absolute;
+            background-color: #1adb96;
+            height: 6rem;
+            width: 20rem;
+            border-radius: 1.5rem;
+            font-size: 2.4rem;
+            color: white;
+            bottom: 10rem;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid pink;
+            box-shadow: 0 0 20px blue;
+            opacity: .8;
+        }
+    </style>
+</head>
+<body id="body">
+    <div class="swiper-container" style="height: 100%; width: 100%">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide" style="background-image: url('../../../common/image/product_imge/1.png'); background-size: 100% 100%"></div>
+            <div class="swiper-slide" style="background-image: url('../../../common/image/product_imge/2.png'); background-size: 100% 100%"></div>
+            <div class="swiper-slide" style="background-image: url('../../../common/image/product_imge/3.png'); background-size: 100% 100%"></div>
+            <div class="swiper-slide" style="background-image: url('../../../common/image/product_imge/4.png'); background-size: 100% 100%; position: relative">
+                <button id="button" class="button">开始阅读之旅</button>
+            </div>
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
+</body>
+<style>
+    .swiper-pagination span {
+        width: 2rem;
+        height: 2rem;
+        background-color: #1adb96;
+    }
+</style>
+<link rel="stylesheet" href="../../css/swiper.min.css">
+<script type="text/javascript" src="../../../common/script/swiper.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        adaptationModel();
+        var swiper = new Swiper('.swiper-container', {
+            pagination: '.swiper-pagination'
+        });
+        $api.byId('button').addEventListener('touchend', function () {
+            $storage.setStorage('device', api.systemType);
+            api.openWin({
+                name: 'login_page',
+                url: './login_page.html',
+                pageParam: {
+                    name: 'start_page'
+                },
+                bounces: false,
+                slidBackEnabled: false
+            });
+        })
+    };
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+</script>
+
+</html>

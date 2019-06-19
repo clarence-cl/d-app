@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>成长记录</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/grow_up_frm.css">
+</head>
+
+<body id="body" class="body">
+    <div class="header">
+        <div class="header-t">
+            <h1 id="titleName">我的成长</h1>
+            <!-- <h3 id="titleType">成长记录</h3> -->
+        </div>
+        <div class="tab">
+            <span class="select tabLeft" id="tabLeft">成长记录</span>
+            <span class="tabRight" id="tabRight">阅读报告</span>
+            <div class="vip">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-chengchang-VIP"></use>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div class="content" id="grow">
+        <div class="basic">
+            <h2>基本信息</h2>
+            <div class="basicList">
+                <div>
+                    <p id="studentReadingBookCount"></p><span>在读的书</span></div>
+                <div>
+                    <p id="haveReadBookCount"></p><span>读过的书</span></div>
+                <div>
+                    <p id="lightUpBookCount"></p><span>点亮的书</span></div>
+                <div>
+                    <p id="lightUpChapterCount"></p><span>完成的阅读单元</span></div>
+                <div>
+                    <p id="totalWordNumbers"></p><span>总阅读字数</span></div>
+            </div>
+        </div>
+        <div class="recent">
+            <h2>最近阅读</h2>
+            <div class="recentList" id="recentlyReadingBook">
+            </div>
+        </div>
+        <div class="grade">
+            <h2>阅读能力等级<i class="icon font_family" id="lever-cover">&#xe77b;</i></h2>
+            <p id="sutdentLevel"></p>
+            <div class="progress">
+                <span>1</span>
+                <div class="plan">
+                    <div id="readingProgressBar" class="progress-bar"></div>
+                    <div class="number" id="level"></div>
+                </div>
+                <span>24</span>
+            </div>
+            <div class="level-desc">阅读能力相当于<span id="levelDesc"></span>水平</div>
+        </div>
+        <div class="readingTime">
+            <div class="clearfix" style="z-index: 99">
+                <h2>读书时长</h2>
+                <div class="calendar">
+                    <div class="prev" id="prev"><i class="icon font_family">&#xe78c;</i></div>
+                    <span id="timetext"></span>
+                    <div class="next" id="next"><i class="icon font_family">&#xe78c;</i></div>
+                </div>
+                <div class="btn" id="aloudReadingTime">朗读时长</div>
+                <div class="sel btn" style="margin-right: 1.5rem;" id="readSilentlyTime">阅读时长</div>
+            </div>
+            <div class="readingline" id="readingline" style="height:40rem;"></div>
+        </div>
+        <div class="footmark">
+            <h2>本周阅读足迹</h2>
+            <p>仅显示最近100条</p>
+            <div class="markAll" id="readingLog">
+            </div>
+        </div>
+    </div>
+    <div class="content report" id="report">
+        <div class="basic">
+            <h2>基本信息</h2>
+            <div class="basicList">
+                <div>
+                    <p id="readingStudentReadingBookCount">1</p><span>在读的书</span></div>
+                <div>
+                    <p id="readingHaveReadBookCount">1</p><span>读过的书</span></div>
+                <div>
+                    <p id="readingLightUpBookCount">15156</p><span>点亮的书</span></div>
+                <div>
+                    <p id="readingLightUpChapterCount">1</p><span>完成的阅读单元</span></div>
+                <div>
+                    <p id="readingTotalWordNumbers">1</p><span>总阅读字数</span></div>
+            </div>
+        </div>
+        <div class="grade">
+            <!-- <h3>阅读能力</h3> -->
+            <h2>阅读能力等级<i class="icon font_family" id="lever-cover02">&#xe77b;</i></h2>
+            <p id="readingGrowSutdentLevel"></p>
+            <div class="progress">
+                <span>1</span>
+                <div class="plan">
+                    <!-- <div id="readingProgressBar" class="progress-bar"></div> -->
+                    <div class="number" id="readingLever">10</div>
+                </div>
+                <span>24</span>
+            </div>
+            <div class="level-desc">阅读能力相当于<span id="levelDescA"></span>水平</div>
+        </div>
+        <div class="radar">
+            <h2>阅读能力雷达图</h2>
+            <div class="radar-p">
+              <p>信息经验水平： <span id="InfoScore"></span> </p>
+              <p>文学经验水平： <span id="LiteratureScore"></span></p>
+            </div>
+            <div id="readRadar" style="height: 46rem; width: 100%;"></div>
+        </div>
+        <div class="readingTime">
+            <div class="clearfix" style="z-index: 99">
+                <!-- <h3>阅读质量</h3> -->
+                <h2>读书时长</h2>
+                <div class="btn" id="aloudReadingTimeRight">朗读时长</div>
+                <div class="sel btn" style="margin-right: 1.5rem;" id="readSilentlyTimeLeft">阅读时长</div>
+            </div>
+            <div id="aloudline" class="aloudline" style="height: 35rem;"></div>
+        </div>
+        <div class="readingTime">
+            <h2>阅读量</h2>
+            <div id="readingNumber" style="height: 40rem;"></div>
+        </div>
+        <div class="readingTime">
+            <div class="clearfix" style="z-index: 99">
+                <h2>读书成果</h2>
+                <div class="btn" id="avgReadScore">朗读平均分</div>
+                <div class="btn sel" style="margin-right: 1.5rem;" id="avgChoiceScore">阅读测平均分</div>
+            </div>
+            <div id="scoreline" style="height: 40rem;"></div>
+        </div>
+    </div>
+    <div class="cover" id="read-cover">
+      <div class="read—ability">
+        <svg class="icon" aria-hidden="true" id="read-close">
+            <use xlink:href="#icon-tongyongban_guanbianniu_anxia"></use>
+        </svg>
+        阅读能力等级来源于你在阅读能力大挑战和平时阅读表现的综合评估，根据阅读能力等级，嘀嗒会为你推荐合适难度的书籍。<br>阅读合适难度的书籍，有助于不断激发你的阅读兴趣和阅读潜能、以超越同龄人1.5倍的速度获得阅读能力上的成长。
+      </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-grow_up_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/echarts.min.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/charts.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var isDay = 0;
+    var readTimeCountLogData = [];
+    var readAvgScoreChartsData = [];
+    var readWorzDate = [];
+    var userInfo = null;
+    var userVipInfo = null;
+    apiready = function() {
+        userInfo = JSON.parse($storage.getStorage('user-info'));
+        userVipInfo = JSON.parse($storage.getStorage('userVipInfo'));
+        api.addEventListener({
+            name: 'change_userVip'
+        }, function () {
+            userInfo = JSON.parse($storage.getStorage('user-info'));
+            userVipInfo = JSON.parse($storage.getStorage('userVipInfo'));
+        });
+        adaptationModel();
+        bindEvent();
+        studentReadTimeCount($api.html($api.byId('timetext')));
+        loadGrowInfo();
+        loadReadingLog();
+        api.addEventListener({
+            name: 'tabC'
+        }, function () {
+            studentReadTimeCount($api.html($api.byId('timetext')));
+            loadGrowInfo();
+            loadReadingLog();
+        });
+    };
+
+    //用户成长基本信息接口
+    function loadGrowInfo() {
+        $growService.userGrowupInfo(funSucGetGrowInfo, funErr);
+    }
+
+    function loadRadar() {
+        $growService.getReadingRadar(function (resp) {
+            if (resp.errCode === 0) {
+                var arr = [];
+                $api.byId('InfoScore').innerHTML = resp.InfoScore;
+                $api.byId('LiteratureScore').innerHTML = resp.LiteratureScore;
+                delete resp.errCode;
+                delete resp.errMsg;
+                delete resp.DefaultTime;
+                delete resp.InfoScore;
+                delete resp.LiteratureScore;
+                for (var key in resp) {
+                    switch (key) {
+                        case 'DimA1Score':
+                            arr[0] = resp[key];
+                            break;
+                        case 'DimB2Score' :
+                            arr[5] = resp[key];
+                            break;
+                        case 'DimB3Score':
+                            arr[4] = resp[key];
+                            break;
+                        case 'DimC4Score':
+                            arr[3] = resp[key];
+                            break;
+                        case 'DimC5Score':
+                            arr[2] = resp[key];
+                            break;
+                        default:
+                            arr[1] = resp[key];
+                    }
+                }
+                $charts.readingTestRadar(arr);
+            } else {
+                toast.fail({
+                    title: resp.errMsg
+                })
+            }
+        }, funErr);
+    }
+
+    //用户成长基本信息数据展示
+    function funSucGetGrowInfo(resp) {
+        if (resp.errCode === 0) {
+            $api.byId('studentReadingBookCount').innerHTML = resp.growupInfo.StudentReadingBookCount;
+            $api.byId('haveReadBookCount').innerHTML = resp.growupInfo.HaveReadBookCount;
+            $api.byId('lightUpBookCount').innerHTML = resp.growupInfo.LightUpBookCount;
+            $api.byId('lightUpChapterCount').innerHTML = resp.growupInfo.LightUpChapterCount;
+            $api.byId('totalWordNumbers').innerHTML = WordNumbersLimit(resp.growupInfo.TotalWordNumbers);
+
+            $api.byId('readingStudentReadingBookCount').innerHTML = resp.growupInfo.StudentReadingBookCount;
+            $api.byId('readingHaveReadBookCount').innerHTML = resp.growupInfo.HaveReadBookCount;
+            $api.byId('readingLightUpBookCount').innerHTML = resp.growupInfo.LightUpBookCount;
+            $api.byId('readingLightUpChapterCount').innerHTML = resp.growupInfo.LightUpChapterCount;
+            $api.byId('readingTotalWordNumbers').innerHTML = WordNumbersLimit(resp.growupInfo.TotalWordNumbers);
+            var books = resp.growupInfo.RecentlyReadingBook;
+            $api.byId('recentlyReadingBook').innerHTML = '';
+            for (var i = 0; i < books.length; i++) {
+                $api.append($api.byId('recentlyReadingBook'), '<div><span>等级\n' + books[i].GradeScaleName + '</span><img src="\n' + $comm.resUri + books[i].CoverUrl + '"></div>');
+            }
+            userLevel(resp.growupInfo.SutdentLevel);
+            $charts.readingTimeCharts("readingline", readTimeCountLogData, false);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    //字数限制
+    function WordNumbersLimit(wordNumber) {
+        if (wordNumber !== 0 && wordNumber > 1000000) {
+            return parseInt(wordNumber / 10000) + '万'
+        } else {
+            return wordNumber;
+        }
+    }
+
+
+    //用户阅读等级展示
+    function userLevel(userLevel) {
+        var level = userLevel.slice(0, userLevel.length - 1);
+        var Width = 16.6 / 24 * level - 1.5;
+        $api.css($api.byId('level'), 'left:' + Width + 'rem');
+        $api.html($api.byId('sutdentLevel'), userLevel + '</div>');
+        $api.html($api.byId('level'), level);
+
+        $api.css($api.byId('readingLever'), 'left:' + Width + 'rem');
+        $api.html($api.byId('readingGrowSutdentLevel'), userLevel + '</div>');
+        $api.html($api.byId('readingLever'), level);
+        $api.html($api.byId('levelDesc'), levelGrade(level));
+        $api.html($api.byId('levelDescA'), levelGrade(level));
+    }
+
+    function levelGrade(level) {
+        var levelGradeTxt = '';
+        var intLevel = parseInt(level);
+        var grade = Math.ceil(intLevel / 4);
+        var gradeStep = intLevel % 4;
+        switch (gradeStep) {
+            case 1:
+                levelGradeTxt = grade + '年级初级';
+                break;
+            case 2:
+                levelGradeTxt = grade + '年级中级';
+                break;
+            case 3:
+                levelGradeTxt = grade + '年级中级';
+                break;
+            case 0:
+                levelGradeTxt = grade + '年级高级';
+                break;
+        }
+        return levelGradeTxt;
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    //用户阅读记录接口
+    function loadReadingLog() {
+        $growService.studentReadingLog(funReadingLog, funErr);
+    }
+
+    //用户阅读记录数据展示
+    function funReadingLog(resp) {
+        if (resp.errCode === 0) {
+            var reading = resp.ReadingLog;
+            var paddNum = function(num) {
+                num += '';
+                return num.replace(/^(\d)$/, '0$1');
+            }
+
+            var html = ""
+            for (var i = 0; i < reading.length; i++) {
+                var time = new Date($comm.timeStamp(reading[i].time));
+                var month = time.getMonth() + 1;
+                var day = time.getDate();
+                var hour = time.getHours() < 10 ? "0" + time.getHours() : time.getHours();
+                var minute = time.getMinutes() < 10 ? "0" + time.getMinutes() : time.getMinutes();
+
+                if (isDay !== day) {
+                    isDay = day;
+                    if (isDay === 0) {
+                        html += "<div class='mark'>";
+                        html += "  <div class='dateLeft'>";
+                        html += "    <span>" + month + "-" + day + "</span><i></i>";
+                        html += "  </div>";
+                        html += "  <div class='dateRight'>";
+                        html += "     <p>";
+                        html += "          <span>" + hour + ":" + minute + "</span>阅读图书《" + reading[i].bookName + "》" + reading[i].chapterName + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;共计" + reading[i].readTime + "分钟&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;完成朗读：" +
+                            reading[i].readScore + "分，阅读理解：" + reading[i].choiceScore + "分";
+                        html += "     </p>";
+
+                    } else {
+                        html += "  </div>";
+                        html += "</div>";
+                        html += "<div class='mark'>";
+                        html += "  <div class='dateLeft'>";
+                        html += "    <span>" + month + "-" + day + "</span><i></i>";
+                        html += "  </div>";
+                        html += "  <div class='dateRight'>";
+                        html += "     <p>";
+                        html += "          <span>" + hour + ":" + minute + "</span>阅读图书《" + reading[i].bookName + "》" + reading[i].chapterName + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;共计" + reading[i].readTime + "分钟&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;完成朗读：" +
+                            reading[i].readScore + "分，阅读理解：" + reading[i].choiceScore + "分";
+                        html += "     </p>";
+                    }
+                } else {
+                    html += "     <p>";
+                    html += "          <span>" + hour + ":" + minute + "</span>阅读图书《" + reading[i].bookName + "》" + reading[i].chapterName + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;共计" + reading[i].readTime + "分钟&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;完成朗读：" + reading[
+                        i].readScore + "分，阅读理解：" + reading[i].choiceScore + "分";
+                    html += "     </p>";
+                }
+            }
+            $api.html($api.byId('readingLog'), html);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    //用户阅读时长接口
+    function studentReadTimeCount(time) {
+        var times = time.split('~');
+        $growService.studentReadTimeCountLog(times[0], times[1], funLoadReadTimeCount, funErr);
+    }
+
+    //用户阅读时长数据展示
+    function funLoadReadTimeCount(resp) {
+        if (resp.errCode === 0) {
+            readTimeCountLogData = [];
+            readTimeCountLogData = resp.ReadTimeCountLog;
+            //成长记录——读书时长
+            $charts.readingTimeCharts("readingline", readTimeCountLogData, false);
+            //阅读报告——读书时长
+            // $charts.readingTimeCharts("aloudline", readTimeCountLogData, false);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    //用户阅读量接口
+    function studentReadNum() {
+        var nowtimetext = getDateStr(new Date(), 0);
+        var prevtimetext = getDateStr(new Date(), -6);
+        $growService.studentReadWordCountLog(prevtimetext, nowtimetext, funLoadReadWordCountLog, funErr);
+    }
+
+    //用户阅读量
+    function funLoadReadWordCountLog(resp) {
+        if (resp.errCode === 0) {
+            readWorzDate = resp.ReadWordLog;
+            $charts.readWordCountCharts("readingNumber", readWorzDate);
+            $charts.readingTimeCharts("aloudline", readTimeCountLogData, false);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    //用户平均分接口
+    function studentReadAvgScore() {
+        var nowtimetext = getDateStr(new Date(), 0);
+        var prevtimetext = getDateStr(new Date(), -6);
+        $growService.studentReadAvgScoreLog(prevtimetext, nowtimetext, funLoadReadAvgScoreLog, funErr);
+    }
+
+    //用户平均分
+    function funLoadReadAvgScoreLog(resp) {
+        if (resp.errCode === 0) {
+            readAvgScoreChartsData = resp.ReadAvgScoreLog;
+            $charts.readAvgScoreCharts("scoreline", readAvgScoreChartsData, false);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function bindEvent() {
+        $api.byId('prev').addEventListener('touchend', function(e) {
+            prevclick();
+        });
+        $api.byId('next').addEventListener('touchend', function(e) {
+            nextclick();
+        });
+        $api.byId('next').addEventListener('touchend', function(e) {
+            nextclick();
+        });
+        $api.byId('readSilentlyTime').addEventListener('touchend', function(e) {
+            $api.addCls($api.byId('readSilentlyTime'), 'sel');
+            $api.removeCls($api.byId('aloudReadingTime'), 'sel');
+            $charts.readingTimeCharts("readingline", readTimeCountLogData, false);
+        });
+        $api.byId('aloudReadingTime').addEventListener('touchend', function(e) {
+            $api.addCls($api.byId('aloudReadingTime'), 'sel');
+            $api.removeCls($api.byId('readSilentlyTime'), 'sel');
+            $charts.readingTimeCharts("readingline", readTimeCountLogData, true);
+        });
+
+        $api.byId('lever-cover').addEventListener('touchend', function() {
+            $api.css($api.byId('read-cover'), 'display:block');
+        });
+        $api.byId('lever-cover02').addEventListener('touchend', function() {
+            $api.css($api.byId('read-cover'), 'display:block');
+        });
+        $api.byId('read-close').addEventListener('touchend', function() {
+            $api.css($api.byId('read-cover'), 'display:none');
+        });
+
+        $api.byId('readSilentlyTimeLeft').addEventListener('touchend', function(e) {
+            $api.addCls($api.byId('readSilentlyTimeLeft'), 'sel');
+            $api.removeCls($api.byId('aloudReadingTimeRight'), 'sel');
+            $charts.readingTimeCharts("aloudline", readTimeCountLogData, false);
+            $charts.readWordCountCharts("readingNumber", readWorzDate);
+            $charts.readAvgScoreCharts("scoreline", readAvgScoreChartsData, false);
+        });
+        $api.byId('aloudReadingTimeRight').addEventListener('touchend', function(e) {
+            $api.addCls($api.byId('aloudReadingTimeRight'), 'sel');
+            $api.removeCls($api.byId('readSilentlyTimeLeft'), 'sel');
+            $charts.readingTimeCharts("aloudline", readTimeCountLogData, true);
+            $charts.readWordCountCharts("readingNumber", readWorzDate);
+            $charts.readAvgScoreCharts("scoreline", readAvgScoreChartsData, false);
+        });
+
+        $api.byId('avgReadScore').addEventListener('touchend', function(e) {
+            $api.addCls($api.byId('avgReadScore'), 'sel');
+            $api.removeCls($api.byId('avgChoiceScore'), 'sel');
+            $charts.readAvgScoreCharts("scoreline", readAvgScoreChartsData, true);
+            $charts.readingTimeCharts("aloudline", readTimeCountLogData, false);
+            $charts.readWordCountCharts("readingNumber", readWorzDate);
+        });
+        $api.byId('avgChoiceScore').addEventListener('touchend', function(e) {
+            $api.addCls($api.byId('avgChoiceScore'), 'sel');
+            $api.removeCls($api.byId('avgReadScore'), 'sel');
+            $charts.readAvgScoreCharts("scoreline", readAvgScoreChartsData, false);
+            $charts.readingTimeCharts("aloudline", readTimeCountLogData, false);
+            $charts.readWordCountCharts("readingNumber", readWorzDate);
+        });
+
+        $analysis.bindEvent($api.byId('tabLeft'), 'touchend', function () {
+            $api.addCls($api.byId('tabLeft'), 'select');
+            $api.removeCls($api.byId('tabRight'), 'select');
+            $api.css($api.byId('grow'), 'display:block');
+            $api.css($api.byId('report'), 'display:none');
+            $api.html($api.byId('titleName'), '我的成长');
+            $api.html($api.byId('titleType'), '成长记录');
+            var nowtimetext = getDateStr(new Date(), 0);
+            var prevtimetext = getDateStr(new Date(), -6);
+            $api.html($api.byId('timetext'), prevtimetext + '~' + nowtimetext);
+            studentReadTimeCount($api.html($api.byId('timetext')));
+            $charts.readingTimeCharts("readingline", readTimeCountLogData, false);
+        },'成长页面_成长记录b',{ '用户当前等级': userInfo.gradeScaleName });
+
+        $analysis.bindEvent($api.byId('tabRight'), 'touchend', function () {
+            if (userVipInfo.IsVIP) {
+                $api.addCls($api.byId('tabRight'), 'select');
+                $api.removeCls($api.byId('tabLeft'), 'select');
+                $api.css($api.byId('grow'), 'display:none');
+                $api.css($api.byId('report'), 'display:block');
+                userInfo = JSON.parse($storage.getStorage('user-info'));
+                $api.html($api.byId('titleName'), userInfo.userName + '的阅读报告');
+                $api.html($api.byId('titleType'), '阅读报告');
+                var nowtimetext = getDateStr(new Date(), 0);
+                var prevtimetext = getDateStr(new Date(), -6);
+                loadRadar();
+                studentReadTimeCount(prevtimetext + '~' + nowtimetext);
+                studentReadNum();
+                studentReadAvgScore();
+            } else {
+                api.openFrame({
+                    name: 'set',
+                    url: '../personalCenter/vip.html',
+                    bounces: false,
+                    slidBackEnabled: false,
+                    animation: {
+                        type: "flip", //动画类型（详见动画类型常量）
+                        subType: "from_right", //动画子类型（详见动画子类型常量）
+                        duration: 600 //动画过渡时间，默认300毫秒
+                    }
+                });
+            }
+        },'成长页面_阅读报告b',{ '用户当前等级': userInfo.gradeScaleName });
+
+        var nowtimetext = getDateStr(new Date(), 0);
+        var prevtimetext = getDateStr(new Date(), -6);
+        $api.html($api.byId('timetext'), prevtimetext + '~' + nowtimetext);
+    }
+
+    function prevclick() {
+
+
+        var nowtimetext = $api.html($api.byId('timetext')).split('~')[0];
+        var prevtimetext = getDateStr(new Date(nowtimetext), -6);
+
+        $api.html($api.byId('timetext'), prevtimetext + '~' + nowtimetext);
+        studentReadTimeCount(prevtimetext + '~' + nowtimetext);
+    }
+
+    function nextclick() {
+        var time = $api.html($api.byId('timetext')).split('~')[1];
+        if (time < $comm.jsDateFormat(new Date(), "yyyy-MM-dd")) {
+            var nowtimetext = getDateStr(new Date(time), 0);
+            var nexttimetext = getDateStr(new Date(time), 6);
+
+            $api.html($api.byId('timetext'), nowtimetext + '~' + nexttimetext);
+            studentReadTimeCount(nowtimetext + '~' + nexttimetext);
+        }
+    }
+
+    function getDateStr(nowtime, AddDayCount) {
+        var dd = nowtime;
+        dd.setDate(dd.getDate() + AddDayCount); //获取AddDayCount天后的日期
+        var y = dd.getFullYear();
+        var m = (dd.getMonth() + 1) < 10 ? "0" + (dd.getMonth() + 1) : (dd.getMonth() + 1); //获取当前月份的日期，不足10补0
+        var d = dd.getDate() < 10 ? "0" + dd.getDate() : dd.getDate(); //获取当前几号，不足10补0
+        return y + "-" + m + "-" + d;
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: '网络异常，请检查网络链接',
+            duration: "2000"
+        })
+    }
+</script>
+
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>书架</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css"/>
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/bookcase.css">
+</head>
+<body>
+  <div id="app" v-cloak>
+    <div class="special" v-show="bookFlag" style="padding-top:30px;">
+      <div class="bookList">
+        <div class="cover">
+          <img src="../../../common/image02/banner.png">
+          <span class="bookNumber">6本书</span>
+          <span class="number">2300人在读</span>
+          <div class="check sel">
+            <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-dg_-copy"></use>
+            </svg>
+          </div>
+        </div>
+        <h3>这个寒假定个小目标，一起来看这些书</h3>
+        <p>北京实验二小校长咏莉为你选书</p>
+      </div>
+      <span class="more">没有更多了</span>
+    </div>
+    <!-- 遮罩 -->
+    <!-- <div class="move" style="color: #00b596;" v-if="editFlag" v-show="!morenFlag">移出所选（2）</div> -->
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+apiready = function (){
+  var app = new Vue({
+    el:'#app',
+    data:{
+      resData:[],
+      isComplete:false,
+      bookFlag:true,
+      click:'click',
+      click1:'',
+      chooseFlag:false,
+      morenFlag:false,
+      checkFlag:false,
+      editFlag:false,
+      editTxt:'编辑'
+      // outFlag:false
+    },
+    mounted(){
+      // this.getBookCaseData(1);
+      // this.watchRemove();
+    },
+    methods:{
+      goBookCity(){
+        api.sendEvent({
+            name: 'goBookCity'
+        });
+      },
+      goBookInfo(bookId,index){
+          if(!this.editFlag){
+            api.openWin({
+                name: 'bookInfo',
+                url: '../myBookshelf/VIPUser_bookInfo_win.html',
+                pageParam: {
+                    thisBookId:bookId
+                },
+                bounces: false,
+                slidBackEnabled:false,
+                reload: true
+            });
+
+          }else{
+            console.log(index)
+            this.resData.bookList[index].isSure = !this.resData.bookList[index].isSure;
+            var n = 0;
+            this.resData.bookList.map((v,i)=>{
+              if(v.isSure){
+                n++
+              }
+            })
+            // console.log(n)
+            api.sendEvent({
+                name: 'changeNum',
+                extra: {
+                    num: n,
+                }
+            });
+
+            this.morenFlag = !this.morenFlag;
+            if(!this.morenFlag){
+              api.sendEvent({
+                  name: 'editFlag',
+              });
+            }else{
+            }
+          }
+      },
+      //编辑
+      edit(){
+        this.editFlag = !this.editFlag;
+        if(this.editFlag){
+          this.morenFlag = true;
+          this.editTxt = '取消';
+        }else{
+          this.resData.bookList.map((v,i)=>{
+            v.isSure = false;
+          })
+          this.morenFlag = false;
+          this.editTxt = '编辑'
+          api.sendEvent({
+              name: 'editFlag1',
+          });
+        }
+      },
+      //选中图书
+      check(){
+        console.log('hahha')
+        if(this.editFlag){
+          this.morenFlag = false
+          console.log(this.morenFlag)
+        }
+      },
+      //点击专题
+      isBook(){
+        this.bookFlag = true;
+        this.click1 = '';
+        this.click = 'click';
+      },
+      isMainTitle(){
+        this.bookFlag = false;
+        this.click = '';
+        this.click1 = 'click';
+      },
+      //JIANTINGSHIJIAN
+      watchRemove(){
+        var that = this;
+        api.addEventListener({
+            name: 'remove'
+        }, function(ret, err){
+            if( ret ){
+                //  alert( JSON.stringify( ret ) );
+                var chooseArr = [];
+                that.resData.bookList.map((v,i)=>{
+                  if(v.isSure){
+                    chooseArr.push(v.bookID)
+                  }
+                });
+                var data = {
+                  BookIDList : chooseArr
+                }
+                $comm.socket(2013,data,res=>{
+                  console.log(res)
+                  if(res){
+                    res = JSON.parse(res);
+                    if(res.error===0){
+                      that.getBookCaseData(1);
+                    }else{
+                      api.toast({
+                          msg: res.errMsg,
+                          duration: 2000,
+                          location: 'middle'
+                      });
+
+                    }
+                  }
+                })
+            }else{
+                //  alert( JSON.stringify( err ) );
+                api.toast({
+                    msg: '网络错误',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+
+            }
+        });
+
+      },
+      //获取书架数据
+      getBookCaseData(page){
+        console.log('什么')
+        var data = {
+          Page:page
+        }
+        $comm.socket(2011,data,(res)=>{
+          console.log(res)
+          res = JSON.parse(res)
+          if(res.error==0){
+            this.resData = JSON.parse(res.datas);
+            console.log(JSON.stringify(this.resData));
+            this.$set(this.resData.bookList,'isSure',false);
+            // console.log(JSON.stringify(this.resData.bookList)+'_____________')
+            this.resData.bookList.map((v,i)=>{
+              // console.log(v.bookName)
+              this.$set(v,'isSure',false)
+              v.bookCover = $comm.resUri + v.bookCover;
+              console.log(v.bookCover)
+            })
+            // console.log(JSON.stringify(this.resData)+'________>>')
+          }else{
+            alert(res.errorMsg)
+          }
+        })
+      },
+    }
+  })
+}
+// apiready = function () {
+//     var app = new Vue({
+//         el: '#app',
+//         data: {
+//             isShowRule: false,
+//             name:'',
+//             shareInfo: '',
+//             audioPath:'',
+//             canShare: false,
+//             contentUrl:'',
+//             popup:false,
+//         },
+//         created:function(){
+//           // this.loadInfo();
+//           swiper
+//         },
+//         mounted: function () {
+//             var that = this;
+//             that.toast = new customToast();
+//         },
+//         methods: {
+//             // 下拉刷新
+//             pullDownFresh:function(){
+//               var that = this;
+//               api.setRefreshHeaderInfo({
+//                     visible: true,
+//                     // loadingImg: '../image/timg.gif',
+//                     bgColor: '#fff',
+//                     textColor: '#ccc',
+//                     textDown: '下拉刷新...',
+//                     textUp: '松开刷新...',
+//                     showTime: true
+//                 }, function(ret, err) {
+//                     // _this.taskListWait();
+//                     console.log('下拉刷新')
+//                     setTimeout('api.refreshHeaderLoadDone()', '500');
+//                 });
+//                 setInterval(function(){
+//
+//                 },1000)
+//             },
+//
+//             initSwiper: function(initialSlide, length) {
+//               mySwiper = new Swiper('.swiper-container', {
+//                   initialSlide: initialSlide, //初始化页面索引
+//                   speed: 1000,
+//                   loop: true,
+//                   centeredSlides: true,
+//                   slidesPerView: 3,
+//                   loopedSlides: length,
+//                   pagination: '.swiper-pagination',
+//                   paginationClickable: true,
+//                   paginationType: 'fraction'
+//               });
+//             },
+//             goReadresults: function () {
+//                 api.openFrame({
+//                     name: 'Readresults_detailShare',
+//                     url: 'Readresults_detailShare.html',
+//                     bounces: false,
+//                     bgColor:'#fff',
+//                     slidBackEnabled: false,
+//                     animation: {
+//                         type: "fade", //动画类型（详见动画类型常量）
+//                         subType: "from_right", //动画子类型（详见动画子类型常量）
+//                         duration: 600 //动画过渡时间，默认300毫秒
+//                     }
+//                 });
+//             },
+//             funErr: function () {
+//                 this.toast.fail({
+//                     title: '网络异常，请检查网络链接'
+//                 })
+//             },
+//             swiper:function () {
+//               var swiper = new Swiper('.swiper-container', {
+//                   pagination: '.swiper-pagination',
+//                   paginationClickable: true
+//               })
+//             }
+//         },
+//     });
+// };
+
+</script>
+
+</html>

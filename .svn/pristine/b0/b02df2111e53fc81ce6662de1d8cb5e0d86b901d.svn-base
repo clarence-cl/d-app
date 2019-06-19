@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>分级选书</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/bookLevel.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top">
+            <div class="return" @touchend="exit">
+                <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon-fh_"></use>
+         </svg>
+            </div>
+            <h1>分级选书</h1>
+            <div class="return">
+                <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon"></use>
+         </svg>
+            </div>
+        </div>
+        <div class="content">
+            <ul class="list">
+                <li  :class="[dimension === 'all' ? 'bg' : '']" @touchstart="start($event)" @touchend="getBook($event,'','all')"><span>全部</span></li>
+                <li :class="[userLevel<item.displayLevel && userLevel!=0?'lock':dimension === item.displayLevel ? 'bg' : '']"  v-for="(item,index) in levelData" @touchstart="start($event)" @touchend="getBook($event,item.id,item.displayLevel)">
+                  <span class="click">{{item.displayLevel}}级
+          <svg class="icon" aria-hidden="true" v-if='userLevel==0?false:userLevel>=item.displayLevel?false:true'>
+              <use xlink:href="#icon-shangsuo-copy"></use>
+          </svg>
+          </span>
+                </li>
+            </ul>
+            <!-- <div class="book">
+                <div class="box">
+                    <img src="../../../common/image02/book.png">
+                    <div>
+                        <h2>亚马孙雨林的故事</h2>
+                        <span>北京联合出版公司</span>
+                        <p>作品简介是作品简介是长袜子皮皮的作品简介的作品简介是作品简介是长袜子皮皮的作品简介的作品简介是作品简介是长袜子皮皮的作品简介的作品简介是</p>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+    apiready = function() {
+            var app = new Vue({
+                        el: '#app',
+                        data: {
+                            levelData: [],
+                            dimension: "all",
+                            userLevel: $storage.getStorage('user-info')?JSON.parse($storage.getStorage('user-info')).level:0
+                        },
+                        mounted() {
+                            this.getLevelList()
+                            this.openCon("")
+                        },
+                        methods: {
+                            exit() {
+                                api.closeWin({});
+                            },
+                            compare(pro) {
+                                return function(a, b) {
+                                    var value1 = a[pro];
+                                    var value2 = b[pro];
+                                    return value1 - value2;
+                                }
+                            },
+                            //获取难度等级
+                            getLevelList() {
+                                var data = {};
+                                $comm.socket(2009, {}, (res) => {
+                                        var res = JSON.parse(res);
+                                        var Data = JSON.parse(res.datas);
+                                        if (res.error == 0) {
+                                                this.levelData = (Data.levelList).sort(this.compare("displayLevel"))
+                                        }
+                                        // this.levelData = JSON.parse(res.data);
+                                    })
+                                    //点击等级选书
+                                },
+                                start(event){
+                                  this.x1 = event.touches[0].pageX
+                                  this.y1 = event.touches[0].pageY
+                                },
+                                getBook(event,levelId,dimension){
+                                  var calX = event.changedTouches[0].pageX - this.x1||0
+                                  var calY = event.changedTouches[0].pageY - this.y1||0
+                                 if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+                                   if(this.userLevel!=0){
+                                     if(this.userLevel<dimension){
+                                       return false
+                                     }
+                                   }
+                                     this.dimension = dimension
+                                       this.openCon(levelId)
+                                 }
+                                },
+                                openCon(LevelId) {
+                                    api.openFrame({
+                                        name: 'bookCategoryCon',
+                                        url: './bookCategoryCon.html',
+                                        bounces: true,
+                                        slidBackEnabled:false,
+                                        reload:true,
+                                        rect: {
+                                            x: 103,
+                                            y: 65,
+                                            w: 'auto',
+                                            h: 'auto'
+                                        },
+                                        pageParam: {
+                                            levelId:LevelId,
+                                            type: 1
+                                        }
+                                    });
+                                },
+                            }
+                        })
+                }
+
+
+</script>
+
+</html>

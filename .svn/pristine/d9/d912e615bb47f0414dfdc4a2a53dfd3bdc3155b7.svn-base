@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>$Title$</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/formal_testfrm.css">
+</head>
+
+<body id="body" class="body">
+    <div class="avatar-wrap">
+        <div class="image-position">
+            <img class="image" src="../../../common/image/xiaonanhai@3x.png" alt="男">
+            <img class="come-image" src="../../../common/image/jiayou@3x.png" alt="come">
+        </div>
+    </div>
+    <div class="text-content">
+        <h2 id="textDescTop" class="text-desc">正式挑战即将开始</h2>
+        <h2 id="textDescCenter">1篇朗读，3道选择题</h2>
+    </div>
+    <div class="svg-circle">
+        <svg width="214" height="214" viewbox="0 0 440 440">
+            <circle cx="220" cy="220" r="170" stroke-width="60" stroke="#e8e8e8" fill="none"></circle>
+            <circle cx="220" cy="220" r="170" stroke-width="60" stroke="#0caeb9" fill="none" transform="matrix(0,-1,1,0,0,440)" stroke-dasharray="1069 1069" stroke-linecap="round"></circle>
+        </svg>
+        <h1 id="timerCount" class="timer-count">3</h1>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript">
+    var timeCount = 3;
+    var timer;
+    apiready = function() {
+        adaptationModel();
+        setTestCount();
+        countDown();
+    };
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function countDown() {
+        var percent = 2 / 3,
+            perimeter = Math.PI * 2 * 170;
+        var circle = document.querySelectorAll("circle")[1];
+        $api.html($api.byId("timerCount"), timeCount + '');
+        circle.setAttribute('stroke-dasharray', perimeter * percent + " " + perimeter * (1 - percent));
+        timer = setInterval(function() {
+            timeCount--;
+            percent = percent - (1 / 3);
+            if (percent < 0) {
+                $api.html($api.byId("timerCount"), timeCount + '');
+                if (timeCount === 0) {
+                    clearInterval(timer);
+                    goToFormalReading();
+                }
+            } else {
+                circle.setAttribute('stroke-dasharray', perimeter * percent + " " + perimeter * (1 - percent));
+                $api.html($api.byId("timerCount"), timeCount + '');
+                if (timeCount === 0) {
+                    clearInterval(timer);
+                    goToFormalReading();
+                }
+            }
+        }, 1000)
+    }
+
+    function setTestCount() {
+        var testCount = $storage.getStorage('test-count');
+        if (!testCount) {
+            $storage.setStorage('test-count', 1)
+        } else if (testCount === '1') {
+            //改变页面文案
+            $api.html($api.byId('textDescTop'), '第二轮即将开始');
+            $api.html($api.byId('textDescCenter'), '继续加油！');
+            $storage.setStorage('test-count', 2)
+        }
+    }
+
+    function goToFormalReading() {
+        clearInterval(timer);
+        api.openFrame({
+            name: 'formal_readingfrm',
+            url: './formal_readingfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: api.pageParam.name ? api.pageParam.name : null,
+                grade: api.pageParam.grade ? api.pageParam.grade : null,
+                month: api.pageParam.month ? api.pageParam.month : null
+            },
+            bounces: false,
+            reload: true
+                // animation: {
+                //     type: "none",
+                //     subType: "from_right",
+                //     duration: 0
+                // }
+        });
+    }
+</script>
+
+</html>

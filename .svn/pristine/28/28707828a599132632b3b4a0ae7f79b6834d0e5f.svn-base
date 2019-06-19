@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的朗读</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/myRead.css">
+	<style media="screen">
+		audio {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<!-- 返回 -->
+		<div class="top">
+			<div class="return" @click="goback">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-fh_"></use>
+					 </svg>
+			</div>
+			<h1>我的朗读</h1>
+			<div class="return">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon"></use>
+					 </svg>
+			</div>
+		</div>
+		<div class="content" ref="conBox">
+			<div class="read" v-for="(item, index) in resultList">
+				<p class="unit">内容选自：{{item.bookName}}</p>
+				<span class="delete" data-id="item.rraID" @click="del(item.rraID,index)">删除</span>
+				<div class="tape" style="position:relative;">
+					<div class="progress-box" style="height: 3.8rem;width:100%;position: absolute;z-index: 0;left:0;padding:0 1rem;box-sizing:border-box;">
+						<div class="progress" style="width:0%;height: 3.8rem;background: #fff;max-width:100%;border-radius: .5rem;"></div>
+					</div>
+					<audio class="my-audio" preload="auto" controls=“controls” :src="item.audioUri">
+					</audio>
+					<div class="svg-box" style="position: absolute;">
+						<svg class="icon" aria-hidden="true" v-if="!item.playSwitch" @click="playControl(index,0)">
+								<use :xlink:href="[ false? '#icon-tz_-1' : '#icon-bf_1']"></use>
+						 </svg>
+						<svg class="icon" aria-hidden="true" v-if="item.playSwitch" @click="playControl(index,1)">
+								 <use xlink:href="#icon-tz_-"></use>
+						 </svg>
+					</div>
+					<div class="soundWave"></div>
+					<span style="position: absolute;right:1.8rem;">03：30</span>
+				</div>
+				<div class="book">
+					<div class="text">
+						<p>
+							{{item.readAloudContent}}
+						</p>
+					</div>
+					<div class="details">
+						<img :src="item.smallCoverUri">
+						<div class="title">
+							<h2>{{item.chapterName}}</h2>
+							<h3>{{item.author}}</h3>
+						</div>
+					</div>
+				</div>
+				<div class="record">
+					<div>
+						<svg style="visibility: hidden;" class="icon" aria-hidden="true">
+ 							 <use xlink:href="#icon-xqfx_-1"></use>
+ 					 </svg>
+						<span></span>
+					</div>
+					<div>
+						<svg class="icon" aria-hidden="true">
+ 							 <use xlink:href="#icon-xqdz_-1"></use>
+ 					 </svg>
+						<span>{{item.heartCount}}</span>
+					</div>
+					<div>
+						<span>发表于  {{item.publishDateTime}}</span>
+					</div>
+				</div>
+			</div>
+			<!-- <p class="Tips" style="position:absolute;top:40%;left:50%;margin-left:-16rem;width:32rem;color:#a3a3a3;font-size:1.6rem;">网络连接情况不太好，点击<span @click="pullDownFresh" style="color:#00b596;">重新加载</span>一下吧</p> -->
+			<p v-if="onoff" class="loading" style="text-align:center;height:1rem;">加载中</p>
+		</div>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+			var app = new Vue({
+						el: '#app',
+						data: {
+							userInfo: JSON.parse($storage.getStorage('user-info')),
+							gradeName: '',
+							userImage: '',
+							placeholder: '',
+							onoff: false,
+							pages: 1,
+							resultList: [ //数据列表
+								{
+									"rraID": "64233db4-4a0c-416c-a26b-3a6380816d9d",
+									"readAloudContent": "就都被揭露出来了。",
+									"readScore": 81,
+									"heartCount": 0,
+									"audioUri": "/Files/Chivox/e3d91f7a-de44-4cf7-b155-87dc674f593c2019-04-08a9c9cc6f-fa1e-4a51-b0d4-72a3334bba40.mp3",
+									"publishDateTime": "2019-04-08 18:21:59:2159",
+									"chapterName": "伟人（5）",
+									"bookName": "科学家故事100个（1）",
+									"author": "叶永烈",
+									"smallCoverUri": "/Files/Covers/4f08b40a0ca04c7c9fd55187af2a9c07.png"
+								}, {
+									"rraID": "64233db4-4a0c-416c-a26b-3a6380816d9d",
+									"readAloudContent": "就都被揭露出来了。",
+									"readScore": 81,
+									"heartCount": 0,
+									"audioUri": "/Files/Chivox/e3d91f7a-de44-4cf7-b155-87dc674f593c2019-04-08a9c9cc6f-fa1e-4a51-b0d4-72a3334bba40.mp3",
+									"publishDateTime": "2019-04-08 18:21:59:2159",
+									"chapterName": "伟人（5）",
+									"bookName": "科学家故事100个（1）",
+									"author": "叶永烈",
+									"smallCoverUri": "/Files/Covers/4f08b40a0ca04c7c9fd55187af2a9c07.png"
+								}
+							]
+						},
+						mounted: function() {
+							this.toast = new customToast();
+							this.pullDownFresh()
+							this.scroll()
+								// this.init(1)
+							this.audioTime()
+								// toast.networkAnomaly(this.pullDownFresh) //点击重新加载
+						},
+						methods: {
+							init(pages) {
+								$myCenter.myRead({
+									PageSize: 4,
+									PageIndex: pages
+								}, (res) => {
+									res = JSON.parse(res);
+									ret = JSON.parse(res.datas)
+								})
+							},
+							progress: function(index, control) {
+								var pro = document.getElementsByClassName('progress')[index]
+								var star = 0;
+								var end = 100;
+								var timer = setInterval(function() {
+										if (star++ >= end) {
+											clearInterval(timer)
+										} else {
+											pro.style.width = ((star++/end)*100)+"%"
+												}
+											}, 1000)
+
+									},
+									audioTime() {
+										var audioArr = document.getElementsByClassName('my-audio')
+										for (var i = 0; i < audioArr.length; i++) {
+											audioArr[i].addEventListener('loadedmetadata', function() {
+												console.log(this.duration)
+												console.log(this.src)
+											})
+										}
+									},
+									playControl(index, control) {
+										var Audio = document.getElementsByClassName('my-audio')[index]
+										if (control == 0) {
+											Audio.play()
+											Audio.addEventListener('ended', function() {
+												console.log("播放结束")
+											}, false);
+											// document.getElementsByClassName('my-audio')
+										} else {
+											Audio.pause()
+										}
+										this.$set(this.resultList[index], 'playSwitch', !this.resultList[index].playSwitch)
+									},
+									scroll() {
+										var that = this
+										api.addEventListener({
+											name: 'scrolltobottom',
+											extra: {
+												threshold: 0 //设置距离底部多少距离时触发，默认值为0，数字类型
+											}
+										}, function(ret, err) {
+											that.init(that.pages++)
+										});
+										api.addEventListener({
+											name: 'offline'
+										}, function(ret, err) {
+											api.toast({
+												msg: '网络链接不太好',
+												duration: 2000,
+												location: 'bottom'
+											});
+										});
+									},
+									goback: function() {
+										api.closeWin({});
+									},
+									pullDownFresh: function() {
+										var that = this;
+										var bounce = true;
+										// api.setFrameAttr({
+										//     name: 'grow_up_frm',
+										//     bounces: true,
+										// });
+										api.refreshHeaderLoading()
+										api.setRefreshHeaderInfo({
+											visible: true,
+											loadingImg: '../image/timg.gif',
+											bgColor: '#fff',
+											textColor: '#ccc',
+											textDown: '下拉更新...',
+											textUp: '松开刷新...',
+											showTime: true
+										}, function(ret, err) {
+											// _this.taskListWait();
+											// console.log('下拉刷新')
+											// this.init(1)
+											// that.loadData();
+											// that.loadRadar("readRadar02");
+											setTimeout('api.refreshHeaderLoadDone()', '1000');
+											// api.setFrameAttr({
+											//     name: 'grow_up_frm',
+											//     bounces: false,
+											// });
+										});
+										setInterval(function() {
+
+										}, 1000)
+									},
+									del(id, index) {
+										toast.alert({
+						            title: '删除录音',
+						            msg: '确认要删除这条录音',
+						            buttons: [{
+						                name: '取消',
+						                onclick: function() {
+						                    toast.hide();
+						                }
+						            }, {
+						                name: '确定',
+						                onclick: function() {
+						                    toast.hide();
+																(this.resultList).splice(index, 1)
+																$myCenter.DelmyRead({
+																	rraID: id
+																}, (res) => {
+																	res = JSON.parse(res);
+																	ret = JSON.parse(res.datas)
+																	console.log(ret)
+																})
+						                }
+						            }]
+						        });
+
+									},
+									changePassWord: function() {
+										api.openWin({
+											name: 'modifyThePassword.html',
+											url: '../personalCenter/modifyThePassword.html',
+											//          pageParam: {},
+											bounces: false,
+											bgColor: '#fff',
+											slidBackEnabled: false,
+											animation: {
+												type: "flip", //动画类型（详见动画类型常量）
+												subType: "from_right", //动画子类型（详见动画子类型常量）
+												duration: 600 //动画过渡时间，默认300毫秒
+											}
+										});
+									},
+									funErr: function() {
+										// this.toast.fail({
+										// 	title: "网络异常，请检查网络链接"
+										// });
+										api.toast({
+			                  msg: "网络异常，请检查网络链接",
+			                  duration: 2000,
+			                  location: 'middle'
+			                });
+									}
+								}
+							});
+					};
+</script>
+
+</html>

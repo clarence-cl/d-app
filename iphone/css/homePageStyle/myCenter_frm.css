@@ -1,0 +1,284 @@
+@font-face {
+    font-family: 'font_family';
+    src: url('../../../common/fontclass/iconfont.eot');
+    src: url('../../../common/fontclass/iconfont.eot?#iefix') format('embedded-opentype'),
+    url('../../../common/fontclass/iconfont.woff') format('woff'),
+    url('../../../common/fontclass/iconfont.ttf') format('truetype'),
+    url('../../../common/fontclass/iconfont.svg#font_family') format('svg');
+}
+.font_family{
+    font-family:"font_family" !important;
+    font-size:16px;font-style:normal;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+}
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}
+
+.icon-font {
+    font-size: 5rem;
+}
+body{
+    background-image: url(../../../common/skin/beijing.png);
+    background-size: 100%  calc(100% + 8rem);
+}
+.item {
+    width: 100%;
+    height: calc(100% - 6rem);
+    /*background-color: white;*/
+    position: relative;
+}
+
+.personal_enter_t {
+    height: 25rem;
+    /*background-image: url(../../image/beijing@3x.png);*/
+    background-size: cover;
+    padding-top: 1rem;
+    position: relative;
+}
+
+.personal_enter_c {
+    padding: 0 7rem;
+    height: 30rem;
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+    -webkit-justify-content: space-between;
+}
+
+.personal_enter_c_ct {
+    width: 50rem;
+    height: 100%;
+    font-size: 3rem;
+    color: #FFFFFF;
+    position: relative;
+}
+
+.personal_enter_c_ct>div:first-child {
+    position: absolute;
+    left: 8rem;
+    top: 8rem;
+}
+
+.personal_enter_c_ct>div:last-child {
+    position: absolute;
+    right: 8rem;
+    bottom: 8rem;
+}
+
+.personal_enter_c_ct:nth-child(1) {
+    background-image: url(../../../common/image/1@2x.png);
+    background-size: 100% 100%;
+    position: relative;
+}
+
+.personal_enter_c_ct:nth-child(2) {
+    background-image: url(../../../common/image/2@2x.png);
+    background-size: 100% 100%;
+    position: relative;
+}
+
+.personal_enter_c_ct:nth-child(3) {
+    background-image: url(../../../common/image/3@2x.png);
+    background-size: 100% 100%;
+    position: relative;
+}
+
+.personal_enter_c_ct:nth-child(4) {
+    background-image: url(../../../common/image/4@2x.png);
+    background-size: 100% 100%;
+    position: relative;
+}
+
+.share-icon {
+    position: absolute;
+    right: 8rem;
+    top: 8rem
+}
+
+.personal_enter_b {
+    padding: 0 11rem;
+    display: flex;
+    display: -webkit-flex;
+    justify-content: space-between;
+}
+.personal_enter_b_ct{
+    position: relative;
+    height: 6rem;
+    width: 30rem;
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+    justify-content: space-between;
+    -webkit-justify-content: space-between;
+}
+.personal_enter_b_ct.null{
+    width: 20rem;
+}
+.personal_enter_b_ct>span:first-child {
+    font-size: 3rem;
+    font-family: "PingFang SC";
+    color: #333;
+}
+.personal_enter_b_ct>span:nth-child(2){
+    font-size: 2.5rem;
+    font-family: "PingFang SC";
+    color: #999999;
+}
+
+.opc {
+    opacity: 0;
+}
+
+.personal_enter_t>div>span {
+    font-size: 3rem;
+    font-family: "PingFang SC";
+    color: #FFFFFF;
+}
+
+.per_user {
+    height: 28rem;
+    position: absolute;
+    top: 0;
+    left: 7rem;
+    display: flex;
+    display: -webkit-flex;
+    align-items: center;
+    -webkit-align-items: center;
+}
+
+.head_portrait {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 100%;
+    position: relative;
+}
+
+.user {
+    height: 8rem;
+    margin-left: 2.3rem;
+    color: #FFFFFF;
+    font-size: 2rem;
+    font-family: "PingFang SC";
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+    justify-content: space-between;
+    -webkit-justify-content: space-between;
+}
+
+.name-wrap {
+    display: flex;
+    align-items: center;
+}
+
+.user>div:nth-child(1) {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+}
+
+.user_sex {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 100%;
+    position: absolute;
+    right: -0.5rem;
+    bottom: 0;
+}
+
+#go_nvip_btn>div:last-child {
+    font-size: 1.3rem;
+}
+
+.font_b {
+    font-family: Futura-CondensedExtraBold;
+    font-size: 3.4rem;
+    font-weight: bold;
+}
+
+#headImg {
+    width: 10rem;
+    height: 10rem;
+    border-radius: 10rem;
+}
+
+.icon-sex {
+    width: 3rem;
+    height: 3rem;
+}
+
+.myVip {
+    height: 28rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: -webkit-flex;
+    align-items: center;
+    -webkit-align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin: 0 4rem;
+    margin-right: 8rem;
+    font-size: 3rem;
+}
+
+.myVip .font_family {
+    display: inline-block;
+    transform: rotate(180deg);
+    margin-left: 1rem;
+    font-size: 1.7rem;
+}
+
+#goVipLevel {
+    width: 30rem;
+    height: 8.35rem;
+    background: url(../../../common/image/bg3.png) no-repeat;
+    background-size: 100% 100%;
+    padding: 1rem 1.7rem;
+    box-sizing: border-box;
+    line-height: 3rem;
+}
+
+#goSetBtn {
+    padding-top: 4rem;
+    padding-right: 8rem;
+    padding-bottom: 2rem;
+    font-size: 2.5rem;
+}
+
+.iconfont-left {
+    display: inline-block;
+    transform: rotate(180deg);
+    margin-left: 1rem;
+}
+
+#goVipBtn {
+    line-height: 8.35rem;
+}
+.qiyu-btn {
+    position: absolute;
+    right: 6rem;
+    bottom: -12rem;
+}
+.qiyu-btn img{
+  width: 8rem;
+}
+.personal_enter_b_ct span.gift{
+    color: red;
+}
+.gift .icon{
+    font-size: 2.3rem;
+}
+.big{
+    position: absolute;
+    height: 7rem;
+    right: 0;
+}

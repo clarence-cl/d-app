@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>嘀嗒会员权益</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/vip.css">
+</head>
+
+<body>
+	<div id="app">
+		<!-- 返回 -->
+		<div class="top">
+			<div class="return" @touchend="goback">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-fh_"></use>
+					 </svg>
+			</div>
+			<h1>嘀嗒会员权益</h1>
+			<div class="return">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon"></use>
+					 </svg>
+			</div>
+		</div>
+		<div class="content">
+			<div class="list">
+				<div class="box">
+					<img src="../../../common/image02/1.png">
+					<h2>每年2000本严选图书</h2>
+					<span>90%以上获奖作品，名家名译</span>
+				</div>
+				<div class="box">
+					<img src="../../../common/image02/2.png">
+					<h2>独家儿童朗读智能评测</h2>
+					<span>自选书中内容朗读，智能评分</span>
+				</div>
+				<div class="box">
+					<img src="../../../common/image02/3.png">
+					<h2>独家随书阅读理解检测</h2>
+					<span>贴合语文课标，兼顾国际标准</span>
+				</div>
+				<div class="box">
+					<img src="../../../common/image02/4.png" style="margin-right:-2rem;">
+					<h2>AI智能阅读计划</h2>
+					<span>专属图书，有趣又能看懂</span>
+				</div>
+				<div class="box">
+					<img src="../../../common/image02/5.png" style="margin-right:-2rem;">
+					<h2>智能成长数据</h2>
+					<span>实时数据反馈，嘀嗒更懂你</span>
+				</div>
+				<div class="box">
+					<img src="../../../common/image02/6.png" style="margin-right:-2rem;">
+					<h2>一书一课</h2>
+					<span>随书精读讲解，课程提升<br><span class="span01">（超级会员专享）</span></span>
+				</div>
+			</div>
+			<div style="width:100%;">
+				<!-- controls="controls" -->
+				<!-- @touchend="FullScreen" -->
+				<video id="videoBox" style="object-fit: fill"  controls="controls"  src=""
+								 poster="../../../common/image02/videoImg.png"></video>
+			</div>
+			<div class="vip">
+				<h3>会员套餐</h3>
+				<div class="package">
+					<div v-for="(item, index) in vipSelect" :sindex="index" :class="index==2?index==selectedIndex?'time bg select':'time bg':index==selectedIndex?'time select':'time'" @touchend="select(index)">
+						<span class="tip" v-if="item.tip?true:false">{{item.tip}}</span>
+						<span class="p1">{{item.time}}</span>
+						<span class="p2">{{item.price}}<span class="p3">元</span></span>
+					</div>
+					<!-- <div class="time select">
+						<span class="p1">12个月</span>
+						<span class="p2">388<span class="p3">元</span></span>
+					</div>
+					<div class="time bg">
+						<span class="tip">PLUS会员，线上专享</span>
+						<span class="p1">12个月</span>
+						<span class="p2">698<span class="p3">元</span></span>
+					</div> -->
+				</div>
+			</div>
+			<div class="explain">
+				<h4>自动续费说明</h4>
+				<p>1.在嘀嗒APP的VIP购买页面，最新的订阅价格会实时显示</p>
+				<p>2.在确认付款后，会从您的iTunes账户扣费</p>
+				<p>3.连续包月会员，苹果会在每个服务周期到期前24小时，自动从您的iTunes账户扣费，并相应延长您的会员服务周期；服务周期以一个自然月为周期</p>
+				<p>4.若需取消自动续费服务，请在到期前最少24小时设置关闭，关闭后不再扣费，取消步骤为：打开iPhone设置 — Apple ID账户设置，点击去取消订阅</p>
+				<p>5.VIP会员有效期内，APP内所有服务及内容均可免费试用（讲解功能及内容需要购买PLUS年费会员）</p>
+				<p>注：详情可查看 <a href="">用户付费协议</a> 和 <a href="">自动续费服务协议</a></p>
+			</div>
+		</div>
+		<div class="payment" style="display:none;">
+			<button>立即支付 {{btnVal}}元</button>
+		</div>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+		var itemArr = ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级'];
+		var app = new Vue({
+			el: '#app',
+			data: {
+				userInfo: JSON.parse($storage.getStorage('user-info')),
+				gradeName: '',
+				userImage: '',
+				placeholder: '',
+				vipSelect: [{
+					tip: "连续包月，首月送15天",
+					time: "连续包月",
+					price: "28"
+				}, {
+					time: "12个月",
+					price: "388"
+				}, {
+					tip: "PLUS会员，线上专享",
+					time: "12个月",
+					price: "698"
+				}],
+				btnVal: '',
+				selectedIndex: 1
+			},
+			watch: {
+				selectedIndex() {
+					this.btnVal = this.vipSelect[this.selectedIndex].price
+				}
+			},
+			mounted: function() {
+				this.btnChange()
+					// FastClick.attach(document.body);
+				this.toast = new customToast();
+				this.bindPlay()
+				// this.clearCache()
+				// this.loadUserInfo();
+				// this.bindEvent();
+			},
+			methods: {
+				FullScreen: function() {
+					var video1=document.getElementById("videoBox")
+					video1.play()
+					video1.webkitEnterFullscreen()
+				},
+				bindPlay:function(){
+						var video=document.getElementById("videoBox")
+					video.addEventListener("play",function(){
+						console.log("播放")
+						video.webkitEnterFullscreen()
+					})
+				},
+				select: function(index) {
+					this.selectedIndex = index
+						// this.btnVal = this.vipSelect[index].price
+				},
+				btnChange() {
+					this.btnVal = this.vipSelect[this.selectedIndex].price
+				},
+				goback: function() {
+					api.closeWin({});
+				}
+
+			}
+		});
+	};
+</script>
+
+</html>

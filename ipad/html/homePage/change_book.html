@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>换书-跳转页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/change_book.css">
+</head>
+<body id="body" class="body">
+ <div id="app">
+     <div class="return">
+         <svg @click="goBack" class="icon" aria-hidden="true">
+             <use xlink:href="#icon-zuoyoujiantou"></use>
+         </svg>
+     </div>
+     <div class="book-header">
+         <book-item v-on:book-checked="selectedBook" :books-data="booksInfo"></book-item>
+     </div>
+     <div class="book-content">
+         <div class="shadow"></div>
+         <div class="tap">
+             <span>默认</span>
+             <div style="display:flex; flex-direction: row">
+                 <div class="label-grade" :class="[selectLabelId === 'gradeName' ? 'select-label' : '' ]" @click="selectLabel('gradeName')">{{gradeName}}</div>
+                 <div class="label-grade" :class="[selectLabelId === 'trainLabel' ? 'select-label' : '']" @click="selectLabel('trainLabel')">共读训练营 1 期</div>
+             </div>
+         </div>
+         <div id="tagWrap" v-show="selectLabelId === 'gradeName'" class="tag-map">
+             <div class="tag open">
+                <span @click="showAllLabel" id="allLabel">所有标签
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-xialajiantou-copy"></use>
+                    </svg>
+                </span>
+                 <div ref="scrollWrap" class="scroll-wrap">
+                     <div  class="ul-wrap">
+                         <div @click="selectedLabel('freeBooks')" class="label-item" :class="[selectedLabelId === 'freeBooks' ? 'select-label-tag' : '']">免费</div>
+                         <div @click="selectedLabel(labelItem)" :class="[selectedLabelId === labelItem ? 'select-label-tag' : '']" v-for="(labelItem, index) in bookAllLabel" class="label-item" id="index" ref="labelIndex">{{labelItem}}</div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         <div class="change-book">
+             <div v-show="selectLabelId === 'gradeName'" class="change01">
+                 <div class="book-sel" v-for="(labelBookItem, index) in labelBooks">
+                     <img @click="goToBookInfo(labelBookItem.bid)" :src="labelBookItem.bcover">
+                     <div class="book-label"></div>
+                     <div v-show="labelBookItem.vipbook" class="vip-icon"></div>
+                     <div class="book-label">
+                         <div class="label-level">
+                             <svg class="icon" aria-hidden="true">
+                                 <use xlink:href="#icon-dingjice_dengji_shiheyuedu"></use>\n' +
+                             </svg>
+                         </div>
+                     </div>
+                     <button @click="replaceBook('labelBooks', index, labelBookItem.bid)" class="replace">替换</button>
+                 </div>
+             </div>
+             <div v-show="selectLabelId === 'trainLabel'" class="change01">
+                 <div class="book-sel" v-for="(tranBookItem, index) in trainBooks">
+                     <img @click="goToBookInfo(tranBookItem.bid)" :src="tranBookItem.bcover">
+                     <div class="book-label"></div>
+                     <div v-show="tranBookItem.vipbook" class="vip-icon"></div>
+                     <div class="book-label">
+                         <div class="label-level">
+                             <svg class="icon" aria-hidden="true">
+                                 <use xlink:href="#icon-dingjice_dengji_shiheyuedu"></use>\n' +
+                             </svg>
+                         </div>
+                     </div>
+                     <button @click="replaceBook('trainBooks', index, tranBookItem.bid)" class="replace">替换</button>
+                 </div>
+             </div>
+         </div>
+     </div>
+     <div class="footer"></div>
+ </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-changeBook-antionSheet.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-changeBook-actionSheet.js"></script>
+<script>
+    apiready = function () {
+        Vue.component('book-item',{
+            props: ['booksData'],
+            data:function () {
+                return {
+                    booksDataArr: this.booksData,
+                }
+            },
+            methods: {
+                choose: function (flag) {
+                    this.$emit('book-checked', flag);
+                    this.$forceUpdate();
+                }
+            },
+            template: '<div :style="{width:  + booksData.length * 13.7 + \'rem\'}" id="bookHeader" class="book-header-content">' +
+                '<div class="book-t" :key="index" v-for="(bookItem, index) in booksData" @click="choose(index)">' +
+                '                  <img :src="bookItem.bcover" alt="">\n' +
+                '                 <div v-show="bookItem.checked" class="cover"><div class="pupop">换</div></div></div>' +
+                '</div>'
+
+        });
+        var app = new Vue({
+            el: '#app',
+            data: {
+                booksInfo: api.pageParam.bookInfo,
+                gradeName: '能力等级 ' + parseInt(JSON.parse($storage.getStorage('user-info')).gradeScaleName),
+                selectLabelId: 'gradeName',
+                bookAllLabel: [],
+                trainBooks: [],
+                selectedLabelId: 'freeBooks',
+                labelBooks: [],
+                positionX:false
+            },
+            mounted: function () {
+                this.pullDownFresh();
+                FastClick.attach(document.body);
+                this.toast = new customToast();
+                //加载点亮墙已有书籍
+                this.loadBookShelfUI();
+                //加载可替换的所有图书
+                this.loadChangeAllBooksInfo();
+                this.bindEvent();
+            },
+            methods: {
+                // 下拉刷新
+                pullDownFresh:function(){
+                  var that = this;
+                  // var bounce=true;
+                  // api.setFrameAttr({
+                  //     name: 'grow_up_frm',
+                  //     bounces: true,
+                  // });
+                  api.setRefreshHeaderInfo({
+                        visible: true,
+                        // loadingImg: '../image/timg.gif',
+                        bgColor: '#fff',
+                        textColor: '#ccc',
+                        textDown: '下拉刷新...',
+                        textUp: '松开刷新...',
+                        showTime: true
+                    }, function(ret, err) {
+                        // _this.taskListWait();
+                        console.log('下拉刷新')
+                        FastClick.attach(document.body);
+                        that.toast = new customToast();
+                        //加载点亮墙已有书籍
+                        // that.loadBookShelfUI();
+
+                        // that.$refs.scrollWrap.scrollTo(0, 0);
+                        //加载可替换的所有图书
+                        that.loadChangeAllBooksInfo();
+                        that.selectedLabelId = 'freeBooks';
+                        that.$refs.scrollWrap.scrollTo(0, 0);
+                        that.bindEvent();
+                        // that.$refs.scrollWrap.scrollTo(0, 0);
+                        that.positionX = true;
+                        setTimeout('api.refreshHeaderLoadDone()', '500');
+                        // api.setFrameAttr({
+                        //     name: 'grow_up_frm',
+                        //     bounces: false,
+                        // });
+                    });
+                    setInterval(function(){
+
+                    },1000)
+                    // window.addEventListener("scroll",function(){
+                    //   var t = document.documentElement.scrollTop || document.body.scrollTop;
+                    //   if(t<=30){
+                    //         if(!bounce){
+                    //             console.log(123)
+                    //             api.setFrameAttr({
+                    //                 name: 'grow_up_frm',
+                    //                 bounces: true,
+                    //             });
+                    //             bounce=true;
+                    //         }
+                    //     }else{
+                    //         if(bounce){
+                    //             console.log(456)
+                    //             api.setFrameAttr({
+                    //                 name: 'grow_up_frm',
+                    //                 bounces: false,
+                    //             });
+                    //             bounce=false;
+                    //         }
+                    //     }
+                    // })
+                },
+                bindEvent: function () {
+                    var that = this;
+                    api.addEventListener({
+                        name: 'back-page'
+                    }, function () {
+                        that.$forceUpdate();
+                    });
+                },
+                loadBookShelfUI: function () {
+                    var that = this;
+                    that.booksInfo = that.booksInfo.filter(function (item) {
+                        return item.checkouted
+                    });
+                    that.booksInfo.forEach(function (item, index) {
+                        api.imageCache({
+                            url: $comm.resUri + item.bcover,
+                            thumbnail: false
+                        }, function(ret, err) {
+                            item.bcover = ret.url;
+                            item.checked = index === 0;
+                        });
+                    });
+                    that.willChangBookBid = that.booksInfo[0].bid
+                },
+                loadChangeAllBooksInfo: function () {
+                    var that = this;
+                    $homeService.changeAllBooks(function (resp) {
+                        if (resp.errCode === 0) {
+                            //免费图书
+                            that.freeBooks = [];
+                            //带有标签的图书
+                            that.allBooks = [];
+                            resp.books.forEach(function (item){
+                                that.allBooks = that.allBooks.concat(item.bookinfos);
+                            });
+                            if (resp.Dimensions && resp.Dimensions.length > 0) {
+                                resp.Dimensions.forEach(function (label, index) {
+                                    that.allBooks.forEach(function (item) {
+                                        if (item.dimensionList.includes(label)) {
+                                            if (that.bookAllLabel.indexOf(label) === -1) {
+                                                that.bookAllLabel.push(label);
+                                            }
+                                        }
+                                    });
+                                });
+                            }
+                            that.cacheImage(that.allBooks, function (data) {
+                                data && data.length > 0 && data.forEach(function (item, index) {
+                                    if (item.dimensionList && item.dimensionList.length === 0) {
+                                        that.freeBooks.push(item);
+                                    }
+                                });
+                                that.labelBooks = that.freeBooks;
+                            });
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                cacheImage: function (data, callback) {
+                    //缓存图书封面
+                    data.forEach(function (item, index) {
+                        api.imageCache({
+                            url: $comm.resUri + item.bcover,
+                            thumbnail: false
+                        }, function(ret, err) {
+                            item.bcover = ret.url;
+                            if (index === data.length - 1) {
+                                callback && callback(data);
+                            }
+                        });
+                    });
+                },
+                selectedLabel: function (id) {
+                    // $analysis.bindZhuge('换书_图书标签', {'标签名称': id});
+                    if (id === 'freeBooks') {
+                        this.labelBooks = this.freeBooks;
+                        this.selectedLabelId = id;
+                        return
+                    }
+                    var labelLeft = this.$refs.labelIndex[this.bookAllLabel.indexOf(id)].offsetLeft;
+                    var needScrollX = labelLeft - ((this.$refs.scrollWrap.clientWidth + this.$refs.scrollWrap.offsetLeft) / 2);
+                    this.$refs.scrollWrap.scrollTo(needScrollX, 0);
+                    this.selectedLabelId = id;
+                    var needShowBooks = [];
+                    this.allBooks.forEach(function (item) {
+                        if (item.dimensionList.includes(id)) {
+                            needShowBooks.push(item);
+                        }
+                    });
+                    this.labelBooks = needShowBooks;
+                },
+                selectLabel: function (type) {
+                    if (type === 'gradeName') {
+                        console.log(this.positionX)
+                        // if(this.positionX){
+                        //   this.$refs.scrollWrap.scrollTo(0, 0);
+                        // }
+                        this.selectLabelId = 'gradeName';
+                        // $analysis.bindZhuge('换书_图书来源', {'图书来源名称': '能力等级'});
+                    } else {
+                        this.selectLabelId = 'trainLabel';
+                        // $analysis.bindZhuge('换书_图书来源', {'图书来源名称': '共读训练营 1 期'});
+                        this.loadTrainBooksInfo();
+                    }
+                },
+                loadTrainBooksInfo: function (reload, type) {
+                    var that = this;
+                    if (reload) {
+                        reloadTrainBooks();
+                    } else {
+                        that.trainBooks.length > 0 || reloadTrainBooks();
+                    }
+                    function reloadTrainBooks () {
+                        $homeService.getTrainBooks(function (resp) {
+                            if (resp.errCode === 0) {
+                                var trainAllBooks = [];
+                                resp.books.forEach(function (item){
+                                    trainAllBooks = trainAllBooks.concat(item.bookinfos);
+                                });
+                                that.cacheImage(trainAllBooks, function (data) {
+                                    that.trainBooks = data;
+                                });
+                            } else {
+                                that.toast.fail({
+                                    title: resp.errMsg
+                                })
+                            }
+                        }, that.funErr);
+                    }
+                },
+                showAllLabel: function () {
+                    var that = this;
+                    if (that.bookAllLabel.length > 0) {
+                        $chanbBookSheet.show(that.bookAllLabel, function (id) {
+                            that.selectedLabel(id);
+                            $chanbBookSheet.hide();
+                        });
+                    }
+                },
+                selectedBook: function (flag) {
+                    this.booksInfo.forEach(function (item, index) {
+                        if (flag === index) {
+                            item.checked = item.checked ? item.checked : !item.checked ;
+                        } else {
+                            item.checked = false
+                        }
+                    });
+                    // $analysis.bindZhuge('换书_点击图书', {'图书名称': this.booksInfo[flag].bname});
+                    this.willChangBookBid = this.booksInfo[flag].bid
+                },
+                replaceBook: function (type, index, bid) {
+                    var that = this;
+                    if (that.booksInfo.findIndex(function (item) {return item.bid === bid;}) !== -1) {
+                        return that.toast.fail({
+                            title: '书架已有这本书'
+                        })
+                    }else{
+                      // $analysis.bindZhuge('换书_替换按钮');
+                      this.changeBook(bid, this.willChangBookBid, function () {
+                          if (type === 'labelBooks') {
+                              that.labelBooks.splice(index, 1)
+                          } else if (type === 'trainBooks') {
+                              //that.trainBooks.splice(index, 1)
+                          }
+                      });
+                    }
+                },
+                changeBook: function (changeBookId, willChangeBookId, callback) {
+                    var that = this;
+                    $homeService.changeBook(willChangeBookId, changeBookId, function (resp) {
+                        if (resp.errCode === 0) {
+                            changeBookId = undefined;
+                            that.toast.fail({
+                                title: '换书成功'
+                            });
+                            callback && callback();
+                            $homeService.getMyBooks(function (resp) {
+                                if (resp.errCode === 0) {
+                                    that.booksInfo = resp.books;
+                                    that.booksInfo = that.booksInfo.filter(function (item) {
+                                        return item.checkouted
+                                    });
+                                    that.booksInfo.forEach(function (item, index) {
+                                        api.imageCache({
+                                            url: $comm.resUri + item.bcover,
+                                            thumbnail: false
+                                        }, function(ret, err) {
+                                            item.bcover = ret.url;
+                                            item.checked = index === 0;
+                                        });
+                                    });
+                                    that.willChangBookBid = that.booksInfo[0].bid
+                                }
+                            }, that.funErr);
+                            api.sendEvent({
+                                name: 'changeBook-info'
+                            });
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                goToBookInfo: function (bid) {
+                    var url = '../myBookshelf/bookInfo.html';
+                    api.openWin({
+                        name: 'bookInfo',
+                        url: url,
+                        bgColor: 'rgba(0,0,0,0)',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        pageParam: {
+                            name: 'bookInfo',
+                            bid: bid
+                        },
+                        bounces: false,
+                        slidBackEnabled: false,
+                        animation: {
+                            type: "fade", //动画类型（详见动画类型常量）
+                            subType: "from_right", //动画子类型（详见动画子类型常量）
+                            duration: 600 //动画过渡时间，默认300毫秒
+                        }
+                    });
+                },
+                funErr: function () {
+                    this.toast.fail({
+                        title: '网络异常，请检查网络链接'
+                    })
+                },
+                goBack: function () {
+                    // $analysis.bindZhuge('换书_返回');
+                    api.closeFrame({});
+                }
+            }
+
+        });
+    };
+</script>
+
+</html>

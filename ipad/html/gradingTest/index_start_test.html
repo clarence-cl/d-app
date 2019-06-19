@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>$Title$</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/index_start_test.css">
+</head>
+
+<body id="body">
+    <div class="img-wrap">
+    </div>
+    <div class="text-content">
+        <h1 class="text-title">阅读能力大挑战</h1>
+        <h2 class="text-desc">5分钟，测出你的真实阅读水平，定制最适读的书</h2>
+    </div>
+    <div class="footer">
+        <button id="btnStartTest" class="btn-start-test">开始测试</button><br>
+    </div>
+    <div id="testCount" class="test-count">已有n个人完成测试</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    apiready = function() {
+        adaptationModel();
+        getTestUserCount();
+        bindEvent()
+    };
+
+    function bindEvent() {
+        $analysis.bindEvent($api.byId('btnStartTest'), 'touchend', function () {
+            goToWarmTest()
+        }, '入学测引导页_开始测试b');
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function getTestUserCount() {
+        $GradingTest.getTestUserCount(funSucGetTestCount, funErr)
+    }
+
+    function funSucGetTestCount(resp) {
+        if (resp.errCode === 0) {
+            $api.html($api.byId('testCount'), '已有' + resp.testCount + '个人完成测试');
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funErr(e) {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        })
+    }
+
+    function startTest() {
+        api.openFrame({
+            name: 'smallSurvey',
+            url: './smallSurvey.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'smallSurvey'
+            },
+            bounces: false,
+            animation: {
+                type: "ripple",
+                subType: "from_right",
+                duration: 1000
+            }
+        });
+    }
+
+    function goToWarmTest() {
+        var userInfo = JSON.parse($storage.getStorage('user-info'));
+        var testStartTime = new Date().getTime();
+        $storage.setStorage('test-start-time', testStartTime);
+        if (userInfo.gender && userInfo.grade && userInfo.age && userInfo.userName!=userInfo.userMobile) {
+            api.openFrame({
+                name: 'warm_up_testfrm',
+                url: './warm_up_testfrm.html',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                pageParam: {
+                    name: 'warm_up_testfrm'
+                },
+                bounces: false,
+                reload: true
+            });
+        } else {
+            goToPerfectInfo();
+        }
+    }
+    function goToPerfectInfo() {
+        api.openWin({
+            name: 'perfect_information_first',
+            url: '../personalCenter/perfect_information_first.html',
+            pageParam: {
+                name: 'perfect_information'
+            },
+            bounces: false,
+            slidBackEnabled: false
+        });
+    }
+</script>
+
+</html>

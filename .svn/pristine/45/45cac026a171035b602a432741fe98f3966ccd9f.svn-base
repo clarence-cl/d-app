@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>书摘朗读</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+	<script src="../../../common/fontclass/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/myBookshelfStyle/readBooksAloud.css">
+</head>
+<body>
+<!-- 返回 -->
+<div id="app">
+	<div class="close">
+			<span>
+				 <svg id="" class="icon" aria-hidden="true">
+						 <use xlink:href="#icon-zuoyoujiantou"></use>
+				 </svg>返回
+			</span>
+			<h1>书摘朗读</h1>
+			<span style="visibility:hidden;">
+				 <svg class="icon" aria-hidden="true">
+						 <use xlink:href="#icon-fenxiang1-copy"></use>
+				 </svg>分享
+			</span>
+	</div>
+	 <!-- 片段朗读测试 -->
+	<div class="read-box">
+			<!-- 选取片段朗读 -->
+			<div class="article">
+				 <span class="book-name">摘自 《 {{ bookName }} 》</span>
+				 <p id="refText">{{ textView }}</p>
+				 <div class="all-read">
+						<div class="read-icon">
+							<div id="playIcon" @touchend="playRecording">
+								<svg id="" class="icon" aria-hidden="true">
+									 <use xlink:href="#icon-dingjice_huifang"></use>
+								</svg>
+							</div>
+							<span>回放</span>
+						</div>
+						<div class="read-icon">
+							<div id="iconWrap" @click="btnRecord">
+								<svg id="" class="icon" aria-hidden="true">
+									 <use xlink:href="#icon-dingjiceluyin_moren"></use>
+								</svg>
+							</div>
+							<span> 点击话筒，开始朗读</span>
+						</div>
+						<div class="read-icon">
+							<div id="scoreIcon">
+								<svg id="" class="icon" aria-hidden="true" style="display:none;">
+									 <use xlink:href="#icon-dingjice_weidefenanniu"></use>
+								</svg>
+							</diV>
+							<div class="mark" id="scoreResult">0</div>
+							<span>得分</span>
+						</div>
+					</div>
+			</div>
+			<!-- 已完成片段朗读 -->
+			<div class="recitation">
+				<div class="recitation-top">
+					 <span class="score">90</span>
+					 <p>近日，由接力出版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来自少儿创作界、出版界。近日，由接力出版社和北京师范大学中国
+						 儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来自少儿创作界、出版界。</p>
+				</div>
+				<div class="recitation-record">
+						<div class="record">
+							 <svg class="icon" aria-hidden="true">
+									<use xlink:href="#icon-bofang"></use>
+							 </svg>
+							 <span>03：30</span>
+						</div>
+						<svg class="icon share" aria-hidden="true" @touchend="share">
+							 <use xlink:href="#icon-fenxiang1"></use>
+						</svg>
+				</div>
+				<span class="time">发表于   2019-01-19 12：52：23</span>
+			</div>
+	</div>
+</div>
+
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/localforage.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript">
+		apiready = function(){
+			var toast = new customToast();
+			var app = new Vue({
+				el:'#app',
+				data:{
+					bookName:'',
+					demo:null,
+					chivoxEngineOn:false,
+					textView:'',
+					isPlay:false,
+					isRecord:false,
+					btn:false,
+					hasReadResult:false,
+					readResult:null,
+					timer:null,
+					startTime:null,
+					endTime:null
+				},
+				mounted:function(){
+					this.bookName = api.pageParam.bookName;
+					this.textView = api.pageParam.text;
+					//初始化驰声
+					this.createChivox();
+					this.registChivoxCallback();
+
+				},
+				methods:{
+					//点击分享按钮进行分享
+					share:function(){
+						api.openWin({
+								name: 'Readresults_detail',
+								url: './Readresults_detail.html',
+								rect: {
+										x: 0,
+										y: 0,
+										w: 'auto',
+										h: 'auto'
+								},
+								bounces: false,
+								slidBackEnabled:false,
+								reload: true,
+								pageParam: {
+										// text:selectWordText,
+										// bookName:api.pageParam.data.bname
+										// bcid: api.pageParam.bcid,
+										// testId: api.pageParam.testId,
+										// data: api.pageParam.data,
+										// bookchaptersData: api.pageParam.bookchaptersData,
+										// chapters: api.pageParam.chapters
+								}
+							})
+					},
+					btnRecord:function() {
+						var that = this;
+						// that.isRecord = false;
+						var privacy = api.require('privacy');
+						privacy.microphone(function(ret, err) {
+								if (ret.status) {
+										console.log(that.isRecord+'???');
+										console.log(that.readResult)
+										if (!that.textView) {
+												return;
+										}
+										console.log(1)
+										if (that.readResult) {
+											console.log(3)
+												// that.stopReplay();
+										}
+										console.log(2)
+										console.log(that.isRecord+'------')
+										if (!that.isRecord) {
+												console.log(453)
+												var eventProperty = {
+														// '用户朗读成绩': score,
+														// '是否VIP图书': api.pageParam.data.vipbook,
+														// '图书名称': api.pageParam.data.bname,
+														// '图书等级': api.pageParam.data.gradeScaleName,
+														// '作者': api.pageParam.data.author,
+														// '已读人数': api.pageParam.data.readingNumber,
+														// '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+														// '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+												};
+												// $analysis.bindZhuge('单元朗读录音', eventProperty);
+												that.hasReadResult = false;
+												that.isRecord = true;
+												that.changBtnUI();
+												// alert('hahha')
+												that.start();
+										} else {
+												// alert(777)
+												that.stopRecord();
+												that.stop();
+										}
+								} else {
+										// toast.fail({
+										// 		title: '请开启麦克风权限'
+										// });
+										api.toast({
+											msg: '请开启麦克风权限',
+											duration: 2000,
+											location: 'middle'
+										});
+								}
+						});
+					},
+					//驰声回调
+					registChivoxCallback:function(){
+						var that = this;
+						api.addEventListener({
+								name: 'chivoxResult'
+						}, function(ret, err) {
+								if (ret) {
+										//$comm.debug('Chivox Callback Result:', JSON.stringify(ret), 'debug');
+								}
+						});
+						//chivox全结果回调
+						api.addEventListener({
+								name: 'chivoxAllResult'
+						}, function(ret, err) {
+								if (ret) {
+										console.log('woshishui')
+										// that.stopRecord();
+										if (ret.value.errId === 60010) {
+												// return toast.fail({
+												// 		title: '网络异常，请检查网络链接'
+												// });
+												return api.toast({
+				                  msg: "网络异常，请检查网络链接",
+				                  duration: 2000,
+				                  location: 'middle'
+				                });
+										}
+										// $unitTestReading.show();
+										// alert(1)
+										that.reloadUI(ret);
+										// alert(2)
+										that.hasReadResult = true;
+								}
+						});
+						//chivox开始回放回调
+						api.addEventListener({
+								name: 'chivoxReplayStart'
+						}, function(ret, err) {
+								if (ret) {
+										//$comm.debug('Chivox Replay Started:', JSON.stringify(ret), 'debug');
+								}
+						});
+						//chivox结束回放回调
+						api.addEventListener({
+								name: 'chivoxReplayFinished'
+						}, function(ret, err) {
+								if (ret) {
+										that.isPlay = false;
+										$api.html($api.byId('playIcon'), ' <svg id="playAloudBtn" class="icon" aria-hidden="true">\n' +
+												'                    <use xlink:href="#icon-dingjice_huifanganniu"></use>\n' +
+												'                </svg>');
+								}
+						});
+					},
+					// 朗读得分算法规则
+					reloadUI:function(ret) {
+							// console.log(JSON.stringify(ret)+'99999')
+							// alert('520')
+							var that = this;
+							var score;
+							var value = $chivox.parse(ret);
+							// var value = ret.value;
+							// console.log(typeof(value)==='string')
+							// console.log(JSON.stringify(value)+'hahaha')
+							// if (!value || !value.details) {
+							// 		return;
+							// }
+							console.log('daozheli');
+							console.log(value.details)
+							var arrIndex = [];
+							var item;
+							for (var i = 0; i < value.details.length; i++) {
+									console.log(value.details[i].overall)
+									if (value.details[i].overall >= 80) {
+											item = {
+													idx: i,
+													type: 1
+											};
+											arrIndex.push(item)
+									} else if (value.details[i].overall >= 50 && value.details[i].overall < 80) {
+											item = {
+													idx: i,
+													type: 2
+											};
+											arrIndex.push(item)
+									} else if (value.details[i].overall < 50) {
+											item = {
+													idx: i,
+													type: 3
+											};
+											arrIndex.push(item)
+									}
+							}
+							console.log(arrIndex+'____>')
+							$api.html($api.byId('refText'), $matchText(that.textView, arrIndex));
+							console.log('mmmmm')
+							//获取用户等级
+							var userGrade = JSON.parse($storage.getStorage('user-info')).grade;
+							var readingScore = $chivox.calcTotalScore(ret, userGrade).totalscore;
+							console.log(readingScore)
+							if (!score || readingScore > score) {
+									score = isNaN(readingScore) ? 0 : readingScore;
+									console.log(score+'!!!!')
+									// $api.byId('maxScoreWrap').style.visibility = 'visible';
+									$api.byId('scoreResult').innerText = score;
+									// currentScore = score;
+									that.readResult = ret;
+									console.log(that.readResult+'____')
+							}
+					},
+					//停止录音
+					stop:function() {
+						console.log('停止录音了')
+							var that = this;
+							// 记录停止录音时间
+							that.endTime = new Date().getTime();
+							//计算录音时间(目前已毫秒为单位，到时候根据后台要求具体转化数据)
+							var recordTime = that.endTime - that.startTime;
+							console.log(recordTime/1000)
+			        if (that.demo) {
+			            that.demo.stop({}, function(ret, err) {
+			                if (ret) {
+													console.log('停止炉体')
+			                    $comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret)), 'debug');
+			                }
+			            });
+			        }
+			    },
+					//点击按钮播放音频
+					playRecording:function(){
+						var that = this;
+						console.log('点击回放按钮')
+						console.log(that.isRecord);
+						console.log(that.readResult);
+						console.log(that.isPlay);
+
+
+						if (that.isRecord) {
+		            return;
+		        }
+		        if (!that.readResult) {
+		            // return toast.fail({
+		            //     title: '请先录音'
+		            // });
+								return api.toast({
+                  msg: "请先录音",
+                  duration: 2000,
+                  location: 'middle'
+                });
+		        }
+		        if (!that.isPlay) {
+		            var eventProperty = {
+		                // '用户朗读成绩': score,
+		                // '是否VIP图书': api.pageParam.data.vipbook,
+		                // '图书名称': api.pageParam.data.bname,
+		                // '图书等级': api.pageParam.data.gradeScaleName,
+		                // '作者': api.pageParam.data.author,
+		                // '已读人数': api.pageParam.data.readingNumber,
+		                // '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+		                // '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+		            };
+		            // $analysis.bindZhuge('单元朗读回放', eventProperty);
+		            that.isPlay = true;
+								console.log('回放继续向下走')
+		            that.replay();
+		            $api.html($api.byId('playIcon'), ' <svg id="playAloudBtn" class="icon" aria-hidden="true">\n' +
+		                '                    <use xlink:href="#icon-dingjice_tingzhianniu"></use>\n' +
+		                '                </svg>');
+		        } else {
+		            that.isPlay = false;
+		            that.stopReplay();
+		        }
+					},
+					//停止播放音频
+					stopReplay:function() {
+			        if (demo) {
+			            demo.stopReplay({}, function(ret, err) {
+			                if (ret) {
+			                    $comm.debug('Chivox Engine ' +
+			                        ':', JSON.stringify(ret), 'debug');
+			                }
+			            });
+			        }
+			    },
+					//调用驰声回放
+					replay:function() {
+							var that = this;
+							console.log('kkkkkkkk')
+							console.log(that.demo)
+			        if (that.demo) {
+			            that.demo.replay({}, function(ret, err) {
+			                if (ret) {
+			                    $comm.debug('Chivox Engine Replaying:', JSON.stringify(ret), 'debug');
+			                }
+			            });
+			        }
+			    },
+					//初始化驰声模块
+					createChivox:function(){
+						var that = this;
+						that.demo = api.require('moduleChivox');
+						if (that.demo) {
+		            that.demo.creatCloudEngine({}, function(ret, err) {
+		                if (ret) {
+												console.log(6789)
+		                    that.chivoxEngineOn = true;
+		                    $comm.debug('Chivox Engine Created:', JSON.stringify(ret), 'debug');
+		                } else {
+		                    that.chivoxEngineOn = false;
+		                }
+		            });
+		        }
+					},
+					//开始录音
+					start:function(){
+						var that = this;
+						// 记录录音开始时间
+						that.startTime = new Date().getTime();
+						// console.log(playRecordTime)
+						// console.log('hehehhe')
+						// demo = api.require('moduleChivox');
+						if (that.demo && that.chivoxEngineOn) {
+		            var reg = /^[\u4e00-\u9fa5]+$/;
+		            var wordArr = [];
+		            var dataStr = that.textView;
+		            var strArr = dataStr.split('');
+		            strArr.forEach(function (item, index) {
+		                if (reg.test(item)) {
+		                    wordArr.push(item)
+		                }
+		            });
+		            dataStr = wordArr.join('');
+		            var data = {
+		                refText: dataStr
+		            };
+								console.log(data)
+		            that.demo.start(data, function(ret, err) {
+										// alert(1)/
+		                if (ret) {
+												// alert(2)
+		                    $comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret, data)), 'debug');
+		                }
+		            });
+		        }
+					},
+					//停止录音
+					stopRecord:function() {
+						console.log('tingzhi')
+							var that = this;
+							that.isRecord = false;
+							clearInterval(that.timer);
+							$api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+									'                <use xlink:href="#icon-dingjice_kaishiluyinanniu"></use>\n' +
+									'            </svg>');
+					},
+					changBtnUI:function() {
+							var that = this;
+							console.log(that.btn)
+							$api.byId('refText').style.color = '#333333';
+							// $api.html($api.byId('refText'), readBook);
+							// var btn = false;
+
+							that.timer = setInterval(function() {
+									if (that.btn) {
+											$api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+													'                <use xlink:href="#icon-dingjiceluyin_kaishi"></use>\n' +
+													'            </svg>');
+									} else {
+											$api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+													'                <use xlink:href="#icon-dingjiceluyin_moren"></use>\n' +
+													'            </svg>');
+									}
+									that.btn = !that.btn;
+							}, 500)
+					},
+				}
+			})
+		}
+</script>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>首页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/index_home_win.css">
+</head>
+<body id="body" class="body">
+    <footer class="tab-bar" id="footer">
+        <div id="activeTab" class="tab-bar-row">
+            <div id="tabA" class="tab-item tab-select">
+                <svg id="aTab" class="icon icon-footer" aria-hidden="true">
+                    <use xlink:href="#icon-biaoqianlan-shufang-xuanzhong"></use>
+                </svg>
+                <h1 class="tab-text tab-text-block">书房</h1>
+            </div>
+            <!-- <div id="tabB" class="tab-item">
+                <svg id="bTab" class="icon icon-footer" aria-hidden="true">
+                    <use xlink:href="#icon-biaoqianlan-faxian-moren"></use>
+                </svg>
+                <h1 class="tab-text">发现</h1>
+            </div> -->
+            <div id="tabC" class="tab-item">
+                <svg id="cTab" class="icon icon-footer" aria-hidden="true">
+                    <use xlink:href="#icon-biaoqianlan-chengchang-moren"></use>
+                </svg>
+                <h1 class="tab-text">成长</h1>
+            </div>
+            <div id="tabD" class="tab-item">
+                <svg id="dTab" class="icon icon-footer" aria-hidden="true">
+                    <use xlink:href="#icon-biaoqianlan-wode-moren"></use>
+                </svg>
+                <h1 class="tab-text">我</h1>
+            </div>
+        </div>
+    </footer>
+    <div id="map" class="map"></div>
+</body>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    //api.welcomePage();
+    var toast = new customToast();
+    var allTabs;
+
+    apiready = function () {
+        adaptationModel();
+        loadUserVipInfo();
+        bindEvent();
+    };
+
+    function loadUserVipInfo(){
+      $myCenter.VIPInfo(funLoadUserVipInfo,funErr);
+    }
+    function funLoadUserVipInfo(resp){
+      if(resp.errCode===0){
+        $storage.setStorage('userVipInfo', resp.VIPInfo);
+        loadUI();
+      }else {
+        toast.fail({
+            title: resp.errMsg
+        })
+      }
+    }
+
+    function bindEvent () {
+        allTabs = $api.domAll($api.byId("activeTab"), "div");
+        $analysis.bindEvent($api.byId('tabA'), 'touchstart', function () {
+            activeTab('tabA');
+            api.sendEvent({
+                name: 'aTab'
+            });
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-biaoqianlan-shufang-xuanzhong"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-biaoqianlan-faxian-moren"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-biaoqianlan-chengchang-moren"></use>');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-biaoqianlan-wode-moren"></use>');
+        }, '进入书房b');
+        // $analysis.bindEvent($api.byId('tabB'), 'touchstart', function () {
+        //     activeTab('tabB');
+        //     $api.html($api.byId('bTab'), '<use xlink:href="#icon-biaoqianlan-faxian-xuanzhong"></use>');
+        //     $api.html($api.byId('aTab'), '<use xlink:href="#icon-biaoqianlan-shufang-moren"></use>');
+        //     $api.html($api.byId('cTab'), '<use xlink:href="#icon-biaoqianlan-chengchang-moren"></use>');
+        //     $api.html($api.byId('dTab'), '<use xlink:href="#icon-biaoqianlan-wode-moren"></use>');
+        // }, '点亮墙_发现b');
+        $analysis.bindEvent($api.byId('tabC'), 'touchstart', function () {
+            activeTab('tabC');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-biaoqianlan-chengchang-xuanzhong"></use>');
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-biaoqianlan-shufang-moren"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-biaoqianlan-faxian-moren"></use>');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-biaoqianlan-wode-moren"></use>');
+        }, '点亮墙_成长b');
+        $analysis.bindEvent($api.byId('tabD'), 'touchstart', function () {
+            activeTab('tabD');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-biaoqianlan-wode-xuanzhong"></use>');
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-biaoqianlan-shufang-moren"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-biaoqianlan-faxian-moren"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-biaoqianlan-chengchang-moren"></use>');
+        }, '点亮墙_我b');
+        api.addEventListener({
+            name: 'goTo-myCenter'
+        }, function() {
+            activeTab('tabD');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-biaoqianlan-wode-xuanzhong"></use>');
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-biaoqianlan-shufang-moren"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-biaoqianlan-faxian-moren"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-biaoqianlan-chengchang-moren"></use>');
+        });
+        if ($storage.getStorage('bookshelf-mask')) {
+            $api.byId('map').style.display = 'none'
+        }
+        api.addEventListener({
+            name: 'bookshelf-mask'
+        }, function () {
+            $api.byId('map').style.display = 'none'
+        });
+    }
+
+    function loadUI(type) {
+        api.openFrameGroup({
+            name: 'homePageGroup',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h:  api.frameHeight - (api.frameHeight / 768 * 120)
+            },
+            scrollEnabled: false,
+            index: 0,
+            preload: 3,
+            frames: [
+                {
+                    name: 'bookshelf_frm',
+                    url: './bookshelf_frm.html',
+                    bgColor: '#fefcf6'
+                },
+                // {
+                //     name: 'discover_frm',
+                //     url: './discover_frm.html',
+                //     bgColor: '#fefcf6'
+                // },
+                {
+                    name: 'grow_up_frm',
+                    url: './grow_up_frm.html',
+                    bgColor: '#fefcf6'
+                },
+                {
+                    name: 'myCenter_frm',
+                    url: './myCenter_frm.html',
+                    bgColor: '#fefcf6'
+                }
+            ]
+        }, function(ret, err) {
+            var index = ret.index;
+        });
+
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function reloadTabUI (index) {
+        api.setFrameGroupIndex({
+            name: 'homePageGroup',
+            index: index,
+            reload: false,
+            scroll: false
+        });
+    }
+
+    function activeTab(id) {
+        for (var i = 0; i < allTabs.length; i++) {
+            if (allTabs[i].id === id) {
+                $api.addCls(allTabs[i], 'tab-select');
+                $api.addCls($api.dom(allTabs[i], 'h1'), 'tab-text-block');
+                reloadTabUI(i);
+            } else{
+                $api.removeCls(allTabs[i], 'tab-select');
+                $api.removeCls($api.dom(allTabs[i], 'h1'), 'tab-text-block');
+            }
+        }
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: '网络异常，请检查网络链接',
+            duration: "2000"
+        })
+    }
+</script>
+</html>

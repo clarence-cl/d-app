@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>兴趣选择</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/interestSelection.css">
+</head>
+
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+        <!-- 题目 -->
+        <div class="content" style="padding:2rem;">
+            <div class="type" v-for="(item, index) in resData">
+                <img :src="item.dImgPath?resUrl+item.dImgPath:'../../../common/image02/logo.png'" class="typeImg">
+                <h3>{{item.dimensionName}}</h3>
+                <img v-if="!item.showBtn" src="../../../common/image02/a1.png" class="add" @touchend="select(index,item.dimensionID)">
+                <img v-if="item.showBtn" src="../../../common/image02/a2.png" class="add" @touchend="del(index,item.dimensionID)">
+            </div>
+        </div>
+        <!-- 进入阅读特效 -->
+        <div id="maskWrap" class="mask-wrap">
+            <div class="mask">
+                <div class="icon-mask">
+                    <svg id="maskIcon" class="icon mask-icon" aria-hidden="true">
+                     <use xlink:href="#icon-jiazaijindu2"></use>
+                 </svg>
+                    <div id="maskProgress" class="mask-progress"></div>
+                </div>
+                <div class="mask-text">
+                    正在为你定制专属阅读书单
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var readingAloudTime = null;
+        var readingTime = null;
+        var app = new Vue({
+            el: '#app',
+            data: {
+                resData: null,
+                resUrl: null,
+                btnComplete: false,
+                selectData: []
+            },
+            mounted() {
+                this.resUrl = $comm.resUri
+                this.pullDownFresh()
+                this.addEvent()
+            },
+            methods: {
+                exit: function() {
+                    api.closeWin()
+                },
+                addEvent(){
+                  api.addEventListener({ //监听内容区域选择事件改变按钮状态
+                        name: 'submitEvent'
+                    }, (ret, err)=> {
+                        this.open()
+                    });
+                },
+                send(val){
+                  api.sendEvent({
+                      name: 'btnEvent',
+                      extra: {
+                          key: val,
+                      }
+                  });
+                },
+                del(index,id) {
+                    this.$set(this.resData[index], "showBtn", false)
+                        var i = this.selectData.indexOf(id);
+                        if (i > -1) {
+                            this.selectData.splice(i, 1);
+                        }
+                      if(this.selectData.length==0){
+                        this.send(false)
+                      }
+                },
+                select(index, id) {
+                    this.selectData.push(id)
+                    this.$set(this.resData[index], "showBtn", true)
+                        // this.showBtn = !this.showBtn
+                    console.log("选择的ID------" + this.selectData)
+                    this.send(true)
+                },
+                open() {
+                        this.circle()
+                        var data = {
+                            DimensionIds: this.selectData
+                        }
+                        $comm.socket(8007, data, (res) => {
+                            console.log(res)
+                            if (res) {
+                                this.send(false)
+                                ret = JSON.parse(res)
+                                if (ret.error == 0) {
+                                    Data = JSON.parse(ret.datas)
+
+                                }
+                            }
+                        })
+                },
+                getData() {
+                    var data = {}
+                    $comm.socket(8006, data, (res) => {
+                      console.log("兴趣选择内容----"+res)
+                        if (res) {
+                            var ret = JSON.parse(res)
+                            if (ret.error == 0) {
+                                var Data = JSON.parse(ret.datas)
+                                this.resData = Data.dimensionList
+                            }
+                        }
+                    })
+                },
+                pullDownFresh: function() {
+                  var that = this;
+                  api.refreshHeaderLoading()
+                  api.setRefreshHeaderInfo({
+                    visible: true,
+                    loadingImg: '../image/timg.gif',
+                    bgColor: '#fff',
+                    textColor: '#ccc',
+                    textDown: '下拉更新...',
+                    textUp: '松开刷新...',
+                    showTime: true
+                  }, (ret, err)=> {
+                    that.getData()
+                    that.send(false)
+                    setTimeout('api.refreshHeaderLoadDone()', '1000');
+
+                  });
+                },
+                circle() {
+                    $api.css($api.byId('maskWrap'), 'display: flex');
+                    var deg = 0;
+                    var progress = 0;
+                    timer = setInterval(() => {
+                        deg += 10;
+                        progress = progress + 5;
+                        $api.html($api.byId('maskProgress'), progress + '%');
+                        $api.css($api.byId('maskIcon'), 'transform: rotate(' + deg + 'deg)');
+                        if (progress >= 100) {
+                            clearInterval(timer);
+                            api.sendEvent({
+                                name: 'maskEvent',
+                            });
+                            $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijinduwancheng"></use>');
+                            $api.css($api.byId('maskIcon'), 'transform: rotate(0deg)');
+                            $api.html($api.byId('maskProgress'), '');
+                            $api.css($api.byId('maskWrap'), 'display: none');
+                            $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijindu2"></use>');
+                            api.openWin({
+                                name: 'indexHomePage',
+                                url: '../homePage/index_home_win.html',
+                                slidBackEnabled: false,
+                                reload: true,
+                                pageParam: {
+                                    from: 1
+                                }
+                            });
+                            api.closeWin({
+                                name: 'testResult'  //关闭结果页面
+                            });
+
+                        }
+                    }, 50)
+                }
+            }
+
+        });
+    };
+</script>
+
+</html>

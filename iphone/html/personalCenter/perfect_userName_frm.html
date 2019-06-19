@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>name</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <link rel="stylesheet" href="../../css/personalCenterStyle/perfect_userName_frm.css">
+</head>
+
+<body id="body">
+    <div class="content">
+        <h1 class="text-title">填写名字，分享挑战成绩和证书吧！</h1>
+        <div class="desc-wrap">
+            <h6 class="desc-text">填写真实姓名找到同一学校的小伙伴</h6>
+        </div>
+        <div class="input-name">
+            <input onfocus="focusInput()" class="input" id="inputValue" type="text" placeholder="请输入">
+        </div>
+        <button class="button-finish" id="btnRegistration">领取证书</button>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    apiready = function() {
+        adaptationModel();
+        bindEvent();
+    };
+
+    function bindEvent() {
+        $analysis.bindEvent($api.byId('btnRegistration'), 'touchend', function () {
+            finish()
+        }, '填写昵称页_生成报告b');
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+        var fontSize = api.frameHeight / 768 * 10 + 'px';
+        document.documentElement.style.fontSize = fontSize;
+    }
+
+    function finish() {
+        var name = $api.byId('inputValue').value;
+        if (!name || name === '' || $api.trim(name) === '') {
+            return toast.fail({
+                title: '请输入名字'
+            })
+        }
+        if (name.length > 8) {
+            return toast.fail({
+                title: '输入的昵称过长啦'
+            })
+        }
+        $GradingTest.completeName(name, funSuc, funErr);
+    }
+
+    function funSuc(resp) {
+        if (resp.errCode === 0) {
+            $storage.setStorage('user-info', resp.user);
+            var userProperties = {
+                '性别': resp.user.gender,
+                'vip': resp.user.vip,
+                '名称': resp.user.userName,
+                '能力等级': resp.user.gradeScaleName,
+                '电话号码': resp.user.userMobile
+
+            };
+            $analysis.identify(resp.user.userName, userProperties);
+            goToResult();
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funErr() {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        })
+    }
+
+    function goToResult() {
+        api.openFrame({
+            name: 'test_resultsfrm',
+            url: '../gradingTest/result_testData_frm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'test_resultsfrm'
+            },
+            bounces: false,
+            slidBackEnabled: false,
+            animation: {
+                type: "flip",
+                subType: "from_right",
+                duration: 500
+            }
+        });
+    }
+
+    function focusInput() {
+        setTimeout(function() {
+            $api.byId('inputValue').scrollIntoView(false);
+        }, 300);
+    }
+
+    function goback() {
+        api.closeFrame({});
+    }
+</script>
+
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>书房</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <link rel="stylesheet" href="../../css/swiper.min.css">
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/bookshelf_frm.css">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+
+        <!-- 书房头部 -->
+        <!-- <div class="head">
+      <div class="gift" @touchend="goLogin">
+        <img :src="token==null?'../../../common/image02/logo.png':userInfo.headImgUrl">
+        <span v-if="token==null?true:false">注册有礼</span>
+        <svg v-if="token==null?true:false"  class="icon" aria-hidden="true">
+          <use xlink:href="#icon-gift_huaban"></use>
+        </svg>
+      </div>
+      <div class="grade" @touchend="gradeSelect">
+        <span>三年级</span>
+      </div>
+      <span class="calendar" style="visibility:hidden">1
+        <svg class="icon" aria-hidden="true">
+          <use xlink:href="#icon-xx_"></use>
+        </svg>
+      </span>
+    </div> -->
+
+        <!-- Swiper 首页头部 -->
+        <div class="banner">
+            <div class="swiper-container swiper01">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide" v-for="(item,index) in resData.bannerActivity">
+                        <img :src="item.coverImgUrl ?resUri+item.coverImgUrl : '../../../common/image02/banner.png'"></div>
+                </div>
+                <!-- Add Pagination -->
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+        <!-- tab -->
+        <div class="tab">
+            <div class="box" @touchstart="start($event)" @touchend="bookByType($event)">
+                <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-x_1"></use>
+          </svg> 兴趣选书
+            </div>
+            <div class="box" @touchstart="start($event)" @touchend="problemLevel($event)">
+                <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-fl_"></use>
+          </svg> 分级选书
+            </div>
+        </div>
+        <!-- 智能推荐 -->
+        <div class="intelligent" v-if="arSwitch">
+            <div class="title">
+                <h2>专属推荐</h2>
+                <span :style="{color:(token==null||level==0||!level?'#c9c9c9':'#708782')}" @touchstart="start($event)" @touchend="more($event)">查看全部
+                  <svg class="icon" aria-hidden="true">
+                    <!-- <use xlink:href="#icon-zuoyoujiantou-copy"></use> -->
+                    <use xlink:href="#icon-zuoyoujiantou-copy-copy"></use>
+                  </svg>
+                </span>
+            </div>
+            <div class="btn" v-if="ARshow">
+                <h1>参加嘀嗒阅读能力大挑战，获取你的阅读能力等级，嘀嗒会推荐更合适的书给你</h1>
+                <button @touchstart="start($event)" @touchend="goEvaluation($event)">获取智能阅读计划</button>
+            </div>
+            <!-- <div v-if="!ARshow" class="bookBox">
+                <div class="book" v-for="(item,index) in resData.aiRecommends" @touchstart="start($event)" @touchend="goBookDetail($event,item.bookID)">
+                    <img :src="resUri+item.bookCover" class="bookImg">
+                    <h5>{{item.bookName}}</h5>
+                </div>
+            </div> -->
+            <div class="swiper-container swiper03">
+                <div class="swiper-wrapper" v-if="!ARshow">
+                    <div class="swiper-slide" v-for="(item,index) in resData.aiRecommends" @touchstart="start($event)" @touchend="goBookDetail($event,item.bookID)">
+                        <img :src="resUri+item.bookCover" class="bookImg">
+                        <h5>{{item.bookName}}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 专题书单 -->
+        <!-- activityTypeCode类型 -->
+        <div class="special" v-for='item in resData.recommendActivitys' v-if="item.activityList.length==0?false:true">
+            <div class="title">
+                <h2>{{item.activityTypeName}}</h2>
+                <span @touchstart="start($event)" @touchend="special($event,item.activityTypeId,item.activityTypeName)" activityId="item.activityTypeId">查看全部
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+                  </svg>
+                </span>
+            </div>
+            <!-- swiper 书单-->
+            <div class="bookList">
+                <div class="swiper-container swiper02">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide" v-for="(term,index) in item.activityList" :key="index" @touchstart="start($event)" @touchend="goActive($event,term.activityId,term.activityName)">
+                            <div class="bookCover">
+                                <img :src="term.coverImgUrl=='' ?'../../../common/image02/banner.png' : resUri+term.coverImgUrl">
+                                <span class="bookNumber">{{term.bookCount}}本书</span>
+                                <span class="number">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-llrs-"></use>
+                    </svg>
+                    {{ term.totalJoinCount }}
+                  </span>
+                            </div>
+                            <h3>{{ term.activityName }}</h3>
+                            <p>{{ term.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 老师推荐 -->
+        <div class="teacher" style="margin-bottom:2.5rem">
+            <div class="title">
+                <h2>老师推荐</h2>
+            </div>
+            <div class="btn">
+                <h1>输入班级码，加入你的班级，获取老师推荐的图书</h1>
+                <button>加入班级</button>
+            </div>
+        </div>
+
+        <!-- 弹窗 -->
+        <!-- 第一天登录 -->
+        <div class="popup" style="display:none;">
+          <div class="login01">
+                <img src="../../../common/image02/person.png" style="padding: .5rem;" class="person">
+                <div class="close" @touchend="closePopup" style="width:2rem;height:2rem;">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-gb_-copy"></use>
+                    </svg>
+                </div>
+                <div class="loginBox">
+                    <div class="popupTop">
+                      <img src="../../../common/image02/tot.png">
+                      <span>Hello,你好！</span>
+                    </div>
+                    <img src="../../../common/image02/t1.png" class="popupBg">
+                    <h1>欢迎你来到嘀嗒宇宙<br>让我们一起开始阅读之旅吧！</h1>
+                    <h2>每天30分钟,让读书看见成长</h2>
+                    <button>开始阅读</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二天登录 -->
+        <div class="popup" style="display:none;">
+          <div class="login01">
+                <img src="../../../common/image02/person.png" style="padding: .5rem;" class="person">
+                <div class="close" @touchend="cancelVip">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-gb_-copy"></use>
+                    </svg>
+                </div>
+                <div class="loginBox">
+                    <div class="popupTop">
+                      <img src="../../../common/image02/tot.png">
+                      <span>Hello,你好！</span>
+                    </div>
+                    <img src="../../../common/image02/t1.png" class="popupBg">
+                    <h1>你已连续2天登陆，加油哦！</h1>
+                    <h2>每天30分钟,让读书看见成长</h2>
+                    <button>开始阅读</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- vip -->
+        <div class="popup" style="display:none;" id="popup">
+          <div class="login01">
+              <img src="../../../common/image02/person.png" class="person">
+              <div class="close" @touchend="closePopup">
+                  <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-gb_-copy"></use>
+                  </svg>
+              </div>
+              <div class="loginBox">
+                  <div class="popupTop">
+                    <img src="../../../common/image02/tot.png">
+                    <span>Hello,你好！</span>
+                  </div>
+                  <img src="../../../common/image02/t3.png" class="popupVip">
+                  <h1>你已成功解锁免费阅读卡</h1>
+                  <h2>每天30分钟,让读书看见成长</h2>
+                  <button @touchend="cancelVip">开始阅读</button>
+              </div>
+          </div>
+        </div>
+        <!-- <img v-if="maskShow" style="position: absolute;top:0;z-index:1999;width: 100%;" src="../../../common/image02/guide2.png" @touchend="cancel"> -->
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/swiper.min.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+    apiready = function() {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                arSwitch:true,
+                ARshow:false,
+                maskShow: false,
+                resData: {},
+                resUri: '',
+                swiper01: null,
+                swiper02: null,
+                swiper03: null,
+                pop: true,
+                grade: $storage.getStorage('slelectGrade') ? $storage.getStorage('slelectGrade') : 3,
+                userInfo: JSON.parse($storage.getStorage('user-info')) ? JSON.parse($storage.getStorage('user-info')) : {},
+                token: $comm.getToken(),
+                level:$storage.getStorage('level')?$storage.getStorage('level'):0
+            },
+            // computed: {
+            //     ARshow(){
+            //       
+            //        return $comm.getToken() && this.userInfo.level && this.userInfo.level != 0 ? false : true
+            //
+            //   }
+            // },
+            mounted() {
+                this.resUri = $comm.resUri
+                    //this.loadFirstPageInfo();
+                this.banner()
+                this.addeven()
+                this.arshow()
+                this.pullDownFresh()
+                this.level = this.userInfo.level
+                api.closeWin({name: 'loginPassword'})
+                // if(!this.userInfo.isvip){
+                //   this.showVip()
+                // }
+                console.log("缓存内容-----------" + $comm.getToken() + "=====" + this.userInfo.level)
+                console.log("智能推荐内容" + JSON.stringify(this.resData))
+            },
+            methods: {
+              showVip(){
+                $api.css($api.byId('popup'), 'display:block');
+                api.sendEvent({
+                    name: 'vipPopup',
+                    extra: {
+                        key: true
+                    }
+                });
+              },
+              cancelVip(){
+                $api.css($api.byId('popup'), 'display:none');
+                api.sendEvent({
+                    name: 'vipPopup',
+                    extra: {
+                        key: false
+                    }
+                });
+              },
+                arshow() {
+                  // alert("token"+$comm.getToken()+"等级"+this.userInfo.level)
+                    $comm.getToken() && this.userInfo.level && this.userInfo.level != 0 ? this.ARshow = false : this.ARshow = true
+                },
+                start(event) {
+                    this.x1 = event.touches[0].pageX
+                    this.y1 = event.touches[0].pageY
+                },
+                //取消引导弹层
+                cancel() {
+                    this.maskShow = false
+                    api.sendEvent({
+                        name: 'cancelMask',
+                        extra: {
+                            key: false,
+                        }
+                    });
+
+                },
+                addeven() {
+                  api.addEventListener({//登陆后更新首页内容
+                      name: 'homeEvent'
+                  }, (ret, err) => {
+                    console.log("登陆缓存信息+++++++"+$storage.getStorage('user-info'))
+                    console.log("登陆后获取的等级-----------"+JSON.parse($storage.getStorage('user-info')).grade)
+                    if($storage.getStorage('user-info')){
+                      this.bookRoomGrade = JSON.parse($storage.getStorage('user-info'))['bookRoomGrade']
+                    }
+                    this.userInfo=JSON.parse($storage.getStorage('user-info'))
+                    this.level=JSON.parse($storage.getStorage('user-info')).level
+                    this.token=$comm.getToken()
+                    console.log("登陆后token++++++++"+this.token)
+                    this.loadFirstPageInfo(this.bookRoomGrade)
+                    this.arshow()
+                  });
+                    api.addEventListener({ //点击头部切换年级事件
+                        name: 'myEvent'
+                    }, (ret, err) => {
+                      console.log("点击切换年级-----------------"+$storage.getStorage('slelectGrade'))
+                        this.grade = $storage.getStorage('slelectGrade')
+                        var grade = $storage.getStorage('slelectGrade')
+                        this.loadFirstPageInfo(grade)
+                    });
+                        api.addEventListener({ //从兴趣选择进来显示智能推荐
+                            name: 'GMask'
+                        }, (ret, err) => {
+                            console.log("进来了---------------++++++++++++++" + $storage.getStorage('user-info'))
+                            var grade = $storage.getStorage('slelectGrade')
+                            this.level = JSON.parse($storage.getStorage('user-info')).level //更新本页等级数据
+                            this.maskShow = ret.value.key
+                            this.loadFirstPageInfo(grade)
+                            this.ARshow = false
+                            api.pageUp(function(ret, err) { // 滚动到头部
+                                if (!ret.scrolled) {
+                                    //已经滚动到顶部
+                                }
+                            });
+                        });
+                },
+                goActive(event, id, name) {
+                    var calX = event.changedTouches[0].pageX - this.x1 || 0
+                    var calY = event.changedTouches[0].pageY - this.y1 || 0
+                    if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                        api.openWin({
+                            // name: 'activityDetail',
+                            // url: '../myBookshelf/activityDetails.html',
+                            name: 'currencyActivityTopicHead',
+                            url: '../myBookshelf/currencyActivityTopicHead.html',
+                            slidBackEnabled: false,
+                            pageParam: {
+                                name: name,
+                                id: id
+                            }
+                        });
+                    }
+                },
+                // if($comm.getToken()==null||!this.userInfo.level){
+                //   console.log("未登陆")
+                // }else{
+                //   console.log("登录"+$comm.getToken())
+                // }
+                //加载图书首页信息
+                loadFirstPageInfo(grade) {
+                  console.log("进来-------------------------"+grade);
+                //  更新页面token
+              //  $comm.getToken() = $storage.getStorage('token')
+                    var data = {
+                        grade: grade ? grade : 3
+                    }
+                    $comm.socket(2001, data, this.FirstPagefunSuc)
+                },
+                //智能推荐查看更多
+                more(event){
+                    var userInfo = JSON.parse($storage.getStorage('user-info'))
+                    if ($comm.getToken() == null || userInfo.level == 0||!userInfo.level) {
+                        return false
+                    } else {
+                        api.openWin({
+                            name: 'intelligentRecommendationHead',
+                            slidBackEnabled: false,
+                            bgColor: '#fff',
+                            url: '../myBookshelf/intelligentRecommendationHead.html',
+                        });
+                    }
+                },
+                //测评
+                goEvaluation(event) {
+                    var calX = event.changedTouches[0].pageX - this.x1 || 0
+                    var calY = event.changedTouches[0].pageY - this.y1 || 0
+                    if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                        var Token = $storage.getStorage('token')
+                        var link = this.userInfo.level!=0&&this.userInfo.level?'readingAbility02.html':'readingAbility01.html'
+                        if (Token) {
+                            api.openWin({
+                                reload:true,
+                                name: 'readingAbility',
+                                slidBackEnabled: false,
+                                url:'../gradingTest/'+link
+                            });
+                        } else {
+                            api.openWin({
+                                name: 'loginIndex',
+                                url: '../login_new/login_index.html',
+                                slidBackEnabled: false
+                            });
+                        }
+                    }
+                },
+                //智能推荐图书详情
+                goBookDetail(event, id) {
+                    var calX = event.changedTouches[0].pageX - this.x1 || 0
+                    var calY = event.changedTouches[0].pageY - this.y1 || 0
+                    if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                        api.openWin({
+                            name: 'bookInfo',
+                            slidBackEnabled: false,
+                            url: '../myBookshelf/VIPUser_bookInfo_win.html',
+                            pageParam: {
+                                thisBookId: id
+                            }
+                        });
+                    }
+                },
+                // 点击选择年级
+                gradeSelect() {
+                    var link = this.userInfo.Level == 0 || this.userInfo.Level == null ? "selectService01.html" : "selectService02.html"
+                    api.openWin({
+                        name: 'gradeSelect',
+                        slidBackEnabled: false,
+                        url: '../myBookshelf/' + link,
+                        pageParam: {
+                            // name: 'test'
+                        }
+                    });
+                },
+                // 点击专题集合
+                special(event, id, name) {
+                    var grade = $storage.getStorage('slelectGrade')
+                    var calX = event.changedTouches[0].pageX - this.x1 || 0
+                    var calY = event.changedTouches[0].pageY - this.y1 || 0
+                    if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                        api.openWin({
+                            name: 'special',
+                            slidBackEnabled: false,
+                            reload: true,
+                            url: '../myBookshelf/currencySpecialActivities.html',
+                            pageParam: {
+                                ActivityTypeId: id,
+                                til: name,
+                                grade: grade ? grade:this.grade
+                            }
+                        });
+                    }
+
+                },
+                //点击分类选书
+                bookByType(event) {
+                    var calX = event.changedTouches[0].pageX - this.x1 || 0
+                    var calY = event.changedTouches[0].pageY - this.y1 || 0
+                    if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2) == 0)) {
+                        api.openWin({
+                            name: 'bookByType',
+                            url: '../myBookshelf/bookCategory.html',
+                            reload: true,
+                            slidBackEnabled: false
+                        });
+                    }
+                },
+                //点击难度等级
+                problemLevel(event) {
+                    var calX = event.changedTouches[0].pageX - this.x1 || 0
+                    var calY = event.changedTouches[0].pageY - this.y1 || 0
+                    if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                        api.openWin({
+                            name: 'problemLevel',
+                            slidBackEnabled: false,
+                            url: '../myBookshelf/bookLevel.html',
+                        });
+                    }
+                },
+                //轮播图
+                banner(){
+                  this.swiper01 = new Swiper('.swiper01', {
+                      pagination: '.swiper-pagination',
+                      paginationClickable: true,
+                      initialSlide:0,
+                      observer:true,
+                      observeParents:true
+                  })
+                },
+                createSlide() {
+                    this.swiper02 = new Swiper('.swiper02', {
+                        // slidesPerView : '2',
+                        slidesPerView: 'auto',
+                        spaceBetween: 16,
+                    });
+                    this.swiper03 = new Swiper('.swiper03', {
+                        slidesPerView : '5',
+                        slidesPerView: 'auto',
+                        spaceBetween: 40,
+                    });
+                },
+                //数据加载成功回调
+                FirstPagefunSuc(res) {
+                    console.log("书房首页内容=========" + res)
+                    console.log("获取数据后遮罩的开关=====" + this.maskShow)
+                    res = JSON.parse(res);
+                    if (res.error === 0) {
+                        this.resData = JSON.parse(res.datas);
+                        var arData = JSON.parse(res.datas).aiRecommends
+                        if(arData.length == 0&&!this.ARshow){
+                          this.arSwitch=false //智能推荐无数据时隐藏
+                          this.cancel()
+                        }
+                        var recommendActivitysData = JSON.parse(res.datas).recommendActivitys
+                        console.log("开启智能推荐————————————————————————————" + arData)
+                        console.log("名师推荐------------"+recommendActivitysData)
+                        this.$set(this.resData, 'aiRecommends', arData)
+                        this.$set(this.resData,'recommendActivitys',recommendActivitysData)
+                            //  this.arData = (JSON.parse(res.datas).aiRecommends).slice(0,5)
+                        //this.swiper01.init()
+                        this.$nextTick(() => {
+                            this.createSlide();
+                        })
+                    }
+                },
+                pullDownFresh: function() {
+                    var that = this;
+                    api.refreshHeaderLoading()
+                    api.setRefreshHeaderInfo({
+                        visible: true,
+                        loadingImg: '../image/timg.gif',
+                        bgColor: '#fff',
+                        textColor: '#ccc',
+                        textDown: '下拉更新...',
+                        textUp: '松开刷新...',
+                        showTime: true
+                    }, (ret, err) => {
+                        setTimeout('api.refreshHeaderLoadDone()', '1000');
+                        this.loadFirstPageInfo(this.grade)
+                        //this.arshow()
+                    });
+                },
+                closePopup() {
+                    this.pop = false
+                }
+            }
+        })
+    }
+</script>
+
+</html>

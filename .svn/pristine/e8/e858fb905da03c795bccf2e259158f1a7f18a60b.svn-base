@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>书架</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css"/>
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/bookcase.css">
+</head>
+<body>
+  <div id="app" v-cloak>
+    <div class="bookshelf" v-show="bookFlag" style="padding-top:30px;">
+      <div class="lock">
+        <span class="time">6天15小时后</span>
+        <span class="span01" style="display:none">待领取</span>
+        <button>分享免费领</button>
+      </div>
+      <div class="book" @click="goBookInfo(item.bookID,index)" v-for="(item,index) in resData.bookList" ref="item.bookID">
+        <div class="bookcover">
+          <img :src="item.bookCover" class="bookImg">
+          <div class="type">
+            <span class="span02">儿童文学</span>
+            <svg class="icon robot" aria-hidden="true">
+                <use xlink:href="#icon-jiqiren"></use>
+            </svg>
+            <!-- 勾选 -->
+            <div class="check" v-if="editFlag" v-show="!item.isSure">
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-dg_-copy"></use>
+              </svg>
+            </div>
+            <div class="check sel" v-if="editFlag" @touchend="check" v-show="item.isSure">
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-dg_-copy"></use>
+              </svg>
+            </div>
+            <!-- 已完成 -->
+            <img src="../../../common/image02/complete.png" class="complete" v-if="item.chapterCount==item.completeChapterCount ? true : false">
+          </div>
+        </div>
+        <!-- 进度条 -->
+        <div class="progress">
+            <div class="plan">
+                <div class="bar" ref="bar" :style="{width:item.width}"></div>
+            </div>
+            <span>{{ item.completeChapterCount }}/{{ item.chapterCount }}</span>
+        </div>
+        <h2>{{ item.bookName }}</h2>
+      </div>
+      <div class="lattice" @touchend="goBookCity">
+        <img src="../../../common/image02/mask.png">
+      </div>
+    </div>
+    <!-- 遮罩 -->
+    <!-- <div class="move" style="color: #00b596;" v-if="editFlag" v-show="!morenFlag">移出所选（2）</div> -->
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+apiready = function (){
+  var app = new Vue({
+    el:'#app',
+    data:{
+      resData:[],
+      isComplete:false,
+      bookFlag:true,
+      click:'click',
+      click1:'',
+      chooseFlag:false,
+      morenFlag:false,
+      checkFlag:false,
+      editFlag:false,
+      editTxt:'编辑',
+      pages:1,
+      isHaveNextPage:true,
+      bookArr:[],
+      // outFlag:false
+    },
+    mounted(){
+      this.getBookCaseData(1);
+      this.watchRemove();
+      this.watchIsEdit();
+      this.refresh()
+      this.scroll();
+
+    },
+    methods:{
+      //监听是否点击了编辑
+      watchIsEdit(){
+        var that = this;
+        api.addEventListener({
+            name: 'edit'
+        }, function(ret, err){
+            if( ret ){
+              console.log(ret.value.status)
+              that.editFlag = ret.value.status;
+              if(ret.value.status){
+                // that.resData.bookList
+
+                that.resData.bookList.map((v,i)=>{
+                  v.isSure = false;
+                })
+                // console.log(JSON.stringify(that.resData.bookList));
+                that.morenFlag = false;
+              }else{
+                this.morenFlag = true;
+              }
+            }else{
+              alert( JSON.stringify( err ) );
+            }
+        });
+      },
+      goBookCity(){
+        if(this.editFlag){
+          return;
+        }
+        api.sendEvent({
+            name: 'goBookCity'
+        });
+        api.closeFrame({
+            name: 'bookCase1'
+        });
+      },
+      scroll() {
+        var that = this
+        api.addEventListener({
+          name: 'scrolltobottom',
+          extra: {
+            threshold: 0 //设置距离底部多少距离时触发，默认值为0，数字类型
+          }
+        }, function(ret, err) {
+          // that.onoff= true
+
+          // that.loadData = "加载中..."
+          if(!that.isHaveNextPage){
+            return;
+          }
+          that.getBookCaseData(that.pages++)
+        });
+
+      },
+      goBookInfo(bookId,index){
+        // console.log(this.editFlag)
+          if(!this.editFlag){
+            api.openWin({
+                name: 'bookInfo',
+                url: '../myBookshelf/VIPUser_bookInfo_win.html',
+                pageParam: {
+                    thisBookId:bookId
+                },
+                bounces: false,
+                slidBackEnabled:false,
+                reload: true,
+            });
+
+          }else{
+            console.log(index)
+            this.resData.bookList[index].isSure = !this.resData.bookList[index].isSure;
+            var n = 0;
+            this.resData.bookList.map((v,i)=>{
+              if(v.isSure){
+                n++
+              }
+            })
+            // console.log(n)
+
+            api.sendEvent({
+                name: 'changeNum',
+                extra: {
+                    num: n,
+                }
+            });
+
+            // this.morenFlag = !this.morenFlag;
+            if(!this.morenFlag){
+              api.sendEvent({
+                  name: 'editFlag',
+              });
+            }else{
+            }
+          }
+      },
+      //选中图书
+      check(){
+        console.log('hahha')
+        if(this.editFlag){
+          this.morenFlag = false
+        }
+      },
+      //点击专题
+      isBook(){
+        this.bookFlag = true;
+        this.click1 = '';
+        this.click = 'click';
+      },
+      isMainTitle(){
+        this.bookFlag = false;
+        this.click = '';
+        this.click1 = 'click';
+      },
+      //JIANTINGSHIJIAN
+      watchRemove(){
+        var that = this;
+        api.addEventListener({
+            name: 'noChoose'
+        }, function(ret, err){
+            if( ret ){
+              that.editFlag = false;
+                //  alert( JSON.stringify( ret ) );
+            }else{
+                //  alert( JSON.stringify( err ) );
+            }
+        });
+
+        api.addEventListener({
+            name: 'remove'
+        }, function(ret, err){
+            if( ret ){
+                //  alert( JSON.stringify( ret ) );
+                var chooseArr = [];
+                that.resData.bookList.map((v,i)=>{
+                  if(v.isSure){
+                    chooseArr.push(v.bookID)
+                  }
+                });
+                var data = {
+                  BookIDList : chooseArr
+                }
+                $comm.socket(2013,data,res=>{
+                  console.log(res)
+                  if(res){
+                    res = JSON.parse(res);
+                    if(res.error===0){
+                      api.sendEvent({
+                          name: 'changeNum',
+                          extra: {
+                              num: 0,
+                          }
+                      });
+                      api.sendEvent({
+                          name: 'editFlag1'
+                      });
+                      api.sendEvent({
+                          name: 'editFlag2',
+                          // extra: {
+                          //     key1: 'value1',
+                          //     key2: 'value2'
+                          // }
+                      });
+
+
+                      that.getBookCaseData(1);
+                    }else{
+                      api.toast({
+                          msg: res.errMsg,
+                          duration: 2000,
+                          location: 'middle'
+                      });
+
+                    }
+                  }
+                })
+            }else{
+                //  alert( JSON.stringify( err ) );
+                api.toast({
+                    msg: '网络错误',
+                    duration: 2000,
+                    location: 'bottom'
+                });
+
+            }
+        });
+
+      },
+      //监听返回刷新数据
+      refresh(){
+        var that = this;
+        api.addEventListener({
+            name: 'backResh'
+        }, function(ret, err){
+            if( ret ){
+                that.getBookCaseData(1);
+                //  alert( 'JSON.stringify( 1 ) ');
+            }else{
+                //  alert( JSON.stringify( err ) );
+            }
+        });
+      },
+      //获取书架数据
+      getBookCaseData(page){
+        var data = {
+          Page:page
+        }
+        $comm.socket(2011,data,(res)=>{
+          console.log(res)
+          res = JSON.parse(res)
+          if(res.error==0){
+            this.resData = JSON.parse(res.datas);
+            this.isHaveNextPage = this.resData.isHaveNextPage;
+            console.log(JSON.stringify(this.resData));
+            // this.bookArr = this.bookArr.concat(this.resData.bookList);
+            this.resData.bookList = page===1 ? this.resData.bookList : this.bookArr.concat(this.resData.bookList);
+            this.bookArr = this.resData.bookList;
+            this.$set(this.resData.bookList,'isSure',false);
+            this.resData.bookList.map((v,i)=>{
+              // console.log(v.bookName)
+              this.$set(v,'isSure',false);
+              this.$set(v,'width',v.completeChapterCount/v.chapterCount+'%')
+              v.bookCover = $comm.resUri + v.bookCover;
+              // console.log(v.bookCover)
+            })
+            console.log(JSON.stringify(this.resData)+'________>>')
+          }else{
+            alert(res.errorMsg)
+          }
+        })
+      },
+    }
+  })
+}
+// apiready = function () {
+//     var app = new Vue({
+//         el: '#app',
+//         data: {
+//             isShowRule: false,
+//             name:'',
+//             shareInfo: '',
+//             audioPath:'',
+//             canShare: false,
+//             contentUrl:'',
+//             popup:false,
+//         },
+//         created:function(){
+//           // this.loadInfo();
+//           swiper
+//         },
+//         mounted: function () {
+//             var that = this;
+//             that.toast = new customToast();
+//         },
+//         methods: {
+//             // 下拉刷新
+//             pullDownFresh:function(){
+//               var that = this;
+//               api.setRefreshHeaderInfo({
+//                     visible: true,
+//                     // loadingImg: '../image/timg.gif',
+//                     bgColor: '#fff',
+//                     textColor: '#ccc',
+//                     textDown: '下拉刷新...',
+//                     textUp: '松开刷新...',
+//                     showTime: true
+//                 }, function(ret, err) {
+//                     // _this.taskListWait();
+//                     console.log('下拉刷新')
+//                     setTimeout('api.refreshHeaderLoadDone()', '500');
+//                 });
+//                 setInterval(function(){
+//
+//                 },1000)
+//             },
+//
+//             initSwiper: function(initialSlide, length) {
+//               mySwiper = new Swiper('.swiper-container', {
+//                   initialSlide: initialSlide, //初始化页面索引
+//                   speed: 1000,
+//                   loop: true,
+//                   centeredSlides: true,
+//                   slidesPerView: 3,
+//                   loopedSlides: length,
+//                   pagination: '.swiper-pagination',
+//                   paginationClickable: true,
+//                   paginationType: 'fraction'
+//               });
+//             },
+//             goReadresults: function () {
+//                 api.openFrame({
+//                     name: 'Readresults_detailShare',
+//                     url: 'Readresults_detailShare.html',
+//                     bounces: false,
+//                     bgColor:'#fff',
+//                     slidBackEnabled: false,
+//                     animation: {
+//                         type: "fade", //动画类型（详见动画类型常量）
+//                         subType: "from_right", //动画子类型（详见动画子类型常量）
+//                         duration: 600 //动画过渡时间，默认300毫秒
+//                     }
+//                 });
+//             },
+//             funErr: function () {
+//                 this.toast.fail({
+//                     title: '网络异常，请检查网络链接'
+//                 })
+//             },
+//             swiper:function () {
+//               var swiper = new Swiper('.swiper-container', {
+//                   pagination: '.swiper-pagination',
+//                   paginationClickable: true
+//               })
+//             }
+//         },
+//     });
+// };
+
+</script>
+
+</html>

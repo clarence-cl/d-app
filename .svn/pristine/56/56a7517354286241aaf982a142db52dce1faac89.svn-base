@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>测评结果</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css">
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/testResult.css">
+</head>
+<body>
+  <div id="app">
+    <div class="top">
+      <div class="return"  @touchend="next">
+         <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon-fh_"></use>
+         </svg>
+      </div>
+      <h1>测评结果</h1>
+      <div class="return">
+         <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon"></use>
+         </svg>
+      </div>
+    </div>
+    <div class="content">
+      <div class="report">
+        <h2>阅读能力等级  {{resultData.lv}}</h2>
+        <p>超越了全国 {{resultData.exceedNum}}% 的同龄人<br>已达到 {{resultData.grade}}年级{{resultData.levelDisplay}}水平</p>
+        <div class="cup">
+          <h5>阅读能力证书</h5>
+          <img src="../../../common/image02/cup.png">
+          <span class="name">{{userInfo.name?userInfo.name:'神秘同学'}}</span>
+          <span class="level">阅读能力等级<span>{{resultData.lv}}</span></span>
+          <span class="time">{{resultData.testDate}}颁发</span>
+        </div>
+      </div>
+      <div class="analysis">
+        <h3>综合分析</h3>
+        <div class="levelBox">
+          <ul class="levelTop" v-html="userAbilityLevel">
+
+          </ul>
+          <ul class="levelBottom" v-html="userAbilityClass">
+          </ul>
+        </div>
+        <div class="text">
+           <p v-html="resultData.levelDesc"></p>
+          <!-- <span>看书时注意掌握以下语文学习的知识点：</span><br>
+          <span>1、了解谜语的特点，积累谜语，猜谜语</span><br>
+          <span>2、积累歇后语</span><br>
+          <span>3、了解汉字的发展规律，知道汉字演变的五个阶段</span><br>
+          <span>4、积累关于诚信、孝敬和立志的名言警句</span> -->
+          <span v-for="(item,index) in levelRemarks" style="display:block;">{{item}}</span>
+        </div>
+      </div>
+      <div class="ability">
+        <h3>各项能力</h3>
+        <div class="readAloud" style="margin-bottom:4.5rem;">
+          <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-jieguoicon_huaban"></use>
+          </svg>
+          <span class="span01">朗读</span>
+          <div class="progress">
+            <!-- :style="{width:+'%'}" -->
+            <div class="plan" :style="{width:resultData.avgReadAloud+'%'}"></div>
+          </div>
+          <span class="score">{{resultData.avgReadAloud}}分</span>
+        </div>
+        <div class="understand">
+          <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-jieguoicon-"></use>
+          </svg>
+          <span class="span01">理解</span>
+          <div class="progress">
+            <div class="plan" :style="{width:resultData.avgChoice+'%'}"></div>
+          </div>
+          <span class="score">{{resultData.avgChoice}}分</span>
+        </div>
+      </div>
+      <div class="project">
+        <h3>提升计划</h3>
+        <p>只有适合自己的阅读方案，才能针对自己的特点，获得最佳阅读效果。</p>
+      </div>
+    </div>
+    <div class="btn" v-if="btnSwitch"><button @touchend="next">下一步</button></div>
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var timer = null;
+    apiready = function() {
+        var app = new Vue({
+                    el: '#app',
+                    data: {
+                      resultData:api.pageParam.result,
+                      btnSwitch:api.pageParam.from?false:true,
+                      time:null,
+                      userInfo: JSON.parse($storage.getStorage('user-info'))||{},
+                    },
+                    computed:{
+                      //等级描述
+                      levelRemarks(){
+                        if((this.resultData.levelRemarks).indexOf("<br/>")!=-1){
+                          return (this.resultData.levelRemarks).split("<br/>")
+                          console.log("分割后的数据----------"+(this.resultData.levelRemarks).split("<br/>"))
+                        }else{
+                          console.log("无需分割======")
+                          return [this.resultData.levelRemarks]
+                        }
+                      },
+                      userAbilityLevel:function(){//下面只显示三个年级的能力等级
+                        //5到24级别 二年级5
+                        //1-4=1年级  5-8二年级 9-12三年级 13-16四年级 17-20五年级 21-24六年级
+                        var level=this.resultData.lv;
+                        //根据上面的用户等级计算年级的其实区间
+                        var startLevel=13;
+                        var endLevel=24;
+                        if(level>=1&&level<=12)//二年级
+                        {
+                          startLevel=1;
+                          endLevel=12;
+                        }
+                        else if(level>=13&&level<=24)//三年级
+                        {
+                            startLevel=13;
+                            endLevel=24;
+                        }
+                        var userAbilityLevelHtml="";
+                        var index=1;
+                        for(var i=startLevel;i<=endLevel;i++)
+                        {
+                          index++;
+                          if(i==level)
+                          {
+                            userAbilityLevelHtml+="<li>LV"+i+"<div class='person' style='top:-"+(index*2)+"rem;''><h4>LV";
+                            userAbilityLevelHtml+=i+"</h4></div>"
+                            +"</li>"
+
+                          }
+                          else {
+                              userAbilityLevelHtml+="<li>LV"+i+"</li>"
+                          }
+
+                        }
+                      return userAbilityLevelHtml;
+                    },
+                    userAbilityClass:function(){//下面只显示三个年级
+                        var level=this.resultData.lv;
+                        //根据能力等级计算开始的年级
+                        var startClass=3;
+                        if(level>=1&&level<=12)//二年级
+                        {
+                          startClass=1;
+                        }
+                        else if(level>=13&&level<=24)//三年级
+                        {
+                            startClass=4;
+                        }
+                        var endClass=startClass+2;
+                          var userAbilityLevelHtml="";
+                          var classArr=['零','一','二','三','四','五','六']
+                          for(var j=startClass;j<=endClass;j++)
+                          {
+                            userAbilityLevelHtml+="<li>"+classArr[j]+"年级</li>";
+                          }
+                          return userAbilityLevelHtml;
+                    }
+                    },
+                    mounted(){
+                      this.readData = api.pageParam.result
+                      this.userInfoUpdate()
+                    },
+                    methods: {
+                        userInfoUpdate(){
+                          user = JSON.parse($storage.getStorage('user-info'))
+                          user.level = this.resultData.lv
+                          console.log("缓存定级测年级书房使用"+this.resultData.grade)
+                          var slelectGrade = this.resultData.grade //缓存定级测年级书房使用
+                          $storage.setStorage('slelectGrade',slelectGrade)
+                          $storage.setStorage('user-info',user)
+                          $storage.setStorage('levelDesc',this.resultData.levelDesc)
+                          $storage.setStorage('levelRemarks',this.levelRemarks)
+                        },
+                        //兴趣选择
+                        next(){
+                          if(api.pageParam.from){
+                            api.closeWin()
+                          }else{
+                            api.closeWin({
+                                name: 'gradReadTest'
+                            });
+                            api.closeWin({
+                                name: 'information'
+                            });
+                            api.closeFrame({
+                                name: 'interestSelection'
+                            });
+                            api.closeWin({
+                                name: 'interestSelectionHead'
+                            });
+
+                            api.openWin({
+                                name: 'interestSelectionHead',
+                                url: './interestSelectionHead.html',
+                                reload:true,
+                                bgColor:'#fff',
+                                slidBackEnabled:false
+                            });
+                          }
+                        }
+                    }
+                })
+    };
+</script>
+
+</html>

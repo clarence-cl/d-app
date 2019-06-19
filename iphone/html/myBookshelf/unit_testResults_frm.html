@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+    content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>正式朗读</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" href="../../css/myBookshelfStyle/unit_testResults_frm.css">
+</head>
+<body id="body" class="body">
+    <div class="popup">
+        <!-- <div class="icon-wrap-right">
+            <i class="iconfont font_family">&#xe6f1;</i>
+            <span class="share-text">分享</span>
+        </div> -->
+        <i class="iconfont font_family close" id="close">&#xe76e;</i>
+        <div class="popup-t">
+            <img class="img-avatar" id="headImg" src="">
+            <span id="name" class="span01"></span>
+            <div class="popup-hard">
+                <!-- <i class="iconfont font_family">&#xe757;</i> -->
+                阅读能力等级 <span id="userGrade"></span>
+            </div>
+            <div>恭喜你完成本单元阅读<span id="isShowTotalScore" style="display: none">，获得<span id="totalScore" class="span02"></span>分</span></div>
+            <div class="result-start">
+                <img id="imgStars" class="img-stars" src="../../../common/image/star-1@3x.png">
+            </div>
+        </div>
+        <div class="result-con clearfix">
+            <div class="result-t" id="result-t"><span id="number">完成《
+               <span id="bookName"></span>》
+               <span id="unitName"></span>，阅读字数
+               <span id="wordNumbers" class="span-color"></span>
+               <!-- 距离下次能力评级还差<span id="nextWordNumbers" class="span-color"></span>字</span> -->
+            </div>
+            <div class="content">
+                <div class="popup-test">
+                    <h2>嘀嗒阅读测</h2>
+                    <span class="line"></span>
+                    <h1 id="choiceScore"></h1>
+                    <h3>小测验得分</h3>
+                    <h4><i></i>答题情况<i></i></h4>
+                    <div id="answerList" class="answer-lis">
+                    </div>
+                    <h4><i></i>能力成长<i></i></h4>
+                    <ul class="clearfix">
+                        <li id="score1"></li>
+                        <li id="score2"></li>
+                        <li id="score3"></li>
+                        <li id="score4"></li>
+                        <li id="score5"></li>
+                        <li id="score6"></li>
+                    </ul>
+                </div>
+                <div class="popup-score aloud">
+                    <h2>嘀嗒朗读</h2>
+                    <span class="line"></span>
+                    <h1 id="readScore"></h1>
+                    <h3>朗读得分</h3>
+                    <h4><i></i>各项成绩<i></i></h4>
+                    <div class="data-map">
+                        <div>
+                            <div class="data-results">
+                                <div id="integrity" class="data">
+                                    <svg class="icon icon-data" aria-hidden="true">
+                                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_wanzhengduicon"></use>
+                                    </svg>
+                                    <h6 class="score" id="scoreIntegrity"></h6>
+                                </div>
+                            </div>
+                            <div class="desc-text">完整度</div>
+                        </div>
+                        <div style="margin: 0 4rem;">
+                            <div class="data-results">
+                                <div id="accuracy" class="data">
+                                    <svg class="icon icon-data" aria-hidden="true">
+                                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_zhengqueduicon"></use>
+                                    </svg>
+                                    <h6 class="score" id="scoreAccuracy" ></h6>
+                                </div>
+                            </div>
+                            <div class="desc-text">正确度</div>
+                        </div>
+                        <div>
+                            <div class="data-results">
+                                <div id="fluency" class="data">
+                                    <svg class="icon icon-data" aria-hidden="true">
+                                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_liuliduicon"></use>
+                                    </svg>
+                                    <h6 class="score" id="scoreFluency"></h6>
+                                </div>
+                            </div>
+                            <div class="desc-text">流利度</div>
+                        </div>
+                    </div>
+                    <div id="imageBtn" class="result-play">
+                        <img id="imagePlayer" src="../../../common/image/sound@3x.png" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="popup-f">
+        <div>
+            <div id="btn01" class="btn btn-color01">去书房</div>
+            <div id="btn02" class="btn btn-color02">新的单元</div>
+            <div id="shareChoiceScore" class="btn btn-color03">炫耀一下</div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var audioDownload = false;
+    var isPlay = false;
+    var nextUnitIndex;
+    var readingAloudScoreBtn = 0;
+    var choiceScoreBtn = 0;
+    var lightsScoreBtn = 0;
+
+    apiready = function () {
+        adaptationModel();
+        loadUnitTestResults(api.pageParam.data);
+        bindEvent();
+    };
+
+    function bindEvent() {
+        var eventProperty = {
+            '图书名称': api.pageParam.data.bname,
+            '朗读成绩': readingAloudScoreBtn,
+            '阅读成绩': choiceScoreBtn,
+            '点亮行星星': lightsScoreBtn,
+            '是否VIP图书': api.pageParam.data.vipbook,
+            '图书等级': api.pageParam.data.gradeScaleName,
+            '作者': api.pageParam.data.author,
+            '已读人数': api.pageParam.data.readingNumber,
+            '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+            '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+        };
+
+        $analysis.bindEvent($api.byId('imageBtn'), 'touchend', function () {
+            if (!isPlay && audioDownload) {
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/soundplay.png');
+                isPlay = true;
+                audioPlayerStartDesc();
+            } else {
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+                isPlay = false;
+                api.stopPlay();
+            }
+        }, '单元阅读测结果页返回', eventProperty);
+
+        $analysis.bindEvent($api.byId('btn01'), 'touchend', function () {
+            goBackHome();
+        }, '单元阅读测结果页回书房', eventProperty);
+
+        $analysis.bindEvent($api.byId('btn02'), 'touchend', function () {
+            if (nextUnitIndex === api.pageParam.chapters.length) {
+                api.sendEvent({
+                    name: 'turn-the-page'
+                });
+                api.closeWin({});
+                return;
+            }
+            $homeService.readingStartCurrent(api.pageParam.chapters[nextUnitIndex].bcid, funSucGetTestID, funErr);
+        }, '单元阅读测结果页新单元', eventProperty);
+
+        $api.byId('close').addEventListener('touchstart', function() {
+            goback();
+        });
+
+        $analysis.bindEvent($api.byId('shareChoiceScore'), 'touchstart', function () {
+            $weChatShare.shareChoiceScore(api.pageParam.testId, funSucReadBlock, funErr)
+        }, '分享-阅读结果页')
+    }
+
+    function funSucReadBlock (resp) {
+        if (resp.errCode === 0) {
+            var params = {
+                desc: resp.Description,
+                url: resp.ShareUrl,
+                shareQrcode: resp.ShareQrcode
+            };
+            $wechatShareAlert.show(params, function (type, ret) {
+                if (ret.status) {
+                    toast.success({
+                        title: '分享成功'
+                    })
+                } else {
+                    toast.success({
+                        title: '分享失败'
+                    })
+                }
+            })
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+
+    function audioPlayerStartDesc () {
+        $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/soundplay.png');
+        api.startPlay({
+            path: resetaudioUri(audioPath)
+        }, function(ret, err) {
+            if (ret) {
+                isPlay = false;
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+            } else {
+                isPlay = false;
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+                toast.fail({
+                    title: '你好像没有朗读哦～'
+                });
+            }
+        });
+    }
+
+    function funSucGetTestID (resp) {
+        if (resp.errCode === 0) {
+            goToUnitInfo(resp.testid);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funWordNumber () {
+        // var c = (document.documentElement.clientHeight / 768 * 10) * 2.3 * 2;
+        // var a = $api.offset($api.byId('result-t')).w - c;
+        // var b = $api.offset($api.byId('number')).w;
+        // if (b < a) {
+        //     $api.css($api.byId('result-t'),'line-height:6.6rem;text-align:center;');
+        // }
+    }
+
+    function funErr(err) {
+        console.log(err);
+    }
+
+    function goToUnitInfo (testId) {
+        api.openFrame({
+            name : 'ReadingGuide',
+            url : './reading_guide.html',
+            rect : {
+                x : 0,
+                y : 0,
+                w : 'auto',
+                h : 'auto'
+            },
+            bounces: false,
+            reload: true,
+            pageParam : {
+                bcid: api.pageParam.chapters[nextUnitIndex].bcid,
+                data: api.pageParam.bookData,
+                testId: testId,
+                bookchaptersData: api.pageParam.bookchaptersData,
+                chapters : api.pageParam.chapters,
+                timeCount: api.pageParam.timeCount
+            }
+        });
+    }
+
+    function goBackHome () {
+        goback();
+    }
+
+    function resetaudioUri(filePath) {
+        //'../image/demo.zip'
+        var path = filePath.replace(/fs:\/\//g, '');
+        path = 'file:///' + api.fsDir + '/' + path;
+        return path;
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'width:' + api.framewidth + 'px');
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.fixStatusBar($api.byId('body'));
+    }
+
+    function loadUnitTestResults (data) {
+        api.pageParam.chapters.forEach(function (item, index) {
+            if (item.bcid === api.pageParam.bcid) {
+                $api.html($api.byId('unitName'), item.bcname);
+                nextUnitIndex = index + 1
+            }
+        });
+        readingAloudScoreBtn = data.readscore;
+        choiceScoreBtn = data.choicescore;
+        lightsScoreBtn = data.lightingstarts;
+        $api.html($api.byId('bookName'), api.pageParam.bookData.bname);
+        var userInfo = JSON.parse($storage.getStorage('user-info'));
+        $api.html($api.byId('name'), userInfo.userName);
+        $api.html($api.byId('userGrade'), userInfo.gradeScaleName);
+        if (userInfo.headimgUrl === '') {
+            $api.attr($api.byId('headImg'), 'src', userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+        } else {
+            $api.attr($api.byId('headImg'), 'src', $comm.resUri + userInfo.headimgUrl);
+        }
+        if (data.readscore === 0) {
+            $api.byId('isShowTotalScore').style.display = 'none';
+        } else {
+            $api.html($api.byId('totalScore'), data.totalscore);
+            $api.byId('isShowTotalScore').style.display = 'inline';
+        }
+        $api.html($api.byId('wordNumbers'), data.wordnumbers);
+        // $api.html($api.byId('nextWordNumbers'), data.nextwordnumbers);
+        $api.html($api.byId('choiceScore'), data.choicescore);
+        $api.html($api.byId('readScore'), data.readscore);
+        if (data.choicescore1.dimscore > 0) {
+            data.choicescore1.dimscore = '+'+ data.choicescore1.dimscore;
+            $api.byId('score1').style.background= '#19db95'
+        } else if (data.choicescore1.dimscore === 0) {
+            $api.byId('score1').style.background= '#e5e5e5'
+        }
+        if (data.choicescore2.dimscore > 0) {
+            data.choicescore2.dimscore = '+'+ data.choicescore2.dimscore;
+            $api.byId('score2').style.background= '#19db95'
+        } else if (data.choicescore2.dimscore === 0) {
+            $api.byId('score2').style.background= '#e5e5e5'
+        }
+        if (data.choicescore3.dimscore > 0) {
+            data.choicescore3.dimscore = '+'+ data.choicescore3.dimscore;
+            $api.byId('score3').style.background= '#19db95'
+        } else if (data.choicescore3.dimscore === 0) {
+            $api.byId('score3').style.background= '#e5e5e5'
+        }
+        if (data.choicescore4.dimscore > 0) {
+            data.choicescore4.dimscore = '+'+ data.choicescore4.dimscore;
+            $api.byId('score4').style.background= '#19db95'
+        } else if (data.choicescore4.dimscore === 0) {
+            $api.byId('score4').style.background= '#e5e5e5'
+        }
+        if (data.choicescore5.dimscore > 0) {
+            data.choicescore5.dimscore = '+'+ data.choicescore5.dimscore;
+            $api.byId('score5').style.background= '#19db95'
+        } else if (data.choicescore5.dimscore === 0) {
+            $api.byId('score5').style.background= '#e5e5e5'
+        }
+        if (data.choicescore6.dimscore > 0) {
+            data.choicescore6.dimscore = '+'+ data.choicescore6.dimscore;
+            $api.byId('score6').style.background= '#19db95'
+        } else if (data.choicescore6.dimscore === 0) {
+            $api.byId('score6').style.background= '#e5e5e5'
+        }
+        $api.byId('score1').innerHTML = data.choicescore1.dimname + '<span>'+ data.choicescore1.dimscore +'</span>';
+        $api.byId('score2').innerHTML = data.choicescore2.dimname + '<span>'+ data.choicescore2.dimscore +'</span>';
+        $api.byId('score3').innerHTML = data.choicescore3.dimname + '<span>'+ data.choicescore3.dimscore +'</span>';
+        $api.byId('score4').innerHTML = data.choicescore4.dimname + '<span>'+ data.choicescore4.dimscore +'</span>';
+        $api.byId('score5').innerHTML = data.choicescore5.dimname + '<span>'+ data.choicescore5.dimscore +'</span>';
+        $api.byId('score6').innerHTML = data.choicescore6.dimname + '<span>'+ data.choicescore6.dimscore +'</span>';
+        var integrity = (data.complete > 35 ? data.complete : 35)  + '%';
+        var accuracy = (data.correct > 35 ? data.correct : 35) + '%';
+        var fluency = (data.fluency > 35 ? data.fluency : 35) + '%';
+        $api.css($api.byId('integrity'), 'height:' + integrity + ';');
+        $api.css($api.byId('accuracy'), 'height:' + accuracy + ';');
+        $api.css($api.byId('fluency'), 'height:' + fluency + ';');
+        $api.html($api.byId('scoreIntegrity'), data.complete);
+        $api.html($api.byId('scoreAccuracy'), data.correct);
+        $api.html($api.byId('scoreFluency'), data.fluency);
+        switch (data.lightingstarts) {
+            case 0:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-0@3x.png');
+                break;
+            case 1:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-1@3x.png');
+                break;
+            case 2:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-2@3x.png');
+                break;
+            case 3:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-3@3x.png');
+                break;
+        }
+        if (nextUnitIndex === api.pageParam.chapters.length) {
+            $api.byId('btn02').innerText = '完成本书';
+        }
+        api.pageParam.questions.forEach(function (item) {
+            if (item.qscore === 0) {
+                var answerDom = '<span class="a-wrong">错</span>'
+            } else {
+                var answerDom = '<span>对</span>'
+            }
+            $api.append($api.byId('answerList'), answerDom);
+        });
+        audioUri = data.audiouri;
+        audioPath = 'fs://' + $comm.guid(true) + '.mp3';
+        api.download({
+            url : $comm.resUri + audioUri,
+            savePath : audioPath,
+            report : true,
+            cache : true,
+            allowResume : true
+        }, function(ret, err) {
+            if (ret.state == 1) {
+                audioDownload = true;
+            } else {
+                if (err) {
+                    console.log(JSON.stringify(err));
+                }
+            }
+        });
+        funWordNumber();
+    }
+
+    function goback() {
+        api.sendEvent({
+            name: 'turn-the-page'
+        });
+        api.closeWin({})
+    }
+
+
+</script>
+</html>

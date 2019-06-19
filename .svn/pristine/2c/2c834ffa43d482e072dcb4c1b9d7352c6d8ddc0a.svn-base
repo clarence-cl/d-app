@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>姓名</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/self.css">
+</head>
+<body>
+	<div id="app">
+		<!-- 返回 -->
+		<div class="top">
+				<div class="return" @click="exit">
+					 <svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-fh_"></use>
+					 </svg>
+				</div>
+				<h1>姓名</h1>
+				<div class="return">
+					 <svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon"></use>
+					 </svg>
+				</div>
+		</div>
+		<div class="content">
+			<div class="introduction">
+			  <input type="text" v-model="name" placeholder="神秘同学" maxlength="15">
+				<svg class="icon" aria-hidden="true" @click="clear">
+						<use xlink:href="#icon-dengluzhuce_guanbianniu_moren"></use>
+				</svg>
+		  </div>
+			<span>仅支持数字、中英文与-_字符，最多可输入15字</span>
+			<button @click="btnSure">确定</button>
+		</div>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+		var app = new Vue({
+			el: '#app',
+			data: {
+				userInfo: JSON.parse($storage.getStorage('user-info')),
+				gradeName: '',
+				userImage: '',
+				placeholder: '',
+				name:api.pageParam.name?api.pageParam.name:''
+			},
+			mounted: function() {
+				FastClick.attach(document.body);
+				this.toast = new customToast();
+				console.log(this.name)
+			},
+			methods: {
+				btnSure:function(){
+					var myReg = /^$|[a-zA-Z0-9_\-\u4e00-\u9fa5]+$/;
+					if (!myReg.test(this.name)) {
+						api.toast({
+								msg: '名称不可用',
+								duration: 2000,
+								location: 'middle'
+						});
+					}else{
+						$myCenter.changeUserInfo({name:this.name},(res)=>{
+								res = JSON.parse(res);
+								ret = JSON.parse(res.datas)
+								if(ret.sucessce){
+									this.$set(this.userInfo,'name',this.name)
+									$storage.setStorage('user-info', this.userInfo);
+									api.sendEvent({
+											name: 'updata'
+									});
+									api.closeWin({})
+
+								}
+						})
+					}
+				},
+				exit: function() {
+					// api.closeFrame()
+					api.closeWin({
+					});
+				},
+				funErr: function() {
+					// this.toast.fail({
+					// 	title: "网络异常，请检查网络链接"
+					// });
+					api.toast({
+            msg: "网络异常，请检查网络链接",
+            duration: 2000,
+            location: 'middle'
+          });
+				},
+				clear(){
+					this.name=""
+				}
+			}
+		});
+	};
+</script>
+
+</html>

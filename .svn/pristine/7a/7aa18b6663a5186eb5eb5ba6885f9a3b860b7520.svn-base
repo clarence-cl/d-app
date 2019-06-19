@@ -1,0 +1,2315 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>默读页</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css">
+	<script src="../../../common/fontclass/iconfont.js"></script>
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/myBookshelfStyle/readBooks_frm.css">
+</head>
+<!-- <body style="-webkit-user-select:all"> -->
+<body>
+	<!-- <div id="reader-content" class="reader-content" style="width: 100%;  overflow-y: hidden;background-color: #CCE8CF;"> -->
+	 <div id="reader-content" class="reader-content" style="width: 100%;  overflow-y: hidden;">
+	 <div class="go_bookfl">回朗读</div>
+	 <div id="goToTest" class="go_book">去测试</div>
+		<!-- 顶部菜单 -->
+		<div id="topMenu" class="top-menu">
+				<div id="q_return" class="menu-fs">
+					<i class="iconfont icon-btn font_family" style="color:#627773;font-size:2rem;">&#xe7a0;</i>
+					<!-- <span style="margin-right: 3rem;">返回</span> -->
+				</div>
+				<div id="haveReaded" style="font-size:1.6rem;">已读<span id="readed" style="font-size:1.6rem;">0</span>分钟</div>
+					<div id="divReadReamk" style="font-size:1.6rem;color:black;display:none">请选择本页中你想要朗读的内容</div>
+
+				<div id="cancel" style="font-size:1.6rem;">
+					<img src="../../../common/image02/buy.png" style="width:2.25rem;height:2.25rem;">
+				</div>
+				<!-- <span id="menuUnitName" style="font-size: 1.5rem"></span>
+				<div style="float: right;" class="menu-fs">
+					<i class="iconfont  icon-btn font_family">&#xe721;</i>
+					<a href="#" style="color: #fff;" onclick="fitFlag()">获取图书</a>
+				</div> -->
+			<!-- </div> -->
+		</div>
+		<!-- 书 -->
+		<div id="box" class="text-wrap">
+			<!-- 自定义章节名 -->
+			<div class="read-unit-name"><span id="menuUnitNameReading">单元名称</span></div>
+			<!-- 时间 -->
+			<div class="positive-timing-read">
+				<i id="dot2" class='dot'></i><span id="time02"></span>
+			</div>
+			<div id="area" class="area"></div>
+			<!-- 朗读部分 -->
+			<div class="popup1" id="popup1" style="display:none;">
+				<div class="pragress1">
+					<svg class="icon close" aria-hidden="true" id="closeComplete">
+							<use xlink:href="#icon-gb_-copy"></use>
+					</svg>
+					<h1>完成阅读</h1>
+					<!-- <span class="chapter1" id="chapter1"></span> -->
+					<span class="readTime1" id="readTime1"></span>
+					<h2 id="getReadNum">获得阅读量</h2>
+					<div class="btn1">
+						<span id="saveAndExit">保存并退出</span>
+						<span id="continueRead">继续阅读</span>
+						<span class="color1">保存并去答题</span>
+				  </div>
+				</div>
+			</div>
+			<!-- 朗读部分 -->
+			<div id="readPart">
+					<div id="pullSlideDown" style="height:4.5rem;">
+						<div class="slideDown" id="slideDown"></div>
+						<div class="bookReadLeft">
+							<!-- 书摘朗读 -->
+							<span></span>
+							<span>书摘朗读</span>
+							<span><svg class="icon" aria-hidden="true" class="">
+									<use xlink:href="#icon-wenhao"></use>
+							</svg></span>
+						</div>
+						<div class="pubLish" id="pubLish">发布</div>
+						<!-- <span class="pubLish" id="pubLish" style="background-color:yellow">发布</span>
+						<div class="bookRead" style="background-color:pink">
+							<div class="bookReadLeft" style="position:absolute;top:4.5rem;left:4.5rem;">
+								<span></span>
+								<span>书摘朗读</span>
+							</div>
+						</div> -->
+				</div>
+
+
+				<div style="height:37.4rem;margin-bottom:4rem;overflow:auto;">
+					<div class="readText" id="readText" style="overflow-x:hidden;overflow-y:scroll;">
+						<!-- 吹下海，失踪了。可皮皮断定他总有一天会回来的，因为她怎么也不相信爸爸已经淹死。她认为她爸爸一定已经上了一个荒岛，就是那种有许许多多黑人的荒岛，做了他们的国王，头上整天戴着金王冠。 -->
+					</div>
+				</div>
+
+				<!-- <div style="width:500px;height:100px;background-color:pink;" id="canvas"></div> -->
+				<canvas id="canvas" style="width:100%;height:6.5rem;margin-bottom:1.9rem;">
+					你这不行啊..不支持canvas
+				</canvas>
+				<div class="readTime" id="readTime" style="position:fixed;left:50%;transform:translate(-50%);font-size:1.4rem;color:#00B596">00:00</div>
+
+
+				<!-- 按钮操作区域 -->
+				<div class="operation" style="margin-top:2.6rem;">
+					<div class="all-read">
+ 						<div class="read-icon">
+ 							<div id="playIcon">
+ 								<svg id="" class="icon" aria-hidden="true">
+ 									 <use xlink:href="#icon-dingjice_huifang"></use>
+ 								</svg>
+ 							</div>
+ 							<span>回放</span>
+ 						</div>
+ 						<div class="read-icon">
+ 							<div id="iconWrap">
+ 								<svg id="" class="icon" aria-hidden="true">
+ 									 <use xlink:href="#icon-dingjiceluyin_moren"></use>
+ 								</svg>
+ 							</div>
+							<div class="mark" id="threeSconds" style="color:#00b596;display:none;">3</div>
+ 							<span id="readChangeTxt">?点击话筒，开始朗读</span>
+ 						</div>
+ 						<div class="read-icon">
+ 							<div class="scoreIcon" id="scoreIcon" style="position:absolute;left:0;top:0;">
+ 								<svg id="" class="icon" aria-hidden="true">
+ 									 <use xlink:href="#icon-dingjice_weidefenanniu"></use>
+ 								</svg>
+ 							</div>
+ 							<div class="mark" id="scoreResult"></div>
+ 							<span>得分</span>
+ 						</div>
+ 					</div>
+				</div>
+
+				<!-- 成绩展示区域 -->
+				<div id="gradeShow" class="gradeShow" style="display:none;">
+					<div>
+						<div class="gradeBar">
+							<div id="finashBar" class="animation"></div>
+						</div>
+						<span>完整度</span>
+						<span id="finashDeg" style="display:inline-block"></span>
+					</div>
+					<div>
+						<div class="gradeBar">
+							<div id="fluencyBar" ></div>
+						</div>
+						<span>流利度</span>
+						<span id="fluencyDeg"></span>
+					</div>
+					<div>
+						<div class="gradeBar">
+							<div id="correctBar"></div>
+						</div>
+						<span id="correctDeg1" style="color:#666666;">正确度</span>
+						<span id="correctDeg"></span>
+						<span id="good" style="color:#26BA9E;display:block;margin-left:2rem;display:none;">太棒了</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- 底部菜单 -->
+		<div id="bottomMenu" class="bottom-menu" style="border-top:1px solid #f9f9f9;">
+			<div id="big_menu" class="menu-fs" style="margin-left:4.5rem;">
+				<span><i class="iconfont  icon-btn font_family" style="color:#627773;">&#xe7f6;</i></span>
+				<!-- <span>目录</span> -->
+			</div>
+			<div class="readPage">
+				<!-- <div style="width:5.1rem;height:5.1rem;position: absolute; top: 0; bottom: 0; left: 0; right: 0;margin: auto;">
+					<img src="../../../common/image/read@2x.png" style="width:5.1rem;height:5.1rem;" id="readImg"></img>
+				</div> -->
+				<div class="oldlive" id="live" style="width:5.1rem;height:5.1rem;padding-top:1.25rem;margin:0 auto;">
+			     <!-- <img src="../../../common/image/read@2x.png" style="width:5.1rem;height:5.1rem;" id="readImg" alt=""/> -->
+					 <i class="iconfont  icon-btn font_family" style="font-size:5.1rem;color:#98aca8;margin:0 auto;" id="readImg">&#xe7ff;</i>
+			     <span></span>
+			     <span></span>
+			  </div>
+			</div>
+
+			<div id="isOpenEye" class="isOpenEye"><span>护眼</span><img src="../../../common/image/openEye.png"></div>
+			<!-- 朗读提示气泡 -->
+			<div class="popup" id="popup">
+				<div style="background-color:white">
+					<div class="text">点击按钮，尝试着读一下本页内容吧</diV>
+					<!-- 倒三角形 -->
+					<div class="threeJiao"></div>
+				</div>
+			</div>
+			<div id="readThisPage" style="position:absolute;left:50%;top:70%;transform:translate(-50%,-50%);color:#98aca8;">朗读本页</div>
+			<!-- <div class="text-color" style="float:right;"> -->
+				<!-- <div class="menu-fs"> -->
+					<!-- <i class="iconfont  icon-btn font_family"></i> -->
+					<!-- <span id="spanEye" style="color: rgb(152,172,168);">护眼</span>
+					<img src="../../../common/image/openEye.png" style="width:5rem;"/>
+				</div> -->
+			 <!-- </div> -->
+	</div>
+	<!-- 遮罩 -->
+	<div class="map-menu" id='Map' style="display: none;"></div>
+	<!-- 目录和朗读池 -->
+	<div class="bigMenu disBigMenu" id="bigMenu">
+		<!-- 返回 -->
+		<div class="menu-close" id="menu-close">
+			<svg id="" class="icon" aria-hidden="true">
+					<use xlink:href="#icon-zuoyoujiantou"></use>
+			</svg>
+		</div>
+		<!-- 目录 -->
+		<div class="tab-menu" style="" id="tab-menu">
+			<!-- 目录头部 -->
+			<div class="menu-h" id="menu-h">
+				<div class="menu-t" id="menu-t">
+					<div style="display:flex;">
+						<img id="unitCover" src="">
+						<div class="menu-tr">
+							<h1 id="bookName"></h1>
+							<p id="unitName"></p>
+						</div>
+					</div>
+
+					<div class="pro-s">
+						<div class="plan">
+							<div id="readingProgressBar" class="progress-bar"></div>
+						</div>
+						<span id="readPlan"></span>
+					</div>
+				</div>
+			</div>
+			<!-- 章节列表 -->
+			<div class="menu-f">
+				<ul id="ulWrap" style="overflow-x:hidden;">
+				</ul>
+			</div>
+		</div>
+		<!-- 朗读池 -->
+		<div class="tab-read" style="display:none;position:relative;" id="tab-read">
+
+		</div>
+		<div style="display:none;" id="freshIng">
+			<svg id="" class="icon" aria-hidden="true">
+				<use xlink:href="#icon-shuidi_huaban"></use>
+			</svg>加载中
+		</div>
+
+		<!-- tab栏 -->
+		<div class="menu-f-m" id="menu-f-m">
+				<!-- <span><i class="iconfont font_family">&#xe720;</i>目录</span> -->
+				<span class="click" id="read01">目录</span>
+				<span id="read02">朗读池</span>
+				<!-- <audio id='aud' src="http://download.cloud.chivox.com:8002/5cac85dcf3067eeecf00a56c.mp3" controls="controls"></audio> -->
+		</div>
+	</div>
+</div>
+	<img src="../../../common/image/guide.png" class="guide-map" id="guideMap" style="display:none;">
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/epub.min.js"></script>
+<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script> -->
+<script type="text/javascript" src="../../../common/script/libs/jszip315.min.js"></script>
+<script type="text/javascript" src="../../../common/script/hooks.js"></script>
+<!-- 存储在离线磁盘的缓存库，h5的只有5M -->
+<script type="text/javascript" src="../../../common/script/libs/localforage.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox1.js"></script>
+<script type="text/javascript" src="../../../common/script/mapCanvas.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-epubExtV1.js"></script>
+<script type="text/javascript" src="../../../common/script/pinyin_dict_withtone.js"></script>
+<script type="text/javascript" src="../../../common/script/pinyinUtil.js"></script>
+<script type="text/javascript">
+	var isRecord = false;
+	var doublePI = Math.PI * 2;
+var canvas;
+var ctx;
+
+//画布的高度的一半
+var halfCanvasHeight = 100;
+//水平边距
+var horizontalMargin = 150;
+
+//衰减系数(越大, 边缘衰减的就越多, 震动宽度相应也越窄)
+var attenuationCoefficient = 2;
+var readFlag = false;
+//半波长个数-1
+var halfWaveCount = 3;
+//振幅是画布高度的一般的百分比[0,1]
+var amplitudePercentage = 0;
+//每帧增加的弧度[0,2PI](作用于sin曲线, 正值相当于原点右移, 曲线左移)
+var radianStep = -0.05;
+
+//当前弧度的偏移
+var radianOffset = 0;
+//画布宽度
+var canvasWidth;
+var readingScore;
+var finashDeg;
+var timeCounted;
+var intervaled;
+var fluencyDeg;
+var correctDeg;
+var readAllData;
+var dataStr;
+var soundTimer = null;
+var readCountTimer = null;
+var prePercent= null;
+var poolStr='';
+var audio = null;
+var isNextPage;
+var pageNum;
+var pageNumBer;
+var PageIndexx =1;
+var isEnd = false;
+var dataList = [];
+var len;
+	var startReadData;
+	var unitName = '';
+	var isTouchScreen = false;
+	var sound = 0;
+	var needBoxChapterTocId = '';
+	var openEye = true;
+	var hasFitRead = false;
+	var codeSw;
+	var lastBubbleDom;
+	var dataLength;
+	var DomArr = [];
+	var docData;
+	var bubble;
+	var readNum=0;
+	var textArr = [];
+	var btnArray;
+	var finishRead = false;
+	var readBook;
+	var threeInterval = null;
+	var isChoose = false;
+	var color = '#cde9cf';
+	var popupIsExist = null;
+	var readInner;
+	var isPlay = false;
+	var demo = null;
+	var timer = null;
+	var chivoxEngineOn = false;
+	var readResult = null;
+	var hasReadResult = false;
+	var isPause = true;
+	var timeCount = 0;
+	var interval = null;
+	var percentage = 0;
+	var spinePosTo;
+	var spinePosFrom;
+	var readingPercentage = 0;
+	var toc;
+	var closeFlag = false;
+	var requestAnimation = null;
+  var choiceComplete = false;
+  var toast = new customToast();
+  var finishCfi;
+  var bookPercentageEnd;
+	var arr = [];
+	var tooFastObj = {};
+	var ReadWordCount;
+	var hasPublished = false;
+	var wordData;
+	var hasScore = false;
+	var flag = false;
+	var a = false;
+	var tabRead;
+	var docHeight;
+	var data_new;
+	var winHeight;
+	var disHeight;
+	//调用有效接口次数
+	var countWordIndex=0;
+	//在当前页阅读的有效字数
+	var readWordNumCount=0;
+	var canContinueRead = true;
+	var wavetime = null;
+	//打开阅读字数记录的次数
+	var recordID="";
+	var selectWordText="";//记录每次选择的文字
+	var isMove = false;
+	var readAloudContentWithStyle = '';
+	var startX, startY, moveEndX, moveEndY, X, Y, gesturesDirection;
+
+  apiready = function() {
+		if($storage.getStorage('__POPUPISEXIST__')){
+			$api.byId('popup').style.display='none';
+		}
+		$api.byId('readPart').style.display = 'none';
+		var boxChapterId = api.pageParam.recordData.readBoxChapterId;
+		var boxChapterTocId = api.pageParam.recordData.readBoxChapterTocId;
+		var cfi = api.pageParam.recordData.readCFI ? api.pageParam.recordData.readCFI :api.pageParam.cfiFrom
+		startRead(boxChapterId,boxChapterTocId,cfi);
+		var firstReadCFI = api.pageParam.readCFI!='' ? api.pageParam.readCFI : api.pageParam.cfiFrom;
+		openEbook(api.pageParam.saveBookPath,api.pageParam.chapterTocListData,api.pageParam.chapterID,firstReadCFI);
+		readLoadPage();
+		create();
+		getReadPool(1,false);
+		// getList(1);
+		watchReadPool();
+		registChivoxCallback();
+		// var a = pinyinUtil.getTone($comm.getNewTone('tou',0))
+		// alert(a)
+		var exitTone = pinyinUtil.getPinyin('头','splitter', 'withtone', true);
+		// alert(exitTone)
+
+		needBoxChapterTocId = api.pageParam.recordData.readBoxChapterTocId;
+		getUnitName($api.byId('menuUnitNameReading'),needBoxChapterTocId,'',1);
+		// percentage = isNaN(percentage) ? 0 : percentage
+		$api.html($api.byId('readPlan'), '已读'+percentage+'%,'+$api.byId('readed').innerText+'分钟');
+	};
+
+	function readLoadPage()
+	{
+		// timeCount = api.pageParam.timeCount ? api.pageParam.timeCount : 0;
+		refreshUIInfo();
+		initUIInfo();
+		loadMenuInfoUI();
+		bindEvent();
+	}
+
+	function GetSlideDirection(startX, startY, endX, endY) {
+	    var dy = startY - endY;
+	    var result = 0;
+	    if(dy>0) {//向上滑动
+	        result=1;
+	    }else if(dy<0){//向下滑动
+	        result=2;
+	    }
+	    else
+	    {
+	        result=0;
+	    }
+	  return result;
+}
+
+	function bindEvent() {
+
+		$api.byId('readImg').addEventListener('touchend',function(){
+			console.log('hasFitRead'+hasFitRead)
+			if(hasFitRead){
+				return;
+			}
+			// 将底部菜单的气泡状态保存；
+			popupIsExist = true;
+			$storage.setStorage('__POPUPISEXIST__',popupIsExist);
+			if($storage.getStorage('__POPUPISEXIST__')){
+				$api.byId('popup').style.display='none';
+			}
+			hasFitRead = false;
+			readFlag = !readFlag;
+			if(readFlag){
+				$api.addCls($api.byId('haveReaded'), 'trueReadFlag');
+				$api.byId('q_return').style.visibility = 'hidden';
+				$api.byId('isOpenEye').style.visibility = 'hidden';
+				$api.addCls($api.byId('big_menu'), 'trueReadFlag');
+				$api.byId('readThisPage').style.color = '#00B596';
+				$api.byId('readImg').style.color = '#00B596';
+				$api.html($api.byId('cancel'), '取消');
+					$api.byId('divReadReamk').style.display='block';
+			}else{
+				$api.removeCls($api.byId('haveReaded'), 'trueReadFlag');
+				$api.byId('q_return').style.visibility = 'visible';
+				$api.byId('isOpenEye').style.visibility = 'visible';
+				$api.removeCls($api.byId('big_menu'), 'trueReadFlag');
+				$api.byId('readThisPage').style.color = '#98aca8';
+				$api.byId('readImg').style.color = '#98aca8';
+				$api.html($api.byId('cancel'), '<img src="../../../common/image02/buy.png" style="width:2.25rem;height:2.25rem;">');
+				$api.byId('divReadReamk').style.display='none';
+				readFlag = false;
+				$epubExt.isEpubNextPage(true);
+			}
+			var btnArray = docData.getElementsByTagName('p');
+			var isImg = /^[a-zA-Z]\*.(jpg|png|JPG|PNG)$/;
+			var patrn=/[\u4E00-\u9FA5]|[\uFE30-\uFFA0]/gi;
+			for(let i=0; i<btnArray.length; i++){
+					// alert(btnArray[i].innerText)
+					//段落中间有注释的情况
+				if(patrn.test(btnArray[i].innerText)!=null  && btnArray[i].children.length<=7 && readFlag){
+					// $api.css(btnArray[i].children[1], "visibility:visible;background-image:url('"+$comm.resUri+"/Files/Temp/falseChoose.png');");
+					if(btnArray[i].getElementsByTagName("img").length==0 && btnArray[i].innerHTML!='<br>'){
+						//筛选是否为图片
+						$api.css(btnArray[i].children[1], "visibility:visible;background-image:url('"+$comm.resUri+"/Files/Temp/falseChoose.png');");
+						$api.css(btnArray[i], 'background:rgba(0,0,0,.1)');
+						btnArray[i].addEventListener('touchend',fn2,true);
+					}
+					$epubExt.isEpubNextPage(false);
+
+				}else{
+					readFlag = false;
+					$api.css(btnArray[i].children[1], "visibility:hidden;background-image:url('"+$comm.resUri+"/Files/Temp/falseChoose.png');");
+
+					btnArray[i].style.background = color;
+				}
+			}
+			if(textArr.length>=1){
+				styToast();
+				$api.css($api.byId('topMenu'), 'background:#999999');
+				$api.byId('readPart').style.display = 'block';
+				$api.css($api.byId('bottomMenu'), 'display:none;');
+				// $api.html($api.byId('readTime'),'00:00/03:00')
+				$api.removeCls($api.byId('readPart'), 'readPartDown');
+				$api.addCls($api.byId('readPart'), 'readPart');
+				$api.addCls($api.byId('haveReaded'), 'trueReadFlag');
+				$api.byId('q_return').style.visibility = 'hidden';
+				$api.byId('isOpenEye').style.visibility = 'hidden';
+				$api.addCls($api.byId('big_menu'), 'trueReadFlag');
+				var strInner = '';
+				readInner = '';
+				textArr = $comm.qc(textArr);
+				textArr.map((v,i)=>{
+					strInner += '<p>'+v+'</p>'
+				})
+				$api.byId('readText').innerHTML = strInner;
+				readInner = strInner;
+				strInner = '';
+				readBook = textArr;
+			}
+		})
+		api.addEventListener({
+		    name: 'readNetBack'
+		}, function(ret, err){
+		    if( ret ){
+					$api.css($api.byId('bigMenu'), 'display:none');
+					// showMenu2();
+					$api.css($api.byId('Map'), 'display:none');
+						getReadPool(1,false);
+		    }else{
+		        //  alert( JSON.stringify( err ) );
+		    }
+		});
+
+		$api.byId('topMenu').addEventListener('touchend',function(){
+			console.log('退出））））））））））））））））））））））')
+			if(!readBook){
+				return;
+			}
+			if(readResult && readBook && !hasPublished){
+				console.log(readResult+'-----'+readBook+'------'+hasPublished)
+				// alert($storage.getStorage('buttonexists'))
+				if($storage.getStorage('buttonexists')==='false'){
+						console.log('退出1））））））））））））））））））））））')
+					exitStyle()
+				}else{
+						console.log('退出2））））））））））））））））））））））')
+					exitThisReading()
+				}
+			}else{
+					console.log('退出3））））））））））））））））））））））')
+				exitStyle()
+			}
+		});
+
+		$api.byId('cancel').addEventListener('touchend',function(){
+			hasFitRead = false;
+			readFlag = false;
+			$api.byId('readThisPage').innerText = '朗读本页';
+			$api.byId('readThisPage').style.color = '#98aca8';
+			$api.byId('readImg').style.color = '#98aca8';
+			$api.removeCls($api.byId('live'),'live');
+			$api.removeCls($api.byId('haveReaded'), 'trueReadFlag');
+			$api.byId('q_return').style.visibility = 'visible';
+			$api.byId('isOpenEye').style.visibility = 'visible';
+			$api.byId('cancel').innerHTML = '<img src="../../../common/image02/buy.png" style="width:2.25rem;height:2.25rem;">';
+			$api.byId('divReadReamk').style.display='none';
+			$api.removeCls($api.byId('big_menu'), 'trueReadFlag');
+			for(var i=0; i<btnArray.length; i++){
+					$api.css(btnArray[i].children[1], "visibility:hidden;background-image:url('http://47.93.214.37:9746/Files/Temp/falseChoose.png');");
+					$api.css(btnArray[i], "background:"+color);
+					$epubExt.isEpubNextPage(true);
+					btnArray[i].children[0].checked = false;
+					textArr = [];
+				}
+			readFlag = false;
+		});
+		$api.byId('saveAndExit').addEventListener('touchend',function(){
+			$api.byId('saveAndExit').style.color = '#98aca8';
+			$api.byId('continueRead').style.color = '#98aca8';
+			$api.byId('popup1').style.display = 'none';
+			api.sendEvent({
+			    name: 'turn-the-page',
+			    extra: {
+			        id:api.pageParam.thisBookId
+			    }
+			});
+
+			endRead(true);
+		});
+		$api.byId('continueRead').addEventListener('touchend',function(){
+			$api.byId('popup1').style.display = 'none';
+			$api.byId('saveAndExit').style.color = '#98aca8';
+			$api.byId('continueRead').style.color = '#98aca8';
+			// endRead(false);
+		});
+		$api.byId('closeComplete').addEventListener('touchend',function(){
+			$api.byId('popup1').style.display = 'none';
+		});
+
+
+		//禁止手机的默认滚屏i行为
+		document.addEventListener('touchmove', function(event) {
+		    event.preventDefault();
+		}, false);
+
+		//手指放在滑块上时的位置
+		$api.byId('pullSlideDown').addEventListener('touchstart',function(ev){
+			startX = ev.touches[0].pageX;
+      startY = ev.touches[0].pageY;
+		});
+		//手指离开滑块时
+		$api.byId('pullSlideDown').addEventListener('touchend',function (ev) {
+            var endX, endY;
+            endX = ev.changedTouches[0].pageX;
+            endY = ev.changedTouches[0].pageY;
+            var direction = GetSlideDirection(startX, startY, endX, endY);
+            switch(direction) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+										if(readResult && !hasPublished){
+											exitThisReading()
+										}else{
+											exitStyle()
+										}
+                    break;
+                default:
+            }
+        }, false);
+
+
+		//点击发布按钮
+		$api.byId('pubLish').addEventListener('touchend', function(){
+			var scoreFlag = $api.byId('scoreResult').innerText;
+			if(scoreFlag){
+				if(!hasPublished){
+					submitRead();
+					hasPublished = true;
+					readResult = false;
+				}else{
+					api.toast({
+					    msg: '你已经发布一次了',
+					    duration: 2000,
+					    location: 'middle'
+					});
+
+				}
+			}else{
+				$api.byId('pubLish').style.color = '#c9c9c9'
+			}
+		});
+
+		$api.byId('ulWrap').addEventListener('touchend', function(e) {
+			// alert(77788888)
+				if (e.target && e.target.nodeName.toLowerCase() === 'p' && !isMove) {
+								$api.css($api.byId('bigMenu'), 'display:none');
+								$api.css($api.byId('Map'), 'display:none');
+								console.log(e.target.id);
+								console.log(e.target.innerText)
+								// e.target.style.color = 'red';
+								$epubExt.goCfi(e.target.id,bookCallback);
+
+
+								var text = e.target.innerText
+								// alert(text)
+								getUnitName($api.byId('menuUnitNameReading'),'',text,2);
+			}else{
+				// alert(8778)
+			}
+		});
+
+		//点击话筒，开始朗读
+		$api.byId('iconWrap').addEventListener('touchend', function(){
+			sound= 0;
+			$api.byId('readText').innerHTML = readInner;
+
+			if(soundTimer){
+				clearInterval(soundTimer)
+			}
+			if(interval){
+				clearInterval(interval);
+			}
+
+			if(canContinueRead){
+				// $api.html($api.byId('readTime'),'00:00/03:00');
+				$api.byId('canvas').style.visibility="visible";
+				$api.byId('gradeShow').style.display = 'none';
+				$api.byId('good').style.display = 'none';
+				$api.byId('correctDeg').style.color = '#000';
+				$api.byId('correctDeg1').style.color = '#000';
+				$api.byId('pubLish').style.color = '#c9c9c9';
+				$api.html($api.byId('scoreIcon'), '<svg id="" class="icon" aria-hidden="true"><use xlink:href="#icon-dingjice_weidefenanniu"></use></svg>');
+				$api.html($api.byId('scoreResult'), '');
+				btnRecord();
+			}else{
+				alert('请耐心等待评测')
+			}
+		});
+		//点击回放按钮，听自己美妙的声音
+		$api.byId('playIcon').addEventListener('touchend', function(){
+			playRecording();
+		});
+		$api.byId('read01').addEventListener('touchend', function() {
+          $api.css($api.byId('tab-menu'), 'display:block');
+          $api.css($api.byId('tab-read'), 'display:none');
+					$api.addCls($api.byId('read01'), 'click');
+					$api.removeCls($api.byId('read02'), 'click');
+		});
+		$api.byId('read02').addEventListener('touchend', function() {
+         $api.css($api.byId('tab-menu'), 'display:none');
+         $api.css($api.byId('tab-read'), 'display:block');
+				 $api.addCls($api.byId('read02'), 'click');
+				 $api.removeCls($api.byId('read01'), 'click');
+		});
+		$api.byId('menu-close').addEventListener('touchend', function() {
+				 $api.css($api.byId('bigMenu'), 'display:none');
+	 			 $api.css($api.byId('Map'), 'display:none');
+		});
+		$api.byId('q_return').addEventListener('touchend', function() {
+			// closeFlag = true;
+			goback();
+		});
+		//点击目录
+		$api.byId('big_menu').addEventListener('touchend', function() {
+						$api.css($api.byId('bigMenu'), 'display:block');
+						// showMenu2();
+						$api.css($api.byId('Map'), 'display:block');
+            // showMenu();
+		});
+    //护眼模式
+		$api.byId('isOpenEye').addEventListener('touchend',function(){
+				openEye = !openEye;
+				btnArray = docData.getElementsByTagName('p');
+				if(openEye){
+					$api.html($api.byId('isOpenEye'), '护眼<img src="../../../common/image/openEye.png" style="width:5rem"></img>');
+					color='#cde9cf';
+					$api.byId('area').style.backgroundColor = '#cde9cf';
+					$api.byId('box').style.backgroundColor = '#cde9cf';
+					for(var i=0;i<btnArray.length;i++){
+						btnArray[i].style.backgroundColor = color
+					}
+				}else{
+						color='#fff';
+						$api.byId('area').style.backgroundColor = '#fff';
+						$api.byId('box').style.backgroundColor = '#fff';
+						for(var i=0;i<btnArray.length;i++){
+							btnArray[i].style.backgroundColor = color
+						}
+						$api.html($api.byId('isOpenEye'), '护眼<img src="../../../common/image/closeEye.png" style="width:5rem"></img>');
+				}
+		});
+		$api.byId('Map').addEventListener('touchend', function() {
+			$api.css($api.byId('bigMenu'), 'display:none');
+			// hideMenu2()
+			$api.css($api.byId('Map'), 'display:none');
+		});
+		// $api.byId('ulWrap').addEventListener('touchend', function(e) {
+		//     if (e.target && e.target.nodeName.toLowerCase() === 'p' && !isMove) {
+    //             $api.css($api.byId('bigMenu'), 'display:none');
+    //             $api.css($api.byId('Map'), 'display:none');
+		// 						$epubExt.goCfi(e.target.id);
+		// 						alert(8899)
+		// 	}
+		// });
+    $api.byId('ulWrap').addEventListener('touchmove', function(e) {
+        moveX = moveX - e.pageX;
+        moveY = moveY - e.pageY;
+        if (Math.abs(moveX) > 10 || Math.abs(moveY) > 10) {
+            isMove = true;
+        } else {
+            isMove = false;
+        }
+    });
+    $api.byId('ulWrap').addEventListener('touchstart', function(e) {
+        isMove = false;
+        moveX = e.pageX;
+        moveY = e.pageY;
+    });
+	}
+
+	//开始阅读
+	function startRead(BoxChapterId,BoxChapterTocID,CFI){
+		var data ={
+			BoxId:api.pageParam.boxId,
+			// BoxChapterId:api.pageParam.needBoxChapterId,
+			BoxChapterId:BoxChapterId,
+			BoxChapterTocID:BoxChapterTocID,
+			CFI:CFI
+		}
+		$comm.socket(3002,data,function(res){
+			res = JSON.parse(res);
+			if(res.error==0){
+				startReadData = JSON.parse(res.datas)
+			}
+		})
+	}
+
+	//朗读池变色以及单元名称函数
+	function getUnitName(ele,tocId,text,type){
+		//默认进来
+		var chapterTocListData = api.pageParam.chapterTocListData;
+		//翻页的时候
+		if(type==1){
+			chapterTocListData.forEach(function(item,index){
+				if(tocId==item.boxChapterTocID){
+					ele.innerHTML = item.tocLabel;
+					$api.html($api.byId('unitName'), item.tocLabel);
+				}
+			})
+		}else{
+			//执行goCFI时候
+			chapterTocListData.forEach(function(item,index){
+				ele.innerHTML = text;
+				// alert(text)
+				$api.html($api.byId('unitName'), text);
+			})
+		}
+		var liDom = document.getElementById('ulWrap').getElementsByTagName('li');
+		for(var i=0;i<liDom.length;i++){
+			liDom[i].children[0].style.color = '#223330';
+			if(liDom[i].innerText==ele.innerHTML){
+				liDom[i].children[0].style.color = '#00b596';
+			}
+		}
+	}
+	//阅读计时
+	function readCountTime(){
+		// var totalSeconds = 0;
+		readCountTimer = setInterval(function(){
+			totalSeconds++
+		},1000);
+	}
+
+	function fn2(){
+		if(!readFlag){
+			return;
+		}
+		if(hasFitRead){
+			return;
+		}
+		this.children[0].checked = !this.children[0].checked;
+		if(this.children[0].checked==true){
+			$api.css(this.children[1], "background-image:url('http://47.93.214.37:9746/Files/Temp/trueChoose.png');");
+			var strText = this.innerText;
+			textArr.push(strText)
+			$api.css(this, "background:rgba(0,181,150,.2)");
+		}else{
+			$api.css(this.children[1], "background-image:url('http://47.93.214.37:9746/Files/Temp/falseChoose.png');");
+			$api.css(this, "background:rgba(0,0,0,.1)");
+			var that = this;
+			if(textArr.length>1){
+				for(var j=0; j<textArr.length; j++){
+					if(textArr[j] == that.innerText){
+						textArr.splice(j,1);
+					}
+				}
+			}else{
+				textArr = [];
+			}
+		}
+		if(textArr.length>=1){
+			$api.byId('readThisPage').innerText = '去朗读';
+			$api.byId('readThisPage').style.color = '#00B596';
+			$api.byId('readImg').style.color = '#00B596';
+			$api.addCls($api.byId('live'),'live');
+		}else{
+			$api.byId('readThisPage').innerText = '朗读本页';
+			$api.byId('readThisPage').style.color = '#00B596';
+			$api.byId('readImg').style.color = '#00B596';
+			$api.removeCls($api.byId('live'),'live');
+		}
+	}
+	//动态添加一个气泡弹窗
+	function createBubble(ele,left){
+
+		if(bubble){
+			lastBubbleDom.removeChild(bubble);
+		}
+		bubble = document.createElement('div');
+		var bot = document.getElementById('bottomMenu');
+		bubble.innerText = '朗读';
+		bubble.style.color = '#fff';
+		bubble.style.fontSize = '.9rem';
+		bubble.style.textAlign = 'center !important';
+		bubble.style.lineHeight = '2.3rem';
+		bubble.style.borderRadius = '0.5rem';
+		bubble.style.width = '6rem';
+		bubble.style.height = '2.3rem';
+		bubble.style.position = 'absolute';
+		bubble.style.top = '-2.3rem';
+		bubble.style.left = left/40+'rem';
+		bubble.style.background = '#223330';
+		var smallSharp = document.createElement('div');
+		smallSharp.style.width = '0px';
+		smallSharp.style.height = '0px';
+		// smallSharp.style.backgroundColor = 'red';
+		smallSharp.style.borderWidth = '.7rem';
+		smallSharp.style.borderStyle = 'solid';
+		smallSharp.style.borderColor= '#223330 transparent transparent transparent';
+		smallSharp.style.position = 'absolute';
+		smallSharp.style.top = '2.3rem';
+		smallSharp.style.left = '50%';
+		smallSharp.style.transform = 'translate(-50%)';
+		bubble.appendChild(smallSharp);
+		ele.appendChild(bubble);
+		bubble.onclick = function(){
+			$api.byId('readPart').style.display = 'block';
+			textArr.map((v,i)=>{
+				$api.byId('readText').innerHTML += v
+			})
+			readBook = textArr;
+		}
+	}
+	function loadMenuInfoUI() {
+		$api.byId('ulWrap').innerHTML = '';
+		try{
+				var bookInfo = api.pageParam.bookInfo;
+				$api.html($api.byId('bookName'), api.pageParam.bookName);
+				$api.attr($api.byId('unitCover'), 'src',api.pageParam.bookCover);
+				toc = api.pageParam.chapterTocListData;
+				console.log('+++++++++++++++++++'+toc+'+++++++++++**************++++')
+        toc.forEach(function (item, index) {
+            var liDom = '<li><p id="'+ item.tocCfi +'">' + item.tocLabel + '</p></li>';
+            $api.append($api.byId('ulWrap'), liDom);
+        });
+			}
+			catch(e)
+			{
+				api.toast({
+					msg: "网络在偷偷在打盹儿哦，请重新打开吧~",
+					duration: 2000,
+					location: 'middle'
+				});
+				setTimeout(api.closeWin(),1000);
+			}
+	}
+
+
+
+	function initUIInfo() {
+		//将UI布局中主要对象的宽,高记录到localStorage中,以备后续使用(而不用临时再计算)
+		var uiInfo = $storage.getUIInfo();
+		$api.css($api.byId('reader-content'), 'height:' + uiInfo.content_h + 'px');
+		api.parseTapmode();
+	}
+
+	function pageChangingEnd () {
+		var currentChapter = Book.currentChapter;
+        if (currentChapter.spinePos === Number(spinePosTo)) {
+			$api.byId('goToTest').style.display = 'block';
+            $homeService.pageChanging({
+                testId: api.pageParam.testId,
+                cfi : finishCfi,
+                percentage : 100,
+                bookpercentage : bookPercentageEnd
+            }, funSuc, funErr);
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	function pageChangingStart () {
+        var currentChapter = Book.currentChapter;
+        if (currentChapter.spinePos === Number(spinePosFrom)) {
+            return false;
+        } else {
+            return true;
+        }
+	}
+
+	function goToChoiceTest() {
+        $homeService.finishReading( api.pageParam.testId, 100, funSucFinishRead, funErr);
+	}
+
+	function funSucFinishRead (resp) {
+	    if (resp.errCode === 0) {
+            clearInterval(interval);
+            api.openWin({
+                name: 'unitChoiceTest',
+                url: './unit_choiceTest_frm.html',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                bounces: false,
+                reload: true,
+								slidBackEnabled:false,
+                pageParam: {
+                    bcid: api.pageParam.bcid,
+                    data: api.pageParam.data,
+                    testId: api.pageParam.testId,
+                    bookchaptersData: api.pageParam.bookchaptersData,
+                    chapters: api.pageParam.chapters,
+					timeCount: timeCount
+                }
+            });
+		} else {
+		}
+	}
+  var setTimeoutWord=null;
+	// alert(api.pageParam.chapterID)
+	function openEbook(filepath,chapterTocListData,chapterID,dispayCfi) {
+		wordData=null;
+		var uiInfo = $storage.getUIInfo();
+        var bookuri = $comm.resetFsUri(filepath);
+        var cssHref= $comm.resUri+'/Static/reader_pad.css?time=' + new Date().getTime();
+				//  var cssHref="../../../ipad/css/reader_pad.css"
+				 //设置图书参数
+				//  console.log(cssHref+'-------------111111')
+				 let bookParam={
+				 	bcid:chapterID ? chapterID : api.pageParam.recordData.readChapterId,//当前单元的ID
+					chapterTocList:chapterTocListData,
+				 	cusTomchapters:api.pageParam.bookChapterList,//自定义书目的json数据
+				 	bookSetParam:{
+							bookUri:bookuri,//打w开当前书目的URL
+							dispayCfi: dispayCfi,//定位到书的某个cfi位置
+					   dispayDiv:"area",//呈现的容器
+				 		smethod:"default",
+				 		sheight:api.winHeight-160-60,
+				 		swidth:api.winWidth-100,
+						stylesheet:cssHref,//"../../../ipad/css/reader_pad.css"//本地目录样式为什么不行？路径解析变了找不到文件？,// [cssHref],
+// "http://192.168.3.245:86/reader_pad.css"
+						flow:"auto",//ginated 分屏显示左边一段右边一段(一屏两页)//scrolled-doc一屏展示//auto,
+						contentViewjs:""
+				 	}
+				};
+				console.log(JSON.stringify(bookParam)+'+++++++++++++++++++++++++++++')
+	setTimeout(function()
+	{
+		$epubExt.readBook(bookParam,bookCallback);
+	},100);
+	}
+	function funSucPageChanging(resp) {
+		if (resp.errCode === 0) {
+				$storage.setStorage('pageInfo',{
+					pagecount:finishCfi,
+					pageBcid:api.pageParam.bcid
+				});
+		} else {
+		}
+	}
+	function funSuc(resp) {
+		if (resp.errCode === 0) {
+			ReadWordCount = resp.ReadWordCount
+			toast.alert({
+				title: '是否去测试？',
+				msg: "本次阅读增加了<span style='color:#8fc31f;font-weight:bold'>"+readWordNumCount+"</span>有效阅读字数",
+					buttons: [{
+							name: '取消',
+							onclick: function() {
+									toast.hide();
+							}
+					}, {
+							name: '去测试',
+							onclick: function() {
+									goToChoiceTest();
+							}
+					}]
+			});
+
+				$storage.setStorage('pageInfo',{
+					pagecount:finishCfi,
+					pageBcid:api.pageParam.bcid
+				});
+		} else {
+			toast.alert({
+						// title: '本次阅读增加了'+ReadWordCount+'有效字数阅读量',
+					msg: '用小测试检验下阅读成果吧！',
+					buttons: [{
+							name: '取消',
+							onclick: function() {
+									toast.hide();
+							}
+					}, {
+							name: '去测试',
+							onclick: function() {
+									goToChoiceTest();
+							}
+					}]
+			});
+		}
+}
+function exitThisReading(){
+	toast.alert({
+		title: '确定退出此次朗读？',
+		warn:'不再显示此提醒',
+		msg: "小提示：点击发布按钮才可以保存本次朗读记录",
+			buttons: [{
+					name: '取消',
+					onclick: function() {
+							toast.hide();
+					}
+			}, {
+					name: '退出',
+					onclick: function() {
+						if($api.byId('awesome').checked){
+							$storage.setStorage('buttonexists','false');
+							}
+							exitStyle()
+							toast.hide();
+					}
+			}]
+	});
+}
+//退出朗读时候
+function exitStyle(){
+	window.cancelAnimationFrame(requestAnimation)
+	$api.css($api.byId('bottomMenu'), 'display:block');
+	hasPublished = false;
+	hasFitRead = false;
+	if(interval){
+		clearInterval(interval);
+	}
+	if(threeInterval){
+		clearInterval(threeInterval)
+	}
+	if(soundTimer){
+		clearInterval(soundTimer)
+	}
+	stop();
+	stopRecord();
+	stopReplay();
+	sound = 0;
+	clearMap();
+	$api.byId('threeSconds').style.display="none";
+	$api.byId('pubLish').style.color='#c9c9c9';
+
+	$api.byId('readChangeTxt').innerText="点击话筒,开始朗读";
+	$api.byId('iconWrap').style.display='block';
+	$api.byId('canvas').style.visibility = 'hidden';
+	$api.html($api.byId('readTime'),'00:00/03:00');
+	$api.byId('readTime').style.display = 'none';
+	$api.byId('gradeShow').style.display = 'none';
+	$api.byId('good').style.display = 'none';
+	$api.byId('correctDeg').style.color = '#000';
+	$api.byId('correctDeg1').style.color = '#000';
+	readResult = null;
+	$api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+			'                    <use xlink:href="#icon-dingjiceluyin_moren"></use>\n' +
+			'                </svg>');
+	$api.html($api.byId('scoreResult'), '');
+	$api.css($api.byId('topMenu'), 'background:#fff;');
+	$api.removeCls($api.byId('haveReaded'), 'trueReadFlag');
+	// $api.addCls($api.byId('q_return'), 'trueReadFlag');
+	$api.byId('q_return').style.visibility = 'visible';
+	$api.byId('isOpenEye').style.visibility = 'visible';
+	$api.removeCls($api.byId('big_menu'), 'trueReadFlag');
+	$api.removeCls($api.byId('q_return'), 'trueReadFlag');
+	$api.removeCls($api.byId('readPart'), 'readPart');
+	$api.addCls($api.byId('readPart'),'readPartDown');
+	$api.byId('cancel').innerHTML = '<img src="../../../common/image02/buy.png" style="width:2.25rem;height:2.25rem;">';
+	$api.byId('divReadReamk').style.display='none';
+	$api.byId('bottomMenu').style.display = 'block';
+	$api.byId('readThisPage').innerText = '朗读本页';
+	$api.byId('readThisPage').style.color = '#98aca8';
+	$api.byId('readImg').style.color = '#98aca8';
+
+	$api.removeCls($api.byId('live'),'live');
+	for(var i=0; i<btnArray.length; i++){
+		$api.css(btnArray[i].children[1], "visibility:hidden;background-image:url('http://47.93.214.37:9746/Files/Temp/falseChoose.png');");
+		// btnArray[i].style.background = color;
+		$api.css(btnArray[i],"background:"+color)
+		$epubExt.isEpubNextPage(true);
+		btnArray[i].children[0].checked = false;
+		textArr = [];
+	}
+	readFlag = false;
+}
+
+//左滑翻页提醒
+function readTooFast(data,prePercent,percentage,type){
+	prePercent || percentage
+	var time = new Date().getTime();
+		arr.push(time);
+		if(arr.length>=2){
+		if(arr[arr.length-1]-arr[arr.length-2]<3000){
+			console.log(11111111)
+			tooFastObj = {
+				percent:prePercent,
+				wordTotals:0
+			}
+			if(type){
+				api.toast({
+						msg: '翻书太快将不记录阅读量哦~',
+						duration: 2000,
+						location: 'bottom'
+				});
+			}
+			arr = [];
+		}else{
+			console.log(2222222222)
+			tooFastObj = {
+				percent:percentage,
+				wordTotals:data.pageWorderNumber
+			}
+		}
+	}
+	return tooFastObj
+}
+function styToast(){
+	$api.byId('threeSconds').style.display="none";
+	$api.byId('cancel').innerHTML = '';
+	$api.byId('pubLish').style.color='#c9c9c9';
+	$api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+			'                    <use xlink:href="#icon-dingjice_weidefenanniu"></use>\n' +
+			'                </svg>');
+	$api.html($api.byId('scoreResult'), '');
+	$api.byId('readChangeTxt').innerText="点击话筒,开始朗读";
+	$api.byId('iconWrap').style.display='block';
+	$api.byId('canvas').style.visibility = 'hidden';
+	$api.byId('readTime').style.display = 'block';
+	$api.html($api.byId('readTime'),'00:00/03:00');
+	$api.byId('readTime').style.display = 'none';
+	$api.byId('gradeShow').style.display = 'none';
+	$api.byId('good').style.display = 'none';
+	$api.byId('correctDeg').style.color = '#000';
+	$api.byId('correctDeg1').style.color = '#000';
+}
+function funErr(err) {
+      // toast.fail({
+      //     title: "网络异常，请检查网络链接"
+      // });
+			api.toast({
+				msg: "网络异常，请检查网络链接",
+				duration: 2000,
+				location: 'middle'
+			});
+}
+
+  function funSucFinish (resp) {
+      if (resp.errCode === 0) {
+          $homeService.finishReading( api.pageParam.testId, parseInt(readingPercentage), funSucFinishReading, funErr);
+      } else {
+          // toast.fail({
+          //     title: resp.errMsg
+          // })
+					api.toast({
+						msg: resp.errMsg,
+						duration: 2000,
+						location: 'middle'
+					});
+      }
+  }
+
+function funSucFinishReading (resp) {
+  if (resp.errCode === 0) {
+        clearInterval(interval);
+    } else {
+        // toast.fail({
+        //     title: resp.errMsg
+        // })
+				api.toast({
+					msg: resp.errMsg,
+					duration: 2000,
+					location: 'middle'
+				});
+}
+}
+
+//页面UI数据刷新
+function refreshUIInfo() {
+	$comm.showLoading();
+	//记录UI宽高等信息
+	var uiInfo = {
+		win_h : api.winHeight,
+		win_w : api.winWidth,
+		frame_h : api.frameHeight,
+		frame_w : api.frameWidth,
+		//header_h : headerPosH,
+		//footer_h : footerPosH,
+		content_h : api.frameHeight,
+		content_w : api.frameWidth
+	};
+	//将UI布局中主要对象的宽,高记录到localStorage中,以备后续使用(而不用临时再计算)
+	$storage.setUIInfo(uiInfo);
+}
+
+function showMenu() {
+    if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+		$api.removeCls($api.byId('topMenu'), 'menu-show');
+		$api.addCls($api.byId('topMenu'), 'menu-hide');
+		$api.removeCls($api.byId('bottomMenu'), 'menu-show');
+		$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+		// $api.byId('q_return').innerHTML = "";
+	} else {
+		$api.addCls($api.byId('topMenu'), 'menu-show');
+		$api.removeCls($api.byId('topMenu'), 'menu-hide');
+		$api.addCls($api.byId('bottomMenu'), 'menu-show');
+		$api.removeCls($api.byId('bottomMenu'), 'menu-hide');
+		// $api.byId('q_return').innerHTML = "返回";
+		}
+}
+function showMenu1() {
+		if(readFlag){
+			return;
+		}
+    if ($api.hasCls($api.byId('topMenu'), 'menu-hide')) {
+		$api.removeCls($api.byId('topMenu'), 'menu-hide');
+		$api.addCls($api.byId('topMenu'), 'menu-show');
+		// $api.addCls($api.byId('q_return'), 'menu-show');
+		// $api.addCls($api.byId('readed'), 'menu-show');
+		// $api.addCls($api.byId('cancel'), 'menu-show');
+		$api.css($api.byId('q_return'), 'display:block');
+
+		// $api.addCls($api.byId('topMenu'), 'menu-hide');
+		$api.removeCls($api.byId('bottomMenu'), 'menu-hide');
+		$api.addCls($api.byId('bottomMenu'), 'menu-show');
+		// $api.byId('q_return').innerHTML = "";
+	} else {
+		$api.addCls($api.byId('topMenu'), 'menu-hide');
+		// $api.addCls($api.byId('q_return'), 'menu-hide');
+		// $api.addCls($api.byId('readed'), 'menu-hide');
+		// $api.addCls($api.byId('cancel'), 'menu-hide');
+		// $api.removeCls($api.byId('topMenu'), 'menu-hide');
+		$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+		// $api.removeCls($api.byId('bottomMenu'), 'menu-hide');
+		// $api.byId('q_return').innerHTML = "返回";
+		}
+}
+
+function showMenu2(){
+	$api.removeCls($api.byId('bigMenu'), 'disBigMenu');
+	$api.addCls($api.byId('bigMenu'), 'bigMenu-show');
+	$api.addCls($api.byId('menu-close'), 'menu-close-show');
+	$api.addCls($api.byId('menu-f-m'), 'menu-f-m-show');
+}
+
+function hideMenu2(){
+	$api.removeCls($api.byId('bigMenu'), 'disBigMenu');
+	$api.addCls($api.byId('bigMenu'), 'bigMenu-hide');
+	$api.addCls($api.byId('menu-close'), 'menu-close-hide');
+	$api.addCls($api.byId('menu-h'), 'menu-t-hide');
+	// $api.addCls($api.byId('menu-t'), 'menu-t-hide');
+	$api.addCls($api.byId('tab-menu'), 'tab-menu-hide');
+	$api.addCls($api.byId('ulWrap'), 'tab-menu-hide');
+
+}
+
+function goback() {
+	console.log('goback退出*********************************************')
+	if(demo){
+		destory();
+	}
+	if(intervaled){
+		clearInterval(intervaled);
+	}
+	if(!closeFlag){
+		closeFlag = true;
+		endRead(true);
+
+	}
+
+	// alert(api.pageParam.bcid)
+  api.sendEvent({
+      name: 'turn-the-page',
+			extra: {
+				id:api.pageParam.thisBookId
+			}
+  });
+}
+//点击获取图书按钮
+function fitFlag(){
+	a = !a
+	$storage.setStorage('fitFlag1',a);
+}
+//图书相关回调
+function bookCallback(opea,data){
+	switch (opea) {
+		case "disPlayBook":
+		nextPage(data);
+			docData = data.contentViewDoc;
+			$comm.hideLoading();//加载完成图书隐藏进度条
+			timeCountFuned();
+			break;
+			case "gocfi":
+			$api.addCls($api.byId('topMenu'), 'menu-hide');
+			$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+			break;
+			case "noMoveScreen"://('点击屏幕');
+			console.log(888)
+				showMenu1()
+				// isTouchScreen = !isTouchScreen;
+				docData = data.contentViewDoc;
+			break;
+			case "leftScreen"://('左滑屏幕翻页'+JSON.stringify(data));
+				// readFlag = false;
+				hasFitRead = true;
+				$api.addCls($api.byId('topMenu'), 'menu-hide');
+				$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+				setTimeout(function(){
+					hasFitRead = false;
+				},500)
+				docData = data.contentViewDoc;
+				nextPage(data,true);
+			break;
+			case "rightScreen"://('右滑屏幕翻页');
+				hasFitRead = true;
+				$api.addCls($api.byId('topMenu'), 'menu-hide');
+				$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+				setTimeout(function(){
+					hasFitRead = false;
+				},500)
+				docData = data.contentViewDoc;
+				nextPage(data);
+			break;
+			case "bookLastPage"://	('已经是本书的最后一章的最后一页了!');//电子书本身还有些结尾信息到这里其实书里面还有最后几页
+			break;
+			case "bookFristPage"://('本书的第一章第一页!');
+				break;
+			case "fristPage"://('自定义章节的第一章第一页：自定义章节是把原始多个章节合并到一个中');
+				break;
+			case "lastPage"://('自定义章节的最后一章最后一页');
+					$api.byId('popup1').style.display = 'block';
+					$api.byId('getReadNum').innerHTML="获得阅读量  " +"<span style='color:#00b596;'>"+"+"+readNum+"</span>";
+
+					showToast();
+					$api.byId('saveAndExit').style.color = '#000';
+					$api.byId('continueRead').style.color = '#000';
+					break;
+			// case "selectWordText"://"选择的文字："+data);
+			// 	  selectWordText=data;
+			// 		if(selectWordText){
+			// 		}
+			// break;
+			case "loadContentView":
+					var flag1;
+				if(!flag){
+					console.log('js注入成功了');
+				}
+				break;
+		default:
+	}
+	return docData;
+}
+
+//初始化驰声模块
+function create(){
+	if(demo)
+	{
+		destory();
+	}
+	demo = api.require('moduleChivox');
+	if (demo) {
+			demo.creatCloudEngine({}, function(ret, err) {
+					if (ret) {
+							chivoxEngineOn = true;
+							$comm.debug('Chivox Engine Created:', JSON.stringify(ret), 'debug');
+					} else {
+							$comm.debug('创建引擎失败')
+							chivoxEngineOn = false;
+					}
+			});
+	}
+}
+// 获取原生章节列表
+function getChapterTocList(boxId,boxChapterId,boxChapterTocId,cfi){
+	var data = {
+		BoxId:boxId,
+		BoxChapterId:boxChapterId
+	}
+	$comm.socket(2004,data,function(res){
+		if(res){
+			res = JSON.parse(res);
+			if(res.error===0){
+				$api.html($api.byId('ulWrap'), '')
+				data_new = JSON.parse(res.datas).chapterTocList;
+				data_new.forEach(function (item, index) {
+            var liDom = '<li><p id="'+ item.tocCfi +'">' + item.tocLabel + '</p></li>';
+            $api.append($api.byId('ulWrap'), liDom);
+						//这里供你测试分页
+						startRead(boxChapterId,boxChapterTocId,cfi)
+        });
+			}else{
+				api.toast({
+				    msg: res.errorMsg,
+				    duration: 2000,
+				    location: 'bottom'
+				});
+			}
+		}
+
+	})
+}
+//弹窗
+function showToast(){
+	// alert($api.byId('time02').innerHTML)
+	// var str1 = '本阅读单元共'+api.pageParam.chapterTocListData.length+'个章节'
+	// alert(1)
+	// $api.byId('chapter1').innerHTML = '本阅读单元共'+data_new.length+'个章节';
+	$api.html($api.byId('readTime1'), '本次阅读时长'+$api.byId('time02').innerHTML);
+	// $api.html($api.byId('chapter1'), str1);
+}
+
+//删除引擎
+function destory(){
+	var data = {};
+	if(demo){
+		demo.deleteCloudEngine({},function(ret,err){
+			if(ret){
+			}else{
+				console.error('删除引擎失败')
+			}
+		})
+	}
+	demo=null;
+}
+function registChivoxCallback() {
+		//chivox简单结果回调
+		api.addEventListener({
+				name: 'chivoxResult'
+		}, function(ret, err) {
+				if (ret) {
+
+						//$comm.debug('Chivox Callback Result:', JSON.stringify(ret), 'debug');
+				}
+		});
+		//录音音量回调
+		api.addEventListener({
+		    name: 'chivoxSoundResult'
+		}, function(ret, err){
+		    if( ret ){
+						 sound = ret.value.sound_intensity;
+		    }else{
+		         alert( JSON.stringify( err ) );
+		    }
+		});
+
+		//chivox全结果回调
+		api.addEventListener({
+				name: 'chivoxAllResult'
+		}, function(ret, err) {
+				if (ret) {
+						stopRecord();
+						stop();
+						clearInterval(interval)
+						if (ret.value.errId === 60010) {
+								// return toast.fail({
+								// 		title: '网络异常，请检查网络链接'
+								// });
+								return api.toast({
+                  msg: "网络异常，请检查网络链接",
+                  duration: 2000,
+                  location: 'middle'
+                });
+						}
+						readAllData = ret;
+						reloadUI(ret);
+						hasReadResult = true;
+				}
+		});
+		//chivox开始回放回调
+		api.addEventListener({
+				name: 'chivoxReplayStart'
+		}, function(ret, err) {
+				if (ret) {
+				}else{
+					console.error('回放失败')
+				}
+		});
+		//chivox结束回放回调
+		api.addEventListener({
+				name: 'chivoxReplayFinished'
+		}, function(ret, err) {
+				if (ret) {
+						console.log('完成回放**********************************************************');
+						isPlay = false;
+						$api.html($api.byId('playIcon'), ' <svg id="playAloudBtn" class="icon" aria-hidden="true">\n' +
+								'                    <use xlink:href="#icon-dingjice_huifanganniu"></use>\n' +
+								'                </svg>');
+				}
+		});
+}
+function init() {
+		if(soundTimer){
+			clearInterval(soundTimer)
+		}
+    canvas = document.getElementById("canvas");
+    ctx = canvas.getContext("2d");
+    canvas.height = halfCanvasHeight * 2;
+    onResize();
+    loop();
+}
+function clearMap(){
+	canvas = document.getElementById("canvas");
+	var width = canvas.width;
+	var height = canvas.height;
+	ctx = canvas.getContext("2d");
+	// canvas.height = halfCanvasHeight * 2;
+	ctx.clearRect(0,0,width,height);
+}
+function onResize() {
+    //元素的大小不能加单位, 单位默认就是像素, 而style中的长度要加单位
+    canvasWidth = canvas.width = window.innerWidth - horizontalMargin;
+}
+
+//设K=attenuationCoefficient, 计算信号衰减 (4K/(4K+x^4))^2K<=1 (x belong [-K,K])
+// function calcAttenuation(x) {
+//     return Math.pow(4 * attenuationCoefficient / (4 * attenuationCoefficient + Math.pow(x, 4)),
+//         2 * attenuationCoefficient);
+// }
+
+//heightPercentage为振幅的显示比例
+function drawAcousticWave(heightPercentage, alpha, lineWidth) {
+		soundTimer = setInterval(function(){
+			amplitudePercentage  = sound/100;
+		},500)
+    ctx.strokeStyle = "#00B596";
+    ctx.globalAlpha = alpha;
+    ctx.lineWidth = lineWidth || 10;
+    ctx.beginPath();
+    ctx.moveTo(0, halfCanvasHeight);
+    var x, y;
+    for (var i = -attenuationCoefficient; i <= attenuationCoefficient; i += 0.01) {
+        //i是当前位置相对于整个长度的比率( x=width*(i+K)/(2*K))
+        x = canvasWidth * (i + attenuationCoefficient) / (2 * attenuationCoefficient);
+        //加offset相当于把sin曲线向右平移
+        y = halfCanvasHeight + halfCanvasHeight * amplitudePercentage * heightPercentage *
+            Math.sin(halfWaveCount * i + radianOffset);
+        ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+}
+
+function loop() {
+    radianOffset = (radianOffset + radianStep) % doublePI;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawAcousticWave(1, 1, 4);
+    requestAnimation=requestAnimationFrame(loop);
+}
+//点击回放
+function playRecording() {
+		if (isRecord) {
+				return;
+		}
+		if (!hasScore) {
+				return api.toast({
+					msg: "请先录音",
+					duration: 2000,
+					location: 'middle'
+				});
+		}
+		// if (!readResult) {
+		// 		return api.toast({
+		// 			msg: "请先录音",
+		// 			duration: 2000,
+		// 			location: 'middle'
+		// 		});
+		// }
+		if (!isPlay) {
+				isPlay = true;
+				replay();
+				$api.html($api.byId('playIcon'), ' <svg id="playAloudBtn" class="icon" aria-hidden="true">\n' +
+						'                    <use xlink:href="#icon-dingjice_tingzhianniu"></use>\n' +
+						'                </svg>');
+		} else {
+				isPlay = false;
+				stopReplay();
+		}
+}
+//点击麦克风
+function btnRecord() {
+		hasScore = false;
+		var privacy = api.require('privacy');
+		privacy.microphone(function(ret, err) {
+				// alert(ret.status)
+				if (ret.status) {
+						if (readResult) {
+								// Replay();
+						}else{
+						}
+						if (!isRecord) {
+								stopReplay();
+								hasReadResult = false;
+								hasPublished = false;
+								// changBtnUI();
+								start();
+								isRecord = true;
+						} else {
+								if(soundTimer){
+									clearInterval(soundTimer)
+								}
+								window.cancelAnimationFrame(requestAnimation)
+								stop();
+								stopRecord();
+								clearMap();
+								clearInterval(interval);
+								if(soundTimer){
+									clearInterval(soundTimer)
+								}
+								isRecord = false;
+						}
+				} else {
+					api.toast({
+					    msg: '请开启麦克风权限',
+					    duration: 2000,
+					    location: 'middle'
+					});
+
+						// toast.fail({
+						// 		title: '请开启麦克风权限'
+						// });
+				}
+		});
+}
+//停止播放音频
+function stopReplay() {
+		if (demo) {
+				demo.stopReplay({}, function(ret, err) {
+						if (ret) {
+									if(soundTimer){
+										clearInterval(soundTimer)
+									}
+								$comm.debug('Chivox Engine ' +
+										':', JSON.stringify(ret), 'debug');
+						}
+				});
+		}
+}
+//播放音频
+function replay() {
+		if (demo) {
+				demo.replay({}, function(ret, err) {
+						if (ret) {
+								$comm.debug('Chivox Engine Replaying:', JSON.stringify(ret), 'debug');
+						}
+				});
+		}
+}
+function reloadUI(ret) {
+	console.log(JSON.stringify(ret))
+		wavetime = Math.floor(ret.value.result.wavetime/1000);
+		var value = $chivox.parse(ret,codeSw);
+		if (!value || !value.details) {
+				return;
+		}
+		if(value.tipmsg || value.tipMsg){
+			if(soundTimer){
+				clearInterval(soundTimer)
+			}
+			$api.byId('canvas').style.visibility='hidden';
+			api.toast({
+			    msg: value.tipmsg ? value.tipmsg : value.tipMsg,
+			    duration: 2000,
+			    location: 'middle'
+			});
+
+			return;
+		}
+		var arrIndex = [];
+		var item;
+		for (var i = 0; i < value.details.length; i++) {
+				if (value.details[i].overall >= 85) {
+						item = {
+								idx: i,
+								type: 1,
+								cnword:value.details[i].cnword
+						};
+						arrIndex.push(item)
+				} else if (value.details[i].overall >= 55 && value.details[i].overall <= 84) {
+						item = {
+								idx: i,
+								type: 2,
+								cnword:value.details[i].cnword
+						};
+						arrIndex.push(item)
+				} else if (value.details[i].overall <= 54) {
+						item = {
+								idx: i,
+								type: 3,
+								// char:value.details[i].char,
+								// char:pinyinUtil.getPinyin(value.details[i].cnword,' ', false)==value.details[i].char ? pinyinUtil.getPinyin(value.details[i].cnword,' ', true) :pinyinUtil.getTone(value.details[i].char+value.details[i].tone),
+								// char:pinyinUtil.getPinyin(value.details[i].cnword,' ', false)==value.details[i].char ? pinyinUtil.getPinyin(value.details[i].cnword,' ', true) :value.details[i].char,
+								// char:pinyinUtil.getPinyin(value.details[i].cnword,' ', false)==value.details[i].char ? pinyinUtil.getPinyin(value.details[i].cnword,' ', true) : pinyinUtil.getTone($comm.getNewTone(value.details[i].char,value.details[i].tone)),
+								char:pinyinUtil.getTone($comm.getNewTone(value.details[i].char,value.details[i].tone)),
+								tone:value.details[i].tone,
+								cnword:value.details[i].cnword
+						};
+						arrIndex.push(item)
+				}
+		}
+		// $api.css($api.byId('readText'), 'text-indent:0');
+		$api.html($api.byId('readText'), $matchText.textWordPinYinStyle(readBook, arrIndex));
+		readAloudContentWithStyle = $matchText.textWordPinYinStyle(readBook, arrIndex)
+		// $api.byId('readText').css('text-indent','0');
+
+
+		//获取用户等级
+	var grade = parseInt($storage.getStorage('slelectGrade'))||3;
+	console.log('+++++++++'+grade+'PPPPPPPPP++++++++++++')
+	 var chivoxStr=$chivox.calcTotalScore(ret,grade,dataLength,codeSw);
+		readingScore = !isNaN(chivoxStr.totalscore) ? chivoxStr.totalscore :0;
+		finashDeg  = !isNaN(chivoxStr.phnScore) ? chivoxStr.phnScore :0;
+		correctDeg = !isNaN(chivoxStr.pronScore) ? chivoxStr.pronScore:0 ;
+		fluencyDeg = !isNaN(chivoxStr.newFluency) ? chivoxStr.newFluency:0;
+
+		// $api.byId('finashDeg').html;
+		if(finashDeg>=90){
+			$api.byId('good').style.display='block';
+			// $api.addCls($api.byId('correctDeg'), 'changeColor');
+			$api.byId('correctDeg').style.color = '#26BA9E';
+			$api.byId('correctDeg1').style.color = '#26BA9E';
+		}
+		if(correctDeg<0){
+			correctDeg = 0;
+		}
+		$api.html($api.byId('finashDeg'), correctDeg);
+		$api.html($api.byId('correctDeg'), finashDeg);
+		$api.html($api.byId('fluencyDeg'), fluencyDeg);
+		$api.byId('finashBar').style.width = correctDeg+'%';
+		$api.byId('correctBar').style.width = finashDeg+'%';
+		$api.byId('fluencyBar').style.width = fluencyDeg+'%';
+
+
+		if (readingScore >= 85) {
+				$api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+						'                    <use xlink:href="#icon-dingjice_-2-copy"></use>\n' +
+						'                </svg>');
+				$api.html($api.byId('scoreResult'), readingScore);
+				$api.byId('scoreResult').style.color = '#00b596';
+				$api.byId('pubLish').style.color = 'rgba(0,181,150,1)';
+				$api.byId('canvas').style.visibility='hidden';
+				hasScore = true;
+		} else if (85 > readingScore && readingScore >= 55) {
+				$api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+						'                    <use xlink:href="#icon-dingjice_-2-copy"></use>\n' +
+						'                </svg>');
+				$api.html($api.byId('scoreResult'), readingScore);
+				$api.byId('scoreResult').style.color = 'rgba(51,51,51,1)';
+				$api.byId('pubLish').style.color = 'rgba(0,181,150,1)';
+				$api.byId('canvas').style.visibility='hidden';
+				hasScore = true;
+		} else if(55> readingScore && readingScore>0){
+				$api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+						'                    <use xlink:href="#icon-dingjice_-2-copy"></use>\n' +
+						'                </svg>');
+				$api.html($api.byId('scoreResult'), readingScore);
+				$api.byId('pubLish').style.color = 'rgba(0,181,150,1)';
+				$api.byId('scoreResult').style.color = '#fd4e26';
+				$api.byId('canvas').style.visibility='hidden';
+				hasScore = true;
+		}
+		readResult = ret;
+		if(readResult){
+			$api.byId('gradeShow').style.display = 'block';
+			canContinueRead = true;
+			clearMap();
+			isRecord = false;
+		}else{
+			canContinueRead = false;
+			isRecord = true;
+		}
+}
+
+//开始录音
+function start() {
+	$api.byId('threeSconds').innerText = '3';
+	$api.byId('iconWrap').style.display='none';
+	$api.byId('threeSconds').style.display="block";
+	$api.html($api.byId('readTime'),'00:00/03:00');
+	$api.byId('readTime').style.display = 'block';
+	var time = 3;
+	threeInterval = setInterval(function () {
+		time--;
+		$api.html($api.byId('threeSconds'), time);
+		if(time<=0){
+			clearInterval(threeInterval);
+			$api.byId('iconWrap').style.display='block'
+			$api.byId('threeSconds').style.display='none'
+			$api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+							'                <use xlink:href="#icon-zt"></use>\n' +
+							'            </svg>');
+			//录音时间开始
+			timeCountFun();
+			$api.byId('readChangeTxt').innerText = '正在录音';
+			//开始画声波图
+				init();
+				// $api.byId('readText').style.color = '#223330';
+				if (demo && chivoxEngineOn) {
+						var reg = /^[\u4e00-\u9fa5]+$/;
+						var wordArr = [];
+						dataStr = $api.byId('readText').innerText;
+						dataLength = dataStr.length;
+						console.error(dataStr+"含有特殊字符"+dataLength)
+						var strArr = dataStr.split('');
+						strArr.forEach(function (item, index) {
+								if (reg.test(item)) {
+										wordArr.push(item)
+								}
+						});
+						var dataStr1 = wordArr.join('');
+						if(dataStr1.length<=4){
+							// codeSw = 'cn.word.score';
+							codeSw = 'cn.sent.score';
+						}else if(dataStr1.length<=15 && dataStr1.length>=5){
+							codeSw = 'cn.sent.score';
+						}else{
+							codeSw = 'cn.pred.raw';
+						}
+						var data = {
+								refText: dataStr1,
+								codeSw:codeSw,
+								isCnWord:codeSw=='cn.pred.raw' ? false : true,
+								isSoundCallBack:1
+						};
+						demo.start(data, function(ret, err) {
+								if (ret) {
+										$comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret, data)), 'debug');
+								}
+						});
+				}
+		}
+	}, 1000);
+}
+function stopRecord() {
+		sound = 0;
+		isRecord = false;
+		if(timer){
+			clearInterval(timer);
+		}
+		if(soundTimer){
+			clearInterval(soundTimer)
+		}
+		clearInterval(readCountTimer)
+		$api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+				'                <use xlink:href="#icon-dingjice_kaishiluyinanniu"></use>\n' +
+				'            </svg>');
+		$api.byId('readChangeTxt').innerText='重新开始';
+
+}
+//停止录音
+function stop() {
+		if (demo) {
+				demo.stop({}, function(ret, err) {
+						if (ret) {
+								isRecord = false;
+								finishRead = true;
+								$comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret)), 'debug');
+						}
+				});
+		}
+}
+
+// 3秒后将数据传给后台
+function nextPage(data,type){
+	console.log('-----'+JSON.stringify(data)+'-------')
+		bookPage(data,type);
+}
+
+// 隐藏菜单
+function hideMenu() {
+	$api.css($api.byId('bigMenu'), 'display:none');
+	$api.css($api.byId('Map'), 'display:none');
+}
+
+//结束阅读
+function endRead(type){
+
+	var data = {
+		TestID:startReadData.testID
+	}
+	$comm.socket(3007,data,function(res){
+		console.log(res)
+		res = JSON.parse(res);
+		if(res.error===0 && JSON.parse(res.datas).flg){
+			if(type){
+				closeFlag = false;
+				console.log('**********************************关闭当前窗口并跳转详情**************')
+				api.closeToWin({
+					name:'bookInfo'//如果是从专题过来，专题打开详情页时没有给详情页写名字 所以这里会关闭不了
+				});
+			}else{
+				// alert(666)
+				//获取当前最新的阅读记录
+				var data = {
+					ReadType:1,
+					BoxId:api.pageParam.boxId,
+					BoxChapterId:''
+				}
+				$comm.socket(3001,data,function(res){
+					res = JSON.parse(res);
+					if(res.error===0){
+						var conData = JSON.parse(res.datas).readLog;
+
+						getChapterTocList(conData.readBoxId,conData.readBoxChapterId,conData.readBoxChapterTocId,conData.readCFI)
+					}else{
+						api.toast({
+						    msg: res.errMsg,
+						    duration: 2000,
+						    location: 'middle'
+						});
+					}
+					// getChapterTocList()
+				})
+			}
+		}
+	})
+}
+
+// 翻页接口    将数据传给后台
+function bookPage(data,type){
+	console.log(JSON.stringify(data))
+	percentage = parseInt(data.spinePercentage* 100)//当前阅读自定义单元的百分比
+	$api.html($api.byId('readPlan'), '已读'+percentage+'%,'+$api.byId('readed').innerText+'分钟');
+
+	$api.byId('readingProgressBar').style.width = percentage + '%';
+	needBoxChapterTocId = data.boxChapterTocID;
+	getUnitName($api.byId('menuUnitNameReading'),needBoxChapterTocId,'',1);
+	prePercent = percentage;
+	var tooFastData = readTooFast(data,prePercent,percentage,type);
+
+	//调取翻页接口
+	var rdata = {
+			TestID:startReadData.testID,
+			BoxChapterTocId:data.boxChapterTocID,
+			CFI:data.cfi,
+			WordCount:tooFastData.wordTotals ? tooFastData.wordTotals :0,
+			Percentage:tooFastData.percent ? tooFastData.percent : parseInt(data.spinePercentage* 100),
+			ReadSecondsCount:0
+	}
+	readNum += rdata.WordCount;
+	console.log('获得的阅读量'+readNum)
+	$comm.socket(3003, rdata, function(res){
+		console.log(res)
+		var res = JSON.parse(res);
+		if(res.error==0){
+		}
+	})
+}
+
+//获取朗读池数据
+function getReadPool(PageIndex,type){
+//	freshIng
+	// if(!isNextPage){
+	// 	return;
+	// }
+	// $api.byId('freshIng').style.display = 'block';
+	$api.html($api.byId('tab-read'), '')
+	var data = {
+		BCID:api.pageParam.chapterID ? api.pageParam.chapterID : api.pageParam.recordData.readChapterId,
+		PageSize:5,
+		PageIndex:PageIndex
+	}
+	$comm.socket(3008,data,function(res){
+		console.log(res)
+		res = JSON.parse(res);
+		if(res.error===0){
+			// $api.byId('freshIng').style.display = 'none'
+			var readPoolData = JSON.parse(res.datas);
+			isNextPage = readPoolData.isNextPage;
+			if(type){
+				dataList = dataList.concat(readPoolData.resultList);
+			}else{
+				dataList = readPoolData.resultList;
+			}
+			var poolStr = '';
+			if(dataList.length===0){
+				poolStr = `<div style="padding-top:150%;text-align:center;color:#98aca8;font-size:1.6rem;">在这里将记录你<br/><br>关于本阅读单元的朗读录音<div>`
+			}else{
+				dataList.map(function(v,i){
+					console.log(v.audioUri)
+					// v.readAloudContentWithStyle = v.readAloudContentWithStyle
+				poolStr +=`<div class="recitation">
+	    		<div class="recitation-top"  data-txt=${v.readAloudContent} data-url=${v.audioUri} data-publishtime=${v.publishDateTime} data-time=${v.waveTime} data-heart=${v.heartCount} data-score=${v.readScore} data-rId=${v.rraID} data-sty=${v.readAloudContentWithStyle}>
+	        <span class="score">${v.readScore}</span>
+	        <p>${v.readAloudContent.replace(/\\n/g,'').replace(/\\n\\n/g,'<br/>').replace(/\\/g,'').replace(/\\r/g,'')}</p>
+	    </div><div class="recitation-record">
+	        <div class="record" id=${v.audioUri}>
+	            <svg class="icon recordPlay" aria-hidden="true">
+	                <use xlink:href="#icon-bofang"></use>
+	            </svg>
+	            <span>${$comm.getReadTime(v.waveTime)}</span>
+	        </div></div>
+	        <span class="time">发表于  ${v.publishDateTime}</span>
+					<div style="float:right;line-height:5rem;">
+	        <svg class="icon" aria-hidden="true">
+	            <use xlink:href="#icon-geiwoyigehaoping-red"></use>
+	    		</svg>
+	    		<span style="color:#F9605D;font-size:1.2rem;">${v.heartCount}</span>
+					</div>
+					</div>`
+				})
+			}
+			$api.html($api.byId('tab-read'), poolStr+'<div style="display:none;margin:0 auto;text-align:center;margin-top:2rem;color:#708782;" id="noMore">没有更多了</div><div style="display:none;margin:0 auto;text-align:center;margin-top:2rem;color:#708782;" id="isLoading">加载中</div>');
+			playSvg();
+			goReadResult();
+		}
+	})
+}
+
+
+
+//通过朗读池进入朗读结果页面
+function goReadResult(){
+	audio.pause()
+	var recitation = document.getElementsByClassName('recitation-top');
+	for(let i=0; i<recitation.length; i++){
+		recitation[i].addEventListener('click',function(e){
+			// console.log(e.currentTarget)
+			let status = isTap(this);
+			var txt = this.getElementsByTagName('p')[0].innerText;
+			if(!status){
+				return;
+			}
+			audio.pause();
+			console.log(JSON.stringify(this.dataset)+'+++++++++++++++++++++++')
+			api.openWin({
+			    name: 'readPoolResult',
+			    url: './Readresults_detail.html',
+			    pageParam: {
+			        readObj: this.dataset,
+							// time
+							txt:txt,
+							bookName:api.pageParam.bookName,
+							author:api.pageParam.author,
+							bookCover:api.pageParam.bookCover,
+							chapterName:api.pageParam.bookInfo.chapterName ? api.pageParam.bookInfo.chapterName : api.pageParam.needReadChapterName
+			    },
+					slidBackEnabled:false
+			});
+
+		},true)
+	}
+}
+
+//朗读池播放
+function playSvg(){
+	var playIngSvg = document.getElementsByClassName('recordPlay');
+	// 动态生成一个audio标签
+	audio = document.createElement('audio');
+	document.body.appendChild(audio);
+	audio.style.display = 'none';
+	var oldUrl = '';
+	for(let i=0; i<playIngSvg.length;i++){
+		playIngSvg[i].addEventListener('click',function(){
+			var that = this;
+			audio.addEventListener('ended',function(){
+				isPause = true;
+				that.innerHTML = '<use xlink:href="#icon-bofang"></use>';
+			})
+			isPause = !isPause;
+			if(oldUrl != this.parentNode.id){
+				audio.src = $comm.resUri + this.parentNode.id;
+				isPause = false;
+			}else{
+
+			}
+			if(!isPause){
+				audio.play();
+				this.innerHTML = '<use xlink:href="#icon-zanting"></use>';
+			}else{
+				audio.pause();
+				this.innerHTML = '<use xlink:href="#icon-bofang"></use>';
+			}
+			oldUrl = this.parentNode.id;
+			window.event? window.event.cancelBubble = true : e.stopPropagation();
+		})
+	}
+}
+//将动态添加的audio标签删除
+function removeAudio(){
+	// var audio = document.getElementsByTagName('audio')[0];
+	audio.pause();
+	document.body.removeChild(audio)
+}
+//提交朗读结果
+function submitRead(){
+	readAllData = JSON.parse($api.trimAll(JSON.stringify(readAllData)));
+	var data = {
+		TestId:startReadData.testID,
+		ReadScore:readingScore,
+		CompleteScore:finashDeg,
+		CorrectScore:correctDeg,
+		FluencyScore:fluencyDeg,
+		ChivoxResult:JSON.stringify(readAllData),
+		WaveTime:wavetime,
+		Audio:readAllData.value.audioUrl,
+		ReadAloudContent:dataStr,
+		ReadAloudContentWithStyle:encodeURIComponent(readAloudContentWithStyle)
+	}
+	$comm.socket(3006,data,function(res){
+		res = JSON.parse(res)
+		if(res.error==0 && JSON.parse(res.datas).flg){
+			api.toast({
+			    msg: '发布成功',
+			    duration: 2000,
+			    location: 'middle'
+			});
+			getReadPool(1,false);
+			PageIndexx = 1;
+		}else{
+			api.toast({
+				msg: resp.errMsg,
+				duration: 2000,
+				location: 'middle'
+			});
+		}
+	})
+}
+
+function isTap(ele){
+	var t1=0; var t2=0;
+	ele.addEventListener('touchend',function(){
+		t2 = new Date();
+	});
+	ele.addEventListener('touchstart',function(){
+		t1 = new Date()
+	});
+	var state = t2-t1<300 ? true : false;
+	return state
+}
+//监听滑动时朗读池底部的距离
+function watchReadPool(){
+	var recitationEle = document.getElementsByClassName("recitation");
+	var tabRead = document.getElementById('tab-read');
+
+	tabRead.addEventListener('scroll',function(e){
+		if(isNextPage){
+			$api.byId('noMore').style.display = 'none';
+			$api.byId('isLoading').style.display = 'block';
+		}else{
+			$api.byId('isLoading').style.display = 'none';
+			$api.byId('noMore').style.display = 'block';
+		}
+
+		e.stopPropagation()
+		tabRead = document.getElementById('tab-read')
+		docHeight = tabRead.scrollHeight;
+		var winHeight = api.winHeight;
+		disHeight = tabRead.scrollTop;
+		// console.log(disHeight)
+		if(disHeight<=-70){
+			// $api.byId('tab-read').innerHTML='';
+			// getReadPool(1,false);
+		}
+		if(docHeight-winHeight-disHeight==0){
+				disHeight = 0;
+				if(isNextPage){
+					PageIndexx = PageIndexx+1;
+					getReadPool(PageIndexx,true);
+				}else{
+					// $api.byId('isLoading').style.display = 'none';
+					// $api.byId('noMore').style.display = 'block';
+				}
+		}
+
+		len = recitationEle.length;
+	},true);
+}
+//上拉加载
+function upRefash(){}
+
+// 点击事件
+function bindEventA() {
+	$api.byId('read01').addEventListener('touchend', function() {
+				$api.css($api.byId('tab-menu'), 'display:block');
+				$api.css($api.byId('tab-read'), 'display:none');
+				$api.addCls($api.byId('read01'), 'click');
+				$api.removeCls($api.byId('read02'), 'click');
+	});
+	$api.byId('read02').addEventListener('touchend', function() {
+			 $api.css($api.byId('tab-menu'), 'display:none');
+			 $api.css($api.byId('tab-read'), 'display:block');
+			 $api.addCls($api.byId('read02'), 'click');
+			 $api.removeCls($api.byId('read01'), 'click');
+	});
+	$api.byId('menu-close').addEventListener('touchend', function() {
+			 $api.css($api.byId('bigMenu'), 'display:none');
+			 $api.css($api.byId('Map'), 'display:none');
+	});
+}
+
+//已经读书的时长
+function timeCountFuned() {
+	timeCounted = 0;
+	intervaled = setInterval(function() {
+		timeCounted++;
+		// if(timeCount>180){
+		// 	clearInterval(interval);
+		// } else {
+			var time = Math.floor(timeCounted/60);
+			$api.html($api.byId('readed'),time);
+			$api.html($api.byId('time02'),time+'分钟');
+			$api.html($api.byId('readPlan'), '已读'+percentage+'%,'+time+'分钟');
+		// }
+	}, 1000);
+}
+
+// 读书时间
+function timeCountFun() {
+	clearInterval(interval);
+	timeCount = 0;
+	interval = setInterval(function() {
+		timeCount++;
+		if(timeCount>180){
+			clearInterval(interval);
+			stopRecord();
+			stop();
+		} else {
+			var time = $comm.getReadTime(timeCount)+'/03:00';
+			$api.html($api.byId('readTime'),time);
+		}
+	}, 1000);
+}
+</script>
+</html>

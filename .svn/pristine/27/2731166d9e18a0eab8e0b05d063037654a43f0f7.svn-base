@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>兴趣选择</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/interestSelection.css">
+</head>
+
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+        <div class="top">
+            <h1>兴趣选择</h1>
+            <h2>选择你感兴趣的类型为你推荐专属图书</h2>
+        </div>
+        <!-- 题目 -->
+        <!-- <div class="content">
+            <div class="type" v-for="(item, index) in resData">
+                <img :src="item.dImgPath?resUrl+item.dImgPath:'../../../common/image02/logo.png'" class="typeImg">
+                <h3>{{item.dimensionName}}</h3>
+                <img v-if="!item.showBtn" src="../../../common/image02/a1.png" class="add" @touchend="select(index,item.dimensionID)">
+                <img v-if="item.showBtn" src="../../../common/image02/a2.png" class="add" @touchend="del(index,item.dimensionID)">
+            </div>
+        </div> -->
+        <div class="footer">
+            <div :class="btnComplete?'complete':'btn'" @touchend="open">开启智能阅读计划</div>
+        </div>
+        <!-- 进入阅读特效 -->
+        <div id="mask" class="mask-wrap"></div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var readingAloudTime = null;
+        var readingTime = null;
+        var app = new Vue({
+            el: '#app',
+            data: {
+                resData: null,
+                resUrl: null,
+                btnComplete: false,
+                selectData: []
+            },
+            mounted() {
+                this.resUrl = $comm.resUri
+                //this.pullDownFresh()
+                this.openCon()
+                this.addEvent()
+            },
+            methods: {
+                exit: function() {
+                    api.closeWin()
+                },
+                openCon(){
+                  api.openFrame({
+                      name: 'interestSelection',
+                      url: './interestSelection.html',
+                      rect: {
+                          x: 0,
+                          y: 175,
+                          w: 'auto',
+                          h: 700
+                      },
+                      reload: true,
+                      bounces: true,
+                      bgColor: '#fff',
+                      vScrollBarEnabled: true,
+                      hScrollBarEnabled: true
+                  });
+                },
+                addEvent(){
+                  api.addEventListener({ //监听内容区域选择事件改变按钮状态
+                        name: 'btnEvent'
+                    }, (ret, err)=> {
+                        this.btnComplete = ret.value.key
+                    });
+                    api.addEventListener({ //监听内容进度读取完成，取消弹层
+                          name: 'maskEvent'
+                      }, (ret, err)=> {
+                        $api.css($api.byId('mask'), 'display: none');
+                      });
+                },
+                open(){
+                  if (this.btnComplete){
+                    api.sendEvent({
+                        name: 'submitEvent',
+                    });
+                    $api.css($api.byId('mask'), 'display: flex');
+                  }
+                },
+            }
+
+        });
+    };
+</script>
+
+</html>

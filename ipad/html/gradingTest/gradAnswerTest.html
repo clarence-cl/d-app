@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>阅读能力测评-阅读选择题</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/gradAnswerTest.css">
+</head>
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+      <div class="head">
+        <!-- 返回 -->
+        <div class="top">
+            <div class="return" @touchend="exit">
+               <svg class="icon" aria-hidden="true">
+                   <use xlink:href="#icon-fh_"></use>
+               </svg>
+            </div>
+            <h1>1/20题</h1>
+            <div class="skip">跳过</div>
+        </div>
+        <div class="clock">
+          <div class="progress">
+            <div class="plan"></div>
+          </div>
+          <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-nz"></use>
+          </svg>05:00
+        </div>
+      </div>
+        <!-- 题目 -->
+        <div class="content">
+          <h2>阅读材料<span>选自：三年级《同步阅读》</span></h2>
+          <p class="text">皮皮还没忘记她爸爸。她爸爸是位船长，在大洋上来来往往，皮皮跟他一起坐船航过海。后来他遇到风暴，被吹下海，失踪了。可
+            皮皮断定他总有一天会回来的，因为她怎么也不相信爸爸已经淹死。她认为她爸爸一定已经上了一个荒岛，就是那种有许许多多黑人的荒岛，做了他
+            们的国王，头上整天戴着金王冠。</p>
+          <h2>单选题 </h2>
+          <h3>寒风属于哪个少数民族？</h3>
+          <ul class="select">
+              <li class="right">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-zhengque"></use>
+                </svg>回族
+              </li>
+              <li class="wrong">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-cuowu"></use>
+                </svg>回族
+              </li>
+              <li class="sel">回族</li>
+              <li>回族</li>
+          </ul>
+        </div>
+        <div class="footer">
+          <div class="btn" @touchend="keepOn">继续</div>
+          <span class="tip">提示：请认真作答，提交后不可修改</span>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript">
+apiready = function() {
+        var readingAloudTime = null;
+        var readingTime = null;
+        var app = new Vue({
+                    el: '#app',
+                    data: {},
+                    created: function() {
+
+                    },
+                    methods: {
+                        exit: function() {
+                            api.closeWin()
+                        },
+                        //结果页面
+                        keepOn(){
+                          api.openWin({
+                              name: 'testResult',
+                              url: './testResult.html',
+                              slidBackEnabled: false
+                          });
+                        }
+                    }
+                })
+            }
+</script>
+
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>专题集合</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css"/>
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/specialActivities.css">
+</head>
+<body>
+  <div id="app">
+    <div class="special" style="padding-top:1rem;">
+      <div class="bookList" v-for='(item, index) in listData' @touchstart="start" @touchend="toDetail(item.activityId,item.activityName)">
+        <div class="cover">
+          <div :class="item.isJoin?'layer':'activeImg'">
+            <img :src="item.coverImgUrl? resUri+item.coverImgUrl:'../../../common/image02/banner.png'">
+          </div>
+          <div class="mask" v-if="item.activityStat==2?true:false">已结束</div>
+          <span class="bookNumber">{{item.bookCount}}本书</span>
+          <span class="number">{{item.totalJoinCount}}人在读</span>
+        </div>
+        <h3>{{item.activityName}}</h3>
+        <p>{{item.activityTitle}}</p>
+      </div>
+    </div>
+    <p v-if="onoff" class="loading" style="text-align:center;height:1rem;color: #98aca8;">加载中</p>
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+apiready = function (){
+  var app = new Vue({
+    el:'#app',
+    data:{
+      listData:[],
+      resUri:'',
+      pages:1,
+      onoff:false,
+      time:null,
+      token:$storage.getStorage('token')
+    },
+    mounted(){
+      this.resUri = $comm.resUri
+      this.pullDownFresh()
+    },
+    methods:{
+      exit(){
+        api.closeWin({
+        });
+      },
+      toDetail(activityId,activityName){
+        if((new Date()).getTime()-this.time<100){
+          api.openWin({
+              // name: 'activityDetail',
+              // url: './activityDetails.html',
+              name: 'currencyActivityTopic',
+              url: '../myBookshelf/currencyActivityTopicHead.html',
+              slidBackEnabled: false,
+              reload:true,
+              pageParam: {
+                  id: activityId,
+                  name: activityName
+              }
+          })
+        }
+      },
+      start(){
+        this.time = (new Date()).getTime()
+      },
+      getList(pages){
+        var data = {
+          activityTypeId:api.pageParam.activityTypeId,
+          grade:api.pageParam.grade?api.pageParam.grade:3,
+          page:pages
+        }
+          $comm.socket(6001,data,(res)=>{
+            let ret = JSON.parse(res)
+            console.log("6001专题————————————"+res)
+            if(ret.error==0){
+              let Data = JSON.parse(ret.datas)
+              if(pages!=1){
+                this.listData  = (this.listData ).concat(Data.activityList)
+              }else{
+                this.listData = Data.activityList
+              }
+              this.onoff = false
+            }
+          })
+      },
+      goBookInfo(id){
+        if(!this.token){
+          api.openWin({
+              name: 'loginIndex',
+              url: '../login_new/login_index.html',
+              slidBackEnabled: false
+          });
+        }else{
+          api.openWin({
+              name: 'bookInfo',
+              url: '../myBookshelf/VIPUser_bookInfo_win.html',
+              slidBackEnabled: false,
+              pageParam: {
+                  thisBookId:id
+              }
+          })
+        }
+      },
+      pullDownFresh: function() {
+        var that = this;
+        var bounce = true;
+        api.refreshHeaderLoading()
+        api.setRefreshHeaderInfo({
+          visible: true,
+          loadingImg: '../image/timg.gif',
+          bgColor: '#fff',
+          textColor: '#ccc',
+          textDown: '下拉更新...',
+          textUp: '松开刷新...',
+          showTime: true
+        }, function(ret, err) {
+          setTimeout('api.refreshHeaderLoadDone()', '1000');
+          that.getList(1)
+        });
+      },
+      scroll() {
+        var that = this
+        api.addEventListener({
+          name: 'scrolltobottom',
+          extra: {
+            threshold: 0 //设置距离底部多少距离时触发，默认值为0，数字类型
+          }
+        }, function(ret, err) {
+          that.onoff = true
+          that.getList(that.pages++)
+        });
+        api.addEventListener({
+          name: 'offline'
+        }, function(ret, err) {
+          api.toast({
+            msg: '网络链接不太好',
+            duration: 2000,
+            location: 'bottom'
+          });
+        });
+      },
+    }
+  })
+}
+
+</script>
+
+</html>

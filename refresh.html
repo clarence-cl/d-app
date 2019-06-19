@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>刷新</title>
+    <link rel="stylesheet" type="text/css" href="ipad/css/api.css" />
+    <link rel="stylesheet" type="text/css" href="common/fontclass02/iconfont.css" />
+    <script src="common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+</head>
+<style>
+[v-cloak] {
+    display: none;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+    font-size: 2rem;
+}
+
+.top {
+    width: 100%;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.return {
+    padding: 1.2rem 2.1rem;
+}
+.refresh{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    font-size: 1.5rem;
+    color: #666666;
+    text-align: center;
+}
+.refresh span{
+    color: #00B596;
+}
+</style>
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+        <!-- 返回 -->
+        <div class="top">
+            <div class="return" @touchend="exit">
+               <svg class="icon" aria-hidden="true">
+                   <use xlink:href="#icon-fh_"></use>
+               </svg>
+            </div>
+        </div>
+        <div class="refresh">
+          网络连接情况不太好，点击
+          <span @touchend="refresh">
+            <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-refresh"></use>
+            </svg>
+            重新加载
+          </span>
+          一下吧
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="ipad/css/custom-toast.css">
+<script type="text/javascript" src="common/script/custom-toast.js"></script>
+<script type="text/javascript" src="common/script/vue.js"></script>
+<script type="text/javascript" src="common/script/fastclick.js"></script>
+<script type="text/javascript" src="common/script/lib-storage.js"></script>
+<script type="text/javascript" src="common/script/api.js"></script>
+<script type="text/javascript" src="common/script/vue.js"></script>
+<script type="text/javascript" src="common/script/lib-common.js"></script>
+<script type="text/javascript" src="common/script/services/lib-homePage-service.js"></script>
+<script src="common/script/services/lib-myCenter_frm-service.js"></script>
+<script src="common/script/public.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var app = new Vue ({
+            el: '#app',
+            data: {
+
+            },
+            created: function () {
+              // this.watchNet();
+            },
+            methods: {
+              exit(){
+                $comm.hideLoading();
+                api.sendEvent({
+                    name: 'isOnline'
+                });
+
+                api.closeWin({
+                    // name: 'page1'
+                });
+
+              },
+              refresh(){
+                var that = this;
+                // $comm.showLoading('数据加载中','请稍等')
+                // alert(2);
+                $comm.showLoading('数据加载中','请稍等');
+                setTimeout(function(){
+                  $comm.hideLoading();
+                },10000)
+                // this.watchNet()
+
+              },
+              //监听是否存在网络
+              watchNet(){
+                alert(7)
+                $comm.hideLoading()
+                api.addEventListener({
+                    name: 'offline'
+                }, function(ret, err){
+                    if( ret ){
+                      alert(888)
+                      setTimeout(function(){
+                        $comm.hideLoading()
+                      },3000)
+
+                        //  alert( JSON.stringify( ret ) );
+                    }else{
+                         alert( JSON.stringify( err ) );
+                    }
+                });
+
+                api.addEventListener({
+                    name: 'online'
+                }, function(ret, err){
+                    if( ret ){
+                      $comm.hideLoading()
+                      api.closeWin({
+                          // name: 'page1'
+                      });
+
+                        //  alert( JSON.stringify( ret ) );
+                    }else{
+                         alert( JSON.stringify( err ) );
+                    }
+                });
+              }
+            }
+        });
+    };
+</script>
+
+</html>

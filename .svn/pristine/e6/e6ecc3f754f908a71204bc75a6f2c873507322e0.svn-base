@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>首页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/index_home_win.css">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+      <div id="myCenterHead" style="display:none;">
+      <div class="header">
+        <div class="news" @touchend="goNew">
+            <svg class="icon" aria-hidden="true">
+               <use xlink:href="#icon-xx_"></use>
+           </svg>
+            <span style="display:none;"></span>
+        </div>
+        <div class="name">
+            <h1 style="text-align: center;">{{userInfo.name?userInfo.name:"神秘同学"}} </h1>
+            <svg v-if="userInfo.isvip" class="icon icon-vip" aria-hidden="true">
+               <use xlink:href="#icon-VIPbiaoshi"></use>
+           </svg>
+        </div>
+        <svg class="icon icon-header" aria-hidden="true" @touchend="goSet">
+             <use xlink:href="#icon-sz_"></use>
+         </svg>
+      </div>
+   </div>
+<!-- 书房头部 -->
+<div id="studyHead" >
+  <div class="head">
+    <div class="gift" @touchend="goLogin">
+      <img :src="token==null?'../../../common/image02/head.png':imgUrl!=null?imgUrl:userInfo.headImgUrl?resUri+userInfo.headImgUrl:'../../../common/image02/head.png'">
+      <span v-if="token==null?true:false">注册有礼</span>
+      <svg  v-if="token==null?true:false" class="icon" aria-hidden="true">
+        <use xlink:href="#icon-gift_huaban"></use>
+      </svg>
+    </div>
+    <div class="grade" @touchend="gradeSelect">
+      <span>{{grade|sinogram}}年级</span>
+    </div>
+    <span class="calendar" style="visibility:hidden">1
+      <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-xx_"></use>
+      </svg>
+    </span>
+  </div>
+</div>
+  <!-- 成长头部 -->
+  <div id="growHead" class="grow-top">
+      <h1>我的成长</h1>
+  </div>
+
+        <footer class="tab" id="activeTab">
+            <div class="list" id="tabA">
+                <!-- <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-sf_mr"></use>
+              </svg> -->
+                <svg id="aTab" class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-sf_anxia"></use>
+              </svg>
+                <h3 class="select tab-text-block">书房</h3>
+            </div>
+            <div class="list" id="tabB">
+                <svg id="bTab" class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-sj_mr"></use>
+              </svg>
+                <h3 class="select">书架</h3>
+            </div>
+            <div class="list" id="tabC">
+                <svg id="cTab" class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-cz_mr"></use>
+              </svg>
+                <h3 class="select">成长</h3>
+            </div>
+            <div class="list" id="tabD">
+                <!-- <span>6</span> -->
+                <svg id="dTab" class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-wd_mr"></use>
+              </svg>
+                <h3 class="select">我</h3>
+            </div>
+        </footer>
+        <!-- <div class="move tab" id="test" style="color: #00b596;display:none;width:600px;height:100px">移出所选（2）</div> -->
+        <div class="move" id="test" style="color:#00b596;display:none" @touchend="removeChoose">移出所选({{ num }})</div>
+  <!-- 遮罩层 -->
+  <div  id="popup" class="popup" ></div>
+  <img v-if="maskShow" style="position: absolute;top:0;z-index:999;width: 100%;" src="../../../common/image02/guide.png" alt="">
+    </div>
+</body>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    //api.welcomePage();
+
+    var toast = new customToast();
+    var allTabs;
+    //记录点击按钮时间
+    var clickTimerHour = null;
+
+    apiready = function() {
+      Vue.filter("sinogram", function(value) {
+                    return $comm.convertToChsNumber(value)
+                });
+      var app = new Vue({
+        el: '#app',
+        data:{
+          resUri:'',
+          num:0,
+          userInfo: JSON.parse($storage.getStorage('user-info'))?JSON.parse($storage.getStorage('user-info')):{},
+          token:$storage.getStorage('token'),
+          imgUrl:null,
+          grade:3,//api.pageParam.grade ,$storage.getStorage('slelectGrade')
+          maskShow:false
+        },
+        mounted(){
+          console.log("退出后获取"+$storage.getStorage('user-info'))
+          this.resUri = $comm.resUri
+          this.upData();
+          this.watchNum();
+          this.fromInterest()
+          this.cancel()
+          this.exitLogin()
+          this.Grade()
+          // this.again();
+          // console.log("首页接收到页面信息"+api.pageParam.grade)
+      },
+      methods:{
+        Grade(){
+          if($storage.getStorage('slelectGrade')){
+            this.grade = $storage.getStorage('slelectGrade')
+          }else{
+            if(JSON.parse($storage.getStorage('user-info'))){
+              this.grade = JSON.parse($storage.getStorage('user-info'))['bookRoomGrade']
+            }else{
+              this.grade = 3
+            }
+          }
+        },
+        exitLogin(){
+          api.addEventListener({
+              name: 'toA'
+          }, function(ret, err){
+              if( ret ){
+                  // alert(88)
+                  activeTab('tabA')
+              }else{
+                   alert( JSON.stringify( err ) );
+              }
+          });
+
+          api.addEventListener({
+              name: 'vipPopup'
+          }, function(ret, err){
+              if(ret.value.key){
+                $api.css($api.byId('popup'), 'display:block');
+              }else{
+                $api.css($api.byId('popup'), 'display:none');
+              }
+          });
+
+          api.addEventListener({
+              name: 'exit-App'
+          }, (ret, err)=>{
+            console.log("退出登陆监听------"+$storage.getStorage('slelectGrade'))
+            this.grade = 3
+            api.sendEvent({
+                name: 'homeEvent'
+            });
+             api.setFrameGroupIndex({
+                 name: 'homePageGroup',
+                 index: 0,
+                 reload: true,
+                 scroll: false
+             });
+            activeTab('tabA')
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_anxia"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_mr"></use>');
+            this.imgUrl=null
+            this.token = null
+          })
+        },
+        cancel(){
+          api.addEventListener({
+              name: 'cancelMask'
+          }, (ret, err)=>{
+              if( ret ){
+                this.maskShow =ret.value.key
+                this.setFram('bookshelf_frm',true)
+              }
+          });
+        },
+        setFram(name,value){
+          api.setFrameAttr({
+            name: name,
+            bounces: value,
+            scroll: value,
+            scrollEnabled:value,
+            vScrollBarEnabled:value
+        });
+        },
+        //兴趣选择进入首页显示遮层
+        fromInterest(){
+          // if(api.pageParam.name=="homePage"){ //监听从登陆过来刷新书房首页数据
+          //   api.sendEvent({
+          //       name: 'homeEvent'
+          //   });
+          // }
+          if(api.pageParam.from==1){
+            api.setFrameGroupIndex({
+                name: 'homePageGroup',
+                index: 0
+            });
+            api.sendEvent({
+                name: 'GMask',
+                extra: {
+                    key: true,
+                }
+            });
+            this.maskShow =true
+            this.setFram('bookshelf_frm',false)
+            api.setFrameGroupAttr({
+                name: 'homePageGroup',
+                rect: {
+                    x: 0,
+                    y: 90,
+                    w: 'auto',
+                    h: '864'
+                }
+            });
+          }
+        },
+        //移除所选
+        removeChoose(){
+          if(this.num>0){
+            api.sendEvent({
+                name: 'remove',
+                extra: {
+                    // key1: 'value1',
+                    // key2: 'value2'
+                }
+            });
+          }
+        },
+        //chongxinlaiyici
+        again(){
+          var data1 = 'WebSocketProcessor '+JSON.stringify(data)
+          // var data = 'WebSocketProcessor {"Key":"","OpCode":2001,"SessionId":"00000000-0000-0000-0000-000000000000","ClientType":1,"DeviceVersion":"IOS12.4","DeviceId":"12311231","Token":"00000000-0000-0000-0000-000000000000","JsonData":"{\"Grade\":\"3\"}"}'
+          $comm.webSocket(data1)
+        },
+        //监听数量
+        watchNum(){
+          var that = this;
+          api.addEventListener({
+              name: 'changeNum'
+          }, (ret, err)=> {
+              // console.log(JSON.stringify(ret))
+              that.num = ret.value.num;
+
+          });
+          api.addEventListener({
+              name: 'success'
+          }, function(ret, err){
+
+          });
+
+        },
+        upData(){
+          api.addEventListener({
+              name: 'updata'
+          }, (ret, err)=> {
+              this.userInfo = JSON.parse($storage.getStorage('user-info'))
+              this.imgUrl =  ret.value.imgUrl
+          });
+        },
+        //登陆
+        goLogin(){
+          if(this.token==null){
+            api.openWin({
+                name: 'loginIndex',
+                url: '../login_new/login_index.html',
+                slidBackEnabled: false,
+                reload:true
+            });
+          }else{
+            activeTab('tabD');
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_mr"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_anxia"></use>');
+          }
+        },
+        goSet: function() {
+            api.openWin({
+                name: 'set',
+                url: '../personalCenter/set.html',
+                bounces: false,
+                slidBackEnabled: false
+            });
+        },
+        // 点击选择年级
+        gradeSelect(){
+          var link = this.userInfo.level&&this.token?"selectService02.html":"selectService01.html"
+          // "selectService02.html"
+          api.openWin({
+              name: 'gradeSelect',
+              url: '../myBookshelf/'+link,
+              slidBackEnabled: false
+          });
+        },
+        goNew: function() {
+            api.openWin({
+                name: 'news',
+                url: '../personalCenter/news.html',
+                bounces: false,
+                slidBackEnabled: false
+            });
+        }
+      }
+    });
+
+// vue--end
+
+        loadUI();
+        // fitTab();
+        bindEvent();
+        api.addEventListener({
+            name: 'online'
+        }, function(ret, err) {
+            //
+            // api.closeWin({
+            //     name: 'refresh404'
+            // });
+
+            // $comm.hideLoading();
+            // connectionType = ret.connectionType;
+            // alert('联网了');
+            adaptationModel();
+            // loadUserVipInfo();
+            // bindEvent();
+        });
+        api.addEventListener({
+            name: 'offline'
+        }, function(ret, err) {
+            connectionType = "";
+            // $comm.showLoading('数据加载中','请稍等');
+            // setTimeout(function(){
+            // $comm.hideLoading();
+            // goRefresh();
+            // },10000)
+
+            alert('网络异常，请检查是否已经断开网络!!!')
+                toast.alert({
+                    title: "网络异常，请检查网络链接"
+                })
+        });
+        adaptationModel();
+        // loadUserVipInfo();
+        bindEvent();
+    };
+    function goRefresh() {
+      api.openWin({
+          name: 'refresh404',
+          url: '../../../refresh.html',
+          pageParam: {
+              name: 'refresh'
+          },
+          animation:{
+            type:"none",                //动画类型（详见动画类型常量）
+            subType:"cube",       //动画子类型（详见动画子类型常量）
+            duration:300                //动画过渡时间，默认300毫秒
+        }
+      });
+    }
+    function bindEvent() {
+      //退出账号后
+      // api.addEventListener({
+      //     name: 'exit-App'
+      // }, function(ret, err){
+      //   console.log("监听到退出=================")
+      //   activeTab('tabA')
+      //  api.sendEvent({
+      //      name: 'homeEvent'
+      //  });
+      //   api.setFrameGroupIndex({
+      //       name: 'homePageGroup',
+      //       index: 0,
+      //       reload: true,
+      //       scroll: false
+      //   });
+      //   changeHead({showHead:"studyHead",hideHead1:"myCenterHead",hideHead2:"growHead",y:"90",height:"864"});
+      // });
+        //监听书架去书房
+        api.addEventListener({
+            name: 'goBookCity'
+        }, function(ret, err){
+            if( ret ){
+                //  alert( JSON.stringify( ret ) );
+                activeTab('tabA');
+                $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_anxia"></use>');
+                $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+                $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+                $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_mr"></use>');
+            }else{
+                 alert( JSON.stringify( err ) );
+            }
+        });
+
+        api.addEventListener({
+            name: 'editFlag'
+        }, function(ret, err){
+            $api.byId('activeTab').style.display = 'none';
+            $api.byId('test').style.display = 'block';
+        });
+        api.addEventListener({
+            name: 'editFlag1'
+        }, function(ret, err){
+          $api.byId('activeTab').style.display = 'flex';
+          $api.byId('test').style.display = 'none';
+        });
+
+        function login(){
+            api.openWin({
+                name: 'loginIndex',
+                url: '../login_new/login_index.html',
+                slidBackEnabled: false
+            });
+        }
+        allTabs = $api.domAll($api.byId("activeTab"), "div");
+        $api.byId('tabA').addEventListener('touchend', function() {
+            activeTab('tabA');
+            api.closeFrame({
+                name: 'bookCase1'
+            });
+            api.sendEvent({
+                name: 'aTab'
+            });
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_anxia"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_mr"></use>');
+        })
+        $api.byId('tabB').addEventListener('touchend', function() {
+            if($storage.getStorage('token')){
+              api.closeFrame({
+                  name: 'newPage'
+              });
+              activeTab('tabB');
+              $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_mr"></use>');
+              $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_anxia"></use>');
+              $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+              $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_mr"></use>');
+            }else{
+              login()
+            }
+
+        });
+
+        $api.byId('tabC').addEventListener('touchend', function() {
+          if($storage.getStorage('token')==null){
+            login()
+          }else {
+            activeTab('tabC');
+            api.closeFrame({
+                name: 'bookCase1'
+            });
+            api.sendEvent({
+                name: 'tabC'
+            });
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_mr"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_anxia"></use>');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_mr"></use>');
+          }
+        });
+
+        $api.byId('tabD').addEventListener('touchend', function() {
+          api.closeFrame({
+              name: 'bookCase1'
+          });
+          if($storage.getStorage('token')==null){
+            api.openWin({
+                name: 'loginIndex',
+                url: '../login_new/login_index.html',
+                slidBackEnabled: false,
+                reload:true
+            });
+
+            return
+          }else{
+              activeTab('tabD');
+              $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_mr"></use>');
+              $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+              $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+              $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_anxia"></use>');
+          }
+        });
+
+        // $analysis.bindEvent($api.byId('tabA'), 'touchstart', function () {
+        //
+        // }, '进入书房b');
+        // $analysis.bindEvent($api.byId('tabB'), 'touchstart', function () {
+        //
+        // }, '点亮墙_发现b');
+        // $analysis.bindEvent($api.byId('tabC'), 'touchstart', function () {
+        //
+        // }, '点亮墙_成长b');
+        // $analysis.bindEvent($api.byId('tabD'), 'touchstart', function () {
+        //     activeTab('tabD');
+        //     $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_mr"></use>');
+        //     $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+        //     $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+        //     $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_anxia"></use>');
+        // }, '点亮墙_我b');
+        api.addEventListener({
+            name: 'goTo-myCenter'
+        }, function() {
+            activeTab('tabD');
+            $api.html($api.byId('aTab'), '<use xlink:href="#icon-sf_mr"></use>');
+            $api.html($api.byId('bTab'), '<use xlink:href="#icon-sj_mr"></use>');
+            $api.html($api.byId('cTab'), '<use xlink:href="#icon-cz_mr"></use>');
+            $api.html($api.byId('dTab'), '<use xlink:href="#icon-wd_anxia"></use>');
+        });
+        // if ($storage.getStorage('bookshelf-mask')) {
+        //     $api.byId('map').style.display = 'none'
+        // }
+        // api.addEventListener({
+        //     name: 'bookshelf-mask'
+        // }, function () {
+        //     $api.byId('map').style.display = 'none'
+        // });
+    }
+    function loadUI(type) {
+        api.openFrameGroup({
+            name: 'homePageGroup',
+            rect: {
+                x: 0,
+                y: 90,
+                w: 'auto',
+                h: '864'
+            },
+            scrollEnabled: false,
+            index: 0,
+            preload: 0,
+            frames: [{
+                name: 'bookshelf_frm',
+                url: './bookshelf_frm.html',
+                bgColor: '#fff',
+                bounces: true,
+                pageParam:{
+                  grade:api.pageParam.grade
+                }
+            }, {
+                name: 'bookcase',
+                url: './bookcase.html',
+                bgColor: '#fff',
+                bounces:true
+            }, {
+                name: 'grow_up_frm',
+                url: './grow_up_frm.html',
+                bgColor: '#fff',
+                bounces: true
+            }, {
+                name: 'myCenterCon',
+                url: './myCenterCon.html',
+                bgColor: '#fff',
+                bounces: true
+            }]
+        }, function(ret, err) {
+            var index = ret.index;
+        });
+
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+  function changeHead(json){
+    $api.css($api.byId(json.showHead),'display:block;')
+    $api.css($api.byId(json.hideHead1),'display:none;')
+    $api.css($api.byId(json.hideHead2),'display:none;')
+      api.setFrameGroupAttr({
+          name: 'homePageGroup',
+          rect: {
+            x: 0,
+            y: json.y,
+            w: 'auto',
+            h: json.height
+          },
+      });
+  }
+    function reloadTabUI(index) {
+      api.setFrameGroupAttr({
+          name: 'homePageGroup',
+          rect: {
+              x: 0,
+              y: 0,
+              w: 'auto',
+              h: api.frameHeight - (api.frameWidth / 768 * 70)
+          },
+      });
+        if (index == 1) //点击的时成长按钮
+        {
+            var isLoad = false;
+
+            if (clickTimerHour) {
+                var hourNum = (new Date().getTime() - clickTimerHour.getTime());
+                if (hourNum >= 500) //大于500豪秒之后才能点击按钮//防止恶意刷新后台接口
+                {
+                    clickTimerHour = new Date();
+                } else {
+                    isLoad = true;
+                }
+            } else {
+                clickTimerHour = new Date();
+            }
+            if (!isLoad) {
+              var isLoad = false;
+
+              if (clickTimerHour) {
+                  var hourNum = (new Date().getTime() - clickTimerHour.getTime());
+                  if (hourNum >= 500) //大于500豪秒之后才能点击按钮//防止恶意刷新后台接口
+                  {
+                      clickTimerHour = new Date();
+                  } else {
+                      isLoad = true;
+                  }
+              } else {
+                  clickTimerHour = new Date();
+              }
+                api.setFrameGroupIndex({
+                    name: 'homePageGroup',
+                    index: index,
+                    reload: isLoad,
+                    scroll: false
+                });
+            }
+        }
+        else if (index == 2) //点击的时成长按钮
+        {
+            changeHead({showHead:"growHead",hideHead1:"myCenterHead",hideHead2:"studyHead",y:"65",height:"889"})
+            api.setFrameGroupIndex({
+                    name: 'homePageGroup',
+                    index: index,
+                    reload: true,
+                    scroll: false,
+                    bounces: true
+                });
+        }
+        else {
+            api.setFrameGroupIndex({
+                name: 'homePageGroup',
+                index: index,
+                reload: false,
+                scroll: false
+            });
+            if (index == 0) {
+              changeHead({showHead:"studyHead",hideHead1:"myCenterHead",hideHead2:"growHead",y:"90",height:"864"})
+            }
+            if (index == 3) {
+              var isLoad = false;
+              changeHead({showHead:"myCenterHead",hideHead1:"studyHead",hideHead2:"growHead",y:"65",height:"889"})
+              if (clickTimerHour) {
+                  var hourNum = (new Date().getTime() - clickTimerHour.getTime());
+                  if (hourNum >= 500) //大于500豪秒之后才能点击按钮//防止恶意刷新后台接口
+                  {
+                    clickTimerHour = new Date();
+                  } else {
+                    isLoad = true;
+                  }
+              } else {
+                  clickTimerHour = new Date();
+              }
+              console.log("开关开关开关开关————————————————"+isLoad)
+
+              api.setFrameGroupIndex({
+                  name: 'homePageGroup',
+                  index: index,
+                  reload: isLoad,
+                  scroll: false
+              });
+            }
+        }
+    }
+
+    var activeTab = function (id) {
+        for (var i = 0; i < allTabs.length; i++) {
+            if (allTabs[i].id === id) {
+                $api.addCls(allTabs[i], 'tab-select');
+                $api.addCls($api.dom(allTabs[i], 'h3'), 'tab-text-block');
+                reloadTabUI(i);
+            } else {
+                $api.removeCls(allTabs[i], 'tab-select');
+                $api.removeCls($api.dom(allTabs[i], 'h3'), 'tab-text-block');
+            }
+        }
+    }
+  Vue.proprtypes.activeTab = activeTab
+
+    function funErr(err) {
+        // toast.fail({
+        //     title: '网络异常，请检查网络链接',
+        //     duration: "2000"
+        // })
+        api.toast({
+          msg: "网络异常，请检查网络链接",
+          duration: 2000,
+          location: 'middle'
+        });
+    }
+
+
+
+</script>
+
+</html>

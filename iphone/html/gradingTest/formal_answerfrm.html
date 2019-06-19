@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>正式阅读理解</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/formal_answerfrm.css">
+</head>
+
+<body id="body" class="body">
+    <div id="exitFormalAnswer" class="icon-wrap">
+        <i class="iconfont font_family icon-btn">&#xe6fe;</i>
+    </div>
+    <div class="title-wrap">
+        <div class="header-bar-wrap">
+            <div class="header-bar" id="headerBar"></div>
+        </div>
+    </div>
+    <div class="icon-wrap-right" onclick="goToLookBook()">
+        <svg class="icon iconfont-btn" aria-hidden="true">
+            <use xlink:href="#icon-dingjice_guanbiyuanwenanniu_moren"></use>
+        </svg>
+        <span class="text-btn">查看原文</span>
+    </div>
+    <div class="reading-content">
+        <h1 class="answer-name" id="title"></h1>
+        <div class="option-wrap" id="optionsWrap">
+        </div>
+    </div>
+    <div class="footer">
+        <div class="footer-icon-wrap">
+            <div class="icon-button">
+                <svg class="icon icon-left" aria-hidden="true">
+                    <use xlink:href="#icon-luyin_yiwancheng"></use>
+                </svg>
+            </div>
+            <div class="footer-icon" id="footerIcon">
+
+            </div>
+        </div>
+        <div class="submit-btn-wrap">
+            <div id="subBtn" class="sub-btn">
+                提交
+            </div>
+        </div>
+    </div>
+    <div class="answer-alert" id="answerAlert">
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var choice = null;
+    var selectOption = '';
+    var qid, score = 0,
+        rightAnswer, iconCount;
+    var subData = {
+        testId: JSON.parse($storage.getStorage('reading-test-id')).testId,
+        paperId: JSON.parse($storage.getStorage('reading-test-id')).paperId,
+        reviewTimes: 0,
+        questions: []
+    };
+    var countDownTimer = null;
+    var time = 60;
+    var submitting = false;
+    var HMQuestions = 0;
+    apiready = function() {
+        adaptationModel();
+        iconCount = (JSON.parse($storage.getStorage('choice-list')).length);
+        loadQuestion();
+        countDown();
+        bindEvent();
+    };
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+        $api.css($api.byId('headerBar'), 'width: 0%;');
+    }
+
+    function bindEvent() {
+        $analysis.bindEvent($api.byId('subBtn'), 'touchend', function () {
+            if (submitting) {
+                return;
+            }
+            submit(true);
+        }, '正式-阅读测_提交b');
+
+        $analysis.bindEvent($api.byId('exitFormalAnswer'), 'touchend', function () {
+            goback();
+        }, '正式-阅读测_关闭b');
+
+        $api.byId('optionsWrap').addEventListener('touchend', function(e) {
+            if (submitting) {
+                return;
+            }
+            if (e.target && e.target.nodeName.toLowerCase() === 'button') {
+                $api.css($api.byId('subBtn'), 'background-color: #1adb96');
+                selectOption = 'selected';
+                activeButton(e.target.id)
+            }
+        })
+    }
+
+    function countDown () {
+        countDownTimer = setInterval(function () {
+            time--;
+            if (time === 0) {
+                submit(false);
+            }
+        }, 1000)
+    }
+
+    function loadQuestion() {
+        submitting = false;
+        $api.css($api.byId('subBtn'), 'background-color: #becbcc');
+        loadPaperFooterUI((3 - HMQuestions), 'reload');
+        choice = JSON.parse($storage.getStorage('choice-list'))[HMQuestions];
+        qid = choice.qid;
+        $api.html($api.byId("optionsWrap"), '');
+        $api.html($api.byId('title'), choice.qtext.title);
+        choice.qtext.options.forEach(function(item, index) {
+            if (item.text !== '') {
+                var liDom = document.createElement('button');
+                $api.attr(liDom, 'id', item.key);
+                $api.attr(liDom, 'class', 'option');
+                liDom.innerHTML = item.text;
+                $api.byId('optionsWrap').appendChild(liDom);
+            }
+        });
+    }
+
+    function loadPaperFooterUI(arr) {
+        $api.byId('footerIcon').innerHTML = null;
+        if (arr === 3) {
+            for (var i = 0; i < iconCount; i++) {
+                var iconDom = document.createElement('div');
+                $api.attr(iconDom, 'class', 'icon-wrap-footer');
+                if (i === 0) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidiyiti_jinhangzhong"></use>\n' +
+                        '                </svg>');
+                } else if (i === 1) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidierti_weikaishi"></use>\n' +
+                        '                </svg>');
+                } else if (i === 2) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidisanti_weikaishi"></use>\n' +
+                        '                </svg>');
+                }
+                $api.byId('footerIcon').appendChild(iconDom);
+            }
+        } else if (arr === 2) {
+            for (var i = 0; i < iconCount; i++) {
+                var iconDom = document.createElement('div');
+                $api.attr(iconDom, 'class', 'icon-wrap-footer');
+                if (i === 0) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidiyiti_yiwancheng"></use>\n' +
+                        '                </svg>');
+                } else if (i === 1) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidierti_jinhangzhong"></use>\n' +
+                        '                </svg>');
+                } else if (i === 2) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidisanti_weikaishi"></use>\n' +
+                        '                </svg>');
+                }
+                $api.byId('footerIcon').appendChild(iconDom);
+            }
+        } else if (arr === 1) {
+            for (var i = 0; i < iconCount; i++) {
+                var iconDom = document.createElement('div');
+                $api.attr(iconDom, 'class', 'icon-wrap-footer');
+                if (i === 0) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidiyiti_yiwancheng"></use>\n' +
+                        '                </svg>');
+                } else if (i === 1) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidierti_yiwancheng"></use>\n' +
+                        '                </svg>');
+                } else if (i === 2) {
+                    $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                        '                    <use xlink:href="#icon-ceshidisanti_jinhangzhong"></use>\n' +
+                        '                </svg>');
+                }
+                $api.byId('footerIcon').appendChild(iconDom);
+            }
+        }
+    }
+
+
+    function activeButton(id) {
+        var allBottons = $api.domAll($api.byId("optionsWrap"), "button");
+        for (var i = 0; i < allBottons.length; i++) {
+            if (allBottons[i].id === id) {
+                if (choice.qtext.options[i].answer) {
+                    score = choice.qscore;
+                } else {
+                    score = 0;
+                }
+                $api.addCls(allBottons[i], 'selected');
+            } else {
+                $api.removeCls(allBottons[i], 'selected');
+            }
+        }
+    }
+
+    function submit(type) {
+        HMQuestions ++;
+        submitting = true;
+        if (type) {
+            if (selectOption === '') {
+                submitting = false;
+                return toast.fail({
+                    title: '请选择答案'
+                });
+            }
+        }
+        time = 60;
+        choice.qtext.options.forEach(function(value) {
+            if (value.answer) {
+                rightAnswer = value.text;
+            }
+        });
+        if (score === 0) {
+            $api.addCls($api.byId('answerAlert'), 'error');
+            $api.html($api.byId('answerAlert'), '<h1 class="title-warn">回答错误</h1>\n' +
+                '    <h4>正确答案: ' + rightAnswer + '</h4>');
+        } else {
+            $api.addCls($api.byId('answerAlert'), 'correct');
+            $api.byId('answerAlert').innerText = '正确';
+        }
+        var data = {
+            qid: qid,
+            qscore: score
+        };
+        selectOption = '';
+        setTimeout(function() {
+            if ($api.hasCls($api.byId('answerAlert'), 'error')) {
+                $api.removeCls($api.byId('answerAlert'), 'error');
+            } else {
+                $api.removeCls($api.byId('answerAlert'), 'correct');
+            }
+            subData.questions.push(data);
+            if (HMQuestions < 3) {
+                loadQuestion();
+            } else {
+                submitChoiceScore();
+            }
+        }, 1500);
+    }
+
+    function submitChoiceScore() {
+        var count = 0;
+        subData.isfinal = ($storage.getStorage('test-count') === '2' ? 'true' : 'false');
+        subData.questions.forEach(function(item) {
+            if (item.qscore !== 0) {
+                count++;
+            }
+        });
+        if ($storage.getStorage('test-choice-count')) {
+            count += Number($storage.getStorage('test-choice-count'));
+        }
+        $storage.setStorage('test-choice-count', count);
+        $GradingTest.submitReadQuestions(subData, funSucSub, funErr)
+    }
+
+    function funSucSub(resp) {
+        if (resp.errCode === 0) {
+            if ($storage.getStorage('test-count') === '2') {
+                $storage.delStorage('test-count');
+                goToResults();
+            } else {
+                continueTest(resp.grade, resp.month);
+            }
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        });
+    }
+
+    function continueTest(grade, month) {
+        $api.html($api.byId("optionsWrap"), '');
+        $api.html($api.byId('title'), '');
+        clearInterval(countDownTimer);
+        api.openFrame({
+            name: 'formal_testfrm',
+            url: './formal_testfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'formalAnswer',
+                grade: grade,
+                month: month
+            },
+            bounces: false,
+            reload: true
+                // animation: {
+                //     type: "ripple",
+                //     subType: "from_right",
+                //     duration: 1000
+                // }
+        });
+    }
+
+    function goToResults() {
+        clearInterval(countDownTimer);
+        api.openFrame({
+            name: 'perfect_userName_frm',
+            url: '../personalCenter/perfect_userName_frm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'perfect_userName_frm'
+            },
+            bounces: false,
+            reload: true
+                // animation: {
+                //     type: "ripple",
+                //     subType: "from_right",
+                //     duration: 1000
+                // }
+        });
+    }
+
+    function goToLookBook() {
+        // $analysis.bindZhuge('\'正式-朗读测_查看原文b\'');
+        toast.alert({
+            title: '确定要查看原文？',
+            msg: '选择查看原文会扣分哟',
+            iconHtml: '<i class="iconfont iconfont-alert">&#xe700;</i>',
+            buttons: [{
+                name: '继续查看',
+                onclick: function() {
+                    subData.reviewTimes++;
+                    toast.hide();
+                    clearInterval(countDownTimer);
+                    api.openFrame({
+                        name: 'look_bookfrm',
+                        url: './look_bookfrm.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        pageParam: {
+                            name: 'look_bookfrm',
+                            bookText: api.pageParam.bookText
+                        },
+                        bounces: false,
+                        reload: true,
+                        animation: {
+                            type: "curl",
+                            subType: "from_right",
+                            duration: 300
+                        }
+                    });
+                }
+            }, {
+                name: '再想一想',
+                onclick: function() {
+                    toast.hide();
+                }
+            }]
+        });
+    }
+
+    function goback() {
+        toast.alert({
+            title: '确定要退出定级测试吗？',
+            msg: '退出以后下次需要从头开始，你确认要退出吗？',
+            buttons: [{
+                name: '继续测试',
+                onclick: function() {
+                    toast.hide();
+                }
+            }, {
+                name: '退出',
+                onclick: function() {
+                    $storage.delStorage('test-count');
+                    toast.hide();
+                    clearInterval(countDownTimer);
+                    api.openFrame({
+                        name: 'index_start_test',
+                        url: './index_start_test.html',
+                        pageParam: {
+                            name: 'index_start_test'
+                        },
+                        bounces: false,
+                        reload: true
+                    });
+                }
+            }]
+        });
+    }
+</script>
+
+</html>

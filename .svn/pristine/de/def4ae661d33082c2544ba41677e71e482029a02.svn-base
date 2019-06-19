@@ -1,0 +1,89 @@
+.iconfont-toast {
+    font-size: 30px;
+    margin-bottom: 5px;
+    color: black;
+}
+.toast-content {
+    background-color: rgba(0,0,0,0.4);
+    width:100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+
+}
+.iconfont-wrap {
+    min-width: 25%;
+    max-width: 50%;
+    min-height: 80px;
+    border-radius: 12px;
+    background-color: white;
+    display: flex;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+}
+.custom-title {
+    font-size: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+.custom-msg {
+    font-size: 16px;
+    text-align: center;
+    color: #333333;
+    line-height: 50px;
+    height: 50px;
+    position: relative;
+    width: 100%;
+}
+.iconfont-alert {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    color: #333333;
+}
+.custom-buttons-wrap {
+    width: 100%;
+    border-top: 0.5px solid #becbcc;
+    height: 50px;
+    display: flex;
+}
+.custom-button-A {
+    flex: 1;
+    height: 100%;
+    text-align: center;
+    font-size: 16px;
+    color: #becbcc;
+    border: none;
+    outline: medium;
+}
+.custom-button-B {
+    flex: 1;
+    text-align: center;
+    font-size: 16px;
+    color: #07AFB9;
+    border: none;
+    outline: medium;
+    border-left: 0.5px solid #becbcc;
+}
+.iconfont-wrap-button {
+    min-height: 80px;
+    border-radius: 12px;
+    background-color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    flex-direction: column;
+    align-items: center;
+    padding-top: 30px;
+    width: 80%;
+}

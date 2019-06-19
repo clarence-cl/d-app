@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>成长记录</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/grow_up_frm.css">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <!-- <div class="top">
+            <h1>我的成长</h1>
+        </div> -->
+        <div class="content">
+          <div class="information">
+            <div class="target">
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-mb"></use>
+              </svg>设定目标
+            </div>
+            <div class="readDate">
+              <div class="box">
+                <h3>总阅读时长</h3>
+                <span class="span01" v-html="dateStr"></span>
+              </div>
+              <div class="box">
+                <h3>总阅读量</h3>
+                <span class="span01" v-html="totalReadWordNum"></span>
+              </div>
+              <div class="box">
+                <h3>坚持阅读</h3>
+                <span class="span01">{{ resData.totalReadDayNum }} <span class="span02">天</span></span>
+              </div>
+              <div class="box">
+                <h3>坚持朗读</h3>
+                <span class="span01">{{ resData.totalReadingAloudDayNum }} <span class="span02">天</span></span>
+              </div>
+            </div>
+            <div class="readDate">
+              <div class="box">
+                <h3>连续阅读</h3>
+                <span class="span01">{{ resData.totalContinuousReadDayNum }} <span class="span02">天</span></span>
+              </div>
+              <div class="box">
+                <h3>连续朗读</h3>
+                <span class="span01">{{ resData.totalContinuousReadingAloudDayNum }} <span class="span02">天</span></span>
+              </div>
+              <div class="box">
+                <h3>朗读平均分</h3>
+                <span class="span01">{{ resData.avgReadingAloudScore }} <span class="span02">分</span></span>
+              </div>
+              <div class="box">
+                <h3>阅读理解正确率</h3>
+                <span class="span01">{{ resData.ratioReadingComprehension }} <span class="span02">%</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="ability">
+            <div class="stage">
+              <h1>当前阅读能力阶段</h1>
+              <div class="levelBox">
+                <ul class="levelTop" v-html="userAbilityLevel">
+                </ul>
+                <ul class="levelBottom" v-html="userAbilityClass">
+                </ul>
+              </div>
+              <div class="text">
+                <p v-html="levelDesc"></p>
+                <span v-for="(item, index) in levelRemarks">{{item}}</span>
+                <!-- <span>1、了解谜语的特点，积累谜语，猜谜语</span>
+                <span>2、积累歇后语</span>
+                <span>3、了解汉字的发展规律，知道汉字演变的五个阶段</span>
+                <span>4、积累关于诚信、孝敬和立志的名言警句 </span> -->
+              </div>
+            </div>
+            <div class="standard">
+              <h1>各项阅读能力水平</h1>
+              <div id="radar"></div>
+              <div class="text">
+                <span>信息提取：寻找和记忆文章基信息的能力  </span>
+                <span>联系推论：联系上下文推断事件发展的能力</span>
+                <span>分析概括：分析和归纳已读文本内容的能力</span>
+                <span>领悟应用：领悟全文信息并能运用到实际生活的能力</span>
+                <span>欣赏评价：能为角色设想另一套行为模式的再创造能力</span>
+                <span>创造评估：能理解文本深层含义的鉴赏能力</span>
+              </div>
+            </div>
+          </div>
+          <div class="readTime">
+            <h1>每日读书时长</h1>
+            <div class="time clearfix">
+              <div class="calendar">
+                  <div class="prev" @click="prevClick">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-zuoyoujiantou-2"></use>
+                    </svg>
+                  </div>
+                  <span>{{timeText}}</span>
+                  <div class="next" @click="nextClick">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-zuoyoujiantou-1"></use>
+                    </svg>
+                  </div>
+              </div>
+              <div class="btn" :class="[isSel ? 'sel' : '']" @click="aloudReadingTimeClick('aloudline')">朗读时长</div>
+              <div class="btn" :class="[isSel ? '' : 'sel']" style="margin-right: 3rem;" @click="readSilentlyTimeClick('aloudline')">阅读时长</div>
+            </div>
+            <div id="aloudline"></div>
+          </div>
+          <div class="readTime">
+            <h1>每日阅读量</h1>
+            <div class="time clearfix">
+              <div class="calendar">
+                  <div class="prev" @click="prevClickReadWord">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-zuoyoujiantou-2"></use>
+                    </svg>
+                  </div>
+                  <span>{{readWordtimeText}}</span>
+                  <div class="next" @click="nextClickReadWord">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-zuoyoujiantou-1"></use>
+                    </svg>
+                  </div>
+              </div>
+            </div>
+            <div id="wordNumber"></div>
+          </div>
+          <div class="footprint">
+            <h1>阅读足迹</h1>
+            <h5>仅显示最近100条</h5>
+            <div class="record">
+              <div class="recordBox" v-for="(item,index) in readStepData" :key="index">
+                <span class="leftBox">{{ item.readDate}}</span>
+                <div class="rightBox">
+                  <!-- <p>{{ item.readDate | sliceTime }}<span class="span03">{{ readStepData.bookName }}</span><span class="span03">阅读时长：{{ item.readTime }}分钟</span></p> -->
+                  <div v-if="item.readingType==1" class="bookName"><div class="bookTime">{{ item.hourDate }}</div><div><span style="margin-right:1.5rem;">阅读图书《{{item.bookName}}》{{item.chapterName}}</span><span>阅读时长：{{item.readTime|sliceSencdToStr}}</span></div></div>
+                  <div v-else-if="item.readingType==2" class="bookName"><div class="bookTime">{{ item.hourDate }}</div><div><span style="margin-right: 1.5rem;">阅读图书《{{item.bookName}}》{{item.chapterName}}</span><span>发布朗读：{{item.readingAloudScore}}分</span></div></div>
+                  <div v-else class="bookName"><div class="bookTime">{{ item.hourDate }}</div><div><span style="margin-right: 1.5rem;">阅读图书《{{item.bookName}}》{{item.chapterName}}</span><span>阅读理解得分：{{item.readingComprehensionScore}}分</span></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/calculationData/typeCalculation.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-grow_up_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/echarts.min.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/charts.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                growUpInfo: {
+                    StudentReadingBookCount: '',
+                    HaveReadBookCount: '',
+                    LightUpBookCount: '',
+                    LightUpChapterCount: '',
+                    TotalWordNumbers: ''
+                },
+                recentlyReadingBook: [],
+                levelDesc: '',
+                levelWidth: 0,
+                levelWidthA: 0,
+                timeText: '',
+                readWordtimeText:'',//每日阅读里时间显示
+                readingLog: [],
+                isDay: 0,
+                isSel: false,
+                infoScore: '',
+                literatureScore: '',
+                isSelAvg: false,
+                isShow: false,
+                popupText:'',
+                resData:{},
+                readStepData:[],//阅读足迹
+                levelRemarks:''
+            },
+            wathc:{
+      readStepData:function() {
+        this.$nextTick(function(){
+          /*现在数据已经渲染完毕*/
+          console.log('现在数据已经渲染完毕')
+        })
+      }
+    },
+            computed:{
+              dateStr:function(){
+                return $typeCalculation.secondToDate(this.resData.totalReadTimeSecond);
+              },
+              totalReadWordNum:function(){
+                return $typeCalculation.numToWordText(this.resData.totalReadWordNum);
+              },
+              //userAbilityLevel用户当前阅读能力等级
+              userAbilityLevel:function(){//下面只显示三个年级的能力等级
+                //5到24级别 二年级5
+                //1-4=1年级  5-8二年级 9-12三年级 13-16四年级 17-20五年级 21-24六年级
+                var level=(this.resData.displayLevel!=null&&this.resData.displayLevel!=0)?this.resData.displayLevel:180;
+                //根据上面的用户等级计算年级的其实区间
+                var startLevel=13;
+                var endLevel=24;
+                if(level>=1&&level<=12)//二年级
+                {
+                  startLevel=1;
+                  endLevel=12;
+                }
+                else if(level>=13&&level<=24)//三年级
+                {
+                    startLevel=13;
+                    endLevel=24;
+                }
+                var userAbilityLevelHtml="";
+                var index=1;
+                for(var i=startLevel;i<=endLevel;i++)
+                {
+                  index++;
+                  if(i==level)
+                  {
+                    userAbilityLevelHtml+="<li>LV"+i+"<div class='person' style='top:-"+(index*2)+"rem;''><h4>LV";
+                    userAbilityLevelHtml+=i+"</h4></div>"
+                    +"</li>"
+
+                  }
+                  else {
+                      userAbilityLevelHtml+="<li>LV"+i+"</li>"
+                  }
+
+                }
+              return userAbilityLevelHtml;
+            },
+            userAbilityClass:function(){//下面只显示三个年级
+                var level=(this.resData.displayLevel!=null&&this.resData.displayLevel!=0)?this.resData.displayLevel:180;
+                //1-4=1年级  5-8二年级 9-12三年级 13-16四年级 17-20五年级 21-24六年级
+                var classNum=1;
+                //根据能力等级计算开始的年级
+                var startClass=3;
+                if(level>=1&&level<=12)//二年级
+                {
+                  startClass=1;
+                  if(level>=5&&level<=8)
+                  {
+                    classNum=2;
+                  }
+                  else if(level>=9&&level<=12)
+                  {
+                    classNum=3;
+                  }
+                }
+                else if(level>=13&&level<=24)//三年级
+                {
+                    startClass=4;
+                    if(level>=13&&level<=16)
+                    {
+                      classNum=4;
+                    }
+                    else if(level>=17&&level<=20)
+                    {
+                      classNum=5;
+                    }
+                    else if(level>=21&&level<=24)
+                    {
+                      classNum=6;
+                    }
+                }
+                var endClass=startClass+2;
+                  var userAbilityLevelHtml="";
+                  var classArr=['零','一','二','三','四','五','六']
+                  for(var j=startClass;j<=endClass;j++)
+                  {
+                    if(j==classNum)
+                    {
+                      userAbilityLevelHtml+="<li style='color:#00b596'>"+classArr[j]+"年级</li>";
+                    }
+                    else {
+                      userAbilityLevelHtml+="<li>"+classArr[j]+"年级</li>";
+                    }
+
+                  }
+                  return userAbilityLevelHtml;
+            }
+            },
+            created:function(){
+
+            },
+            mounted: function () {
+                this.pullDownFresh();
+                this.prevTimeText = this.getDateStr(new Date(), -6);
+                this.nowTimeText = this.getDateStr(new Date(), 0);
+                this.timeText = this.prevTimeText + '~' + this.nowTimeText;
+                this.prevReadWordTimeText = this.getDateStr(new Date(), -6);
+                this.nowReadWordTimeText = this.getDateStr(new Date(), 0);
+                this.readWordtimeText= this.prevReadWordTimeText + '~' + this.nowReadWordTimeText;
+                //加载数据
+                this.loadRadar('radar');
+            },
+            filters:{
+              sliceTime(val){
+                return val.slice(11,16)
+              },
+              sliceSencdToStr(val){
+                return  $typeCalculation.secondToDateNotClass(val);
+              }
+            },
+            methods: {
+                //获取成长数据
+                getGrowData(){
+                  $comm.socket(4001,{},res=>{
+                    console.log("成长数据=============="+res)
+                    if(res){
+                      res = JSON.parse(res);
+                      if(res.error===0){
+                        var ret = JSON.parse(res.datas);
+                        this.resData = ret;
+                        this.levelDesc = ret.scaleDesc;
+                        if((ret.remarks).indexOf("<br/>")!=-1){
+                          this.levelRemarks= (ret.remarks).split("<br/>")
+                        }else{
+                          this.levelRemarks= [this.resultData.levelRemarks]
+                        }
+
+                      }
+                    }
+                  })
+                },
+                //获取每日阅读时长数据
+                getReadData(){
+                  var  endDate= this.getDateStr(new Date(), 0);
+                  var startDate= this.getDateStr(new Date(), -6);
+                  data = {
+                    StartDate:startDate,
+                    EndDate:endDate
+                  }
+                  $comm.socket(4002,data,res=>{
+                    if(res){
+
+                      res = JSON.parse(res);
+                      if(res.error==0){
+                        this.readAllData = JSON.parse(res.datas);
+                        // this.readAllData.readTimeList;//阅读时长数据列表
+                        // this.readAllData.readingAloudTimeList;//朗读时长数据列表
+                        // this.readAllData.readWordNumList;//阅读字数
+                        $charts.readingTimeCharts("aloudline", this.readAllData.readTimeList, false);
+                        $charts.readWordCountCharts('wordNumber',this.readAllData.readWordNumList);
+                      }
+                    }
+                  })
+                },
+                //雷达图
+                loadRadar: function (rader) {
+                  $charts.readingTestRadar(rader,[0,0,0,0,0,0]);
+                },
+                // 获取阅读足迹数据
+                getReadStep(){
+                  let data = {
+                    TopNum:100
+                  }
+                  $comm.socket(4003,data,res=>{
+                    if(res){
+                      res=JSON.parse(res);
+                      if(res.error==0){
+                        this.readStepData= JSON.parse(res.datas).myReadFootPrintList;
+                        //按时间倒序排列数据
+                        this.readStepData.sort(function(x,y){
+                            return Date.parse(x.readDate)-Date.parse(y.readDate);//时间排序
+                        });
+                        //根据日期排序后分组汇总数据
+                        var titleDateTimeStr='';
+                        this.readStepData.forEach((item, index) => {
+                          var date=item.readDate.slice(5,10).replace('-','.');
+                          var hourDate=item.readDate.slice(11,16).replace('-','.');
+                          item.hourDate=hourDate;
+                          if(titleDateTimeStr==date)
+                          {
+                            item.readDate="";
+                          }
+                          else {
+                            titleDateTimeStr=date;
+                            item.readDate=date;
+                          }
+                        });
+                      }
+                    }
+                  })
+                },
+                // 下拉刷新
+                 pullDownFresh:function(){
+                  var that = this
+                  api.refreshHeaderLoading();
+                  console.log("进入下拉----")
+                  api.setRefreshHeaderInfo({
+                        visible: true,
+                        loadingImg: '../image/timg.gif',
+                        bgColor: '#fff',
+                        textColor: '#ccc',
+                        textDown: '下拉刷新...',
+                        textUp: '松开刷新...',
+                        showTime: true
+                    }, function(ret, err) {
+                      that.getGrowData();
+                      that.getReadStep();
+                      that.getReadData();
+                        setTimeout('api.refreshHeaderLoadDone()', '500');
+                    });
+                },
+                getDateStr: function (nowtime, AddDayCount) {
+                    var dd = nowtime;
+                    dd.setDate(dd.getDate() + AddDayCount); //获取AddDayCount天后的日期
+                    var y = dd.getFullYear();
+                    var m = (dd.getMonth() + 1) < 10 ? "0" + (dd.getMonth() + 1) : (dd.getMonth() + 1); //获取当前月份的日期，不足10补0
+                    var d = dd.getDate() < 10 ? "0" + dd.getDate() : dd.getDate(); //获取当前几号，不足10补0
+                    return y + "-" + m + "-" + d;
+                },
+                studentReadTimeCount: function (time, nextTime,type) {
+                    var that = this;
+                    var data={
+                      StartDate:time,
+                      EndDate:nextTime
+                    };
+                    $comm.socket(4002,data,res=>{
+                      if(res){
+                        res = JSON.parse(res);
+                        if(res.error==0){
+                          this.readAllData = JSON.parse(res.datas);
+                          if(type==1)
+                          {
+                            if(this.isSel)
+                            {
+                            $charts.readingTimeCharts("aloudline", this.readAllData.readingAloudTimeList, true);
+                          }
+                          else {
+                            $charts.readingTimeCharts("aloudline", this.readAllData.readTimeList, false);
+                          }
+                        }
+                        else {
+                          $charts.readWordCountCharts('wordNumber',this.readAllData.readWordNumList)
+                        }
+                    }
+                  }
+                });
+                },
+                prevClick: function () {
+                    this.nowTimeText = this.prevTimeText;
+                    this.prevTimeText = this.getDateStr(new Date(this.nowTimeText), -6);
+                    this.timeText = this.prevTimeText + '~' + this.nowTimeText;
+                    this.studentReadTimeCount(this.prevTimeText, this.nowTimeText,1);
+                },
+                nextClick: function () {
+                    var time = this.nowTimeText;
+                    if (time < $comm.jsDateFormat(new Date(), "yyyy-MM-dd")) {
+                        var _now = this.getDateStr(new Date(time), 0);
+                        var _next = this.getDateStr(new Date(time), 6);
+                        this.nowTimeText = _next;
+                        this.prevTimeText = _now;
+                        this.timeText = _now + '~' + _next;
+                        this.studentReadTimeCount(_now, _next,1);
+                    }
+                },
+                prevClickReadWord: function () {
+                    this.nowReadWordTimeText = this.prevReadWordTimeText;
+                    this.prevReadWordTimeText = this.getDateStr(new Date(this.prevReadWordTimeText), -6);
+                    this.readWordtimeText = this.prevReadWordTimeText + '~' + this.nowReadWordTimeText;
+                    this.studentReadTimeCount(this.prevReadWordTimeText, this.nowReadWordTimeText,2);
+                },
+                nextClickReadWord: function () {
+                    var time = this.nowReadWordTimeText;
+                    if (time < $comm.jsDateFormat(new Date(), "yyyy-MM-dd")) {
+                        var _now = this.getDateStr(new Date(time), 0);
+                        var _next = this.getDateStr(new Date(time), 6);
+                        this.nowReadWordTimeText = _next;
+                        this.prevReadWordTimeText = _now;
+                        this.readWordtimeText = _now + '~' + _next;
+                        this.studentReadTimeCount(_now, _next,2);
+                    }
+                },
+                aloudReadingTimeClick: function (type) {
+                    this.isSel = true;
+                    $charts.readingTimeCharts(type, this.readAllData.readingAloudTimeList, true);
+                },
+                readSilentlyTimeClick: function (type) {
+                    this.isSel = false;
+                    $charts.readingTimeCharts(type, this.readAllData.readTimeList, false);
+                },
+                funErr: function (e) {
+                    // this.toast.fail({
+                    //     title: '网络异常，请检查网络链接'
+                    // })
+                    api.toast({
+                      msg: "网络异常，请检查网络链接",
+                      duration: 2000,
+                      location: 'middle'
+                    });
+                }
+            }
+        })
+    }
+</script>
+
+</html>

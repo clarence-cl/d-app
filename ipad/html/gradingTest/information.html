@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>录入信息</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css">
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/information.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="top">
+            <div class="return" @touchend="exit">
+                <svg class="icon" aria-hidden="true">
+           <use xlink:href="#icon-fh_"></use>
+       </svg>
+            </div>
+        </div>
+        <h1>你是？</h1>
+        <h2>嘀嗒根据性别定制测试内容</h2>
+        <div class="sex" v-if="init">
+            <svg class="icon" aria-hidden="true" @touchend="selInt(1)">
+        <use  xlink:href="#icon-boy_huaban"></use>
+    </svg>
+          <svg class="icon" aria-hidden="true" @touchend="selInt(2)">
+        <use xlink:href="#icon-girl-"></use>
+    </svg>
+        </div>
+        <div class="sex" v-if="!init">
+            <svg class="icon" aria-hidden="true" @touchend="selsex(1)">
+        <use v-if="onoff" xlink:href="#icon-boy_huaban"></use>
+        <use v-if="!onoff" xlink:href="#icon-xingbie-1"></use>
+    </svg>
+            <svg class="icon" aria-hidden="true" @touchend="selsex(2)">
+        <use v-if="!onoff" xlink:href="#icon-girl-"></use>
+        <use v-if="onoff" xlink:href="#icon-xingbie-2"></use>
+    </svg>
+        </div>
+        <h1>你在读？</h1>
+        <h2>嘀嗒根据年级阶段定制测试内容</h2>
+        <div class="grade">
+          <span v-for="(item, index) in gradeData" :class='selIndex==index?"sel":""' @touchend="sleGrade(item.grade,index)">{{item.grade|sinogram}}年级</span>
+            <!-- <span>二年级</span>
+            <span class="sel">三年级</span>
+            <span>四年级</span>
+            <span>五年级</span>
+            <span>六年级</span> -->
+        </div>
+        <div class="btn">
+            <button :class="select?'selected':'unselected'" @touchend="keepOn">提交</button>
+            <span>信息仅用于测试使用，嘀嗒会为你保密</span>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script>
+    apiready = function() {
+            var readingAloudTime = null;
+            var readingTime = null;
+            var app = new Vue({
+                        el: '#app',
+                        data: {
+                          gradeData:[],
+                          testId:api.pageParam.testId,
+                          grade:null,
+                          sexId:null,
+                          selIndex:-1,
+                          init:true,
+                          onoff:true,
+                          select:false
+                        },
+                        created: function() {
+
+                        },
+                        watch:{
+                            grade(){
+                              this.btnClass()
+                            },
+                          sexId(){
+                            this.btnClass()
+                          }
+                        },
+                        mounted(){
+                          this.getLevel()
+
+                        },
+                        filters:{
+                          sinogram(value){
+                            return $comm.convertToChsNumber(value)
+                          }
+                        },
+                        methods: {
+                          initData(){
+                            this.selIndex=-1,
+                            this.init=true,
+                            this.onoff=true,
+                            this.select=false
+                          },
+                            selsex(sex){
+                              if(sex!=this.sexId){
+                                this.onoff?this.sexId=1:this.sexId=2
+                                this.onoff= !this.onoff
+                              }
+                            },
+                            selInt(sex){
+                              this.init = false
+                              this.sexId=sex
+                              sex==1?this.onoff=false:this.onoff=true
+
+                            },
+                            btnClass(){
+                              if(this.testId&&this.grade&&this.sexId){
+                                this.select = true
+                              }
+                            },
+                            exit: function() {
+                                api.closeWin()
+                            },
+                            sleGrade(grade,index){
+                              this.selIndex = index
+                              this.grade = grade
+                            },
+                            startTest(){
+
+
+                              // var data = {
+                              //   testType:2
+                              // }
+                              // $comm.socket(8001,data,(res)=>{
+                              //   if(res){
+                              //     var ret = JSON.parse(res)
+                              //     if(ret.error==0){
+                              //       var Data = JSON.parse(ret.datas)
+                              //       console.log("完成——————————————————")
+                              //       api.openWin({
+                              //           name: 'gradReadTest',
+                              //           url: './gradReadTest.html',
+                              //           pageParam:{
+                              //             testId:Data.testID,
+                              //             testType:2
+                              //           }
+                              //       });
+                              //     }
+                              //   }
+                              // })
+                            },
+                            getLevel(){
+                              var data = {}
+                              $comm.socket(2012,data,(res)=>{
+                                let ret = JSON.parse(res);
+                                let Data = JSON.parse(ret.datas)
+                                let grades = Data.grades
+                                this.gradeData = grades.sort($comm.compare("grade"))
+                              })
+                            },
+                            keepOn(){
+                                // api.closeWin({
+                                //     name: 'index_home_win'
+                                // });
+                              if(this.testId&&this.grade&&this.sexId){
+                                var data = {
+                                  testID:this.testId,
+                                  grade:this.grade,
+                                  gender:this.sexId
+                                }
+                                $comm.socket(8002,data,(res)=>{
+                                  if(res){
+                                    ret = JSON.parse(res)
+                                    if(ret.errorMsg==0){
+                                      api.openWin({
+                                          name: 'gradReadTest',
+                                          url: './gradReadTest.html',
+                                          slidBackEnabled: false,
+                                          reload:true,
+                                          pageParam:{
+                                            testId:this.testId,
+                                            testType:2
+                                          }
+                                      });
+                                      //this.initData()
+                                    }
+                                  }
+                                })
+                              }else{
+                                console.log("信息为空")
+                              }
+                              return
+                            }
+                        }
+                    })
+                }
+</script>
+</html>

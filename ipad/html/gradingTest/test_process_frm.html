@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title></title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/test_process_frm.css">
+</head>
+
+<body id="body" class="body">
+    <div id="exit" class="icon-wrap">
+        <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-tongyongban_guanbianniu_moren"></use>
+        </svg>
+    </div>
+    <div class="text-content">
+        <h1 class="title">热身测结束，准备正式测试</h1>
+        <div>
+            <h2>1.正式测试一共两轮，第二轮根据你的成绩升降难度</h2>
+            <h2>2.每轮的朗读测试有三次机会，答题只有一次机会，请认真作答</h2>
+            <h2>3.两轮测试完会后给你一个大大的证书，可以分享给你的小伙伴</h2>
+            <h2>4.测试完毕会根据你的阅读能力级别，推荐适合的书</h2>
+            <h2>5.只有一次正式测试的机会，中途测试要重头开始</h2>
+        </div>
+    </div>
+    <div class="img-content">
+        <img src="../../../common/image/process.png" alt="process">
+    </div>
+    <div class="btn-wrap">
+        <div>
+            <button id="startTestBtn" class="start-test-btn">开始测试</button>
+        </div>
+        <div>
+            <button id="reTestBtn" class="btn">重新测试</button>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    apiready = function() {
+        adaptationModel();
+        bindEvent()
+    };
+
+    function bindEvent() {
+        $analysis.bindEvent($api.byId('exit'), 'touchend', function () {
+            goback();
+        }, '正式测引导页_关闭b');
+        $analysis.bindEvent($api.byId('startTestBtn'), 'touchend', function () {
+            goToTest();
+        }, '正式测引导页_开始测试b');
+        $analysis.bindEvent($api.byId('reTestBtn'), 'touchend', function () {
+            goback();
+        }, '正式测引导页_重新测试b');
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function goToTest() {
+        $storage.delStorage('test-count');
+        $storage.delStorage('test-choice-count');
+        $storage.delStorage('choice-list');
+        api.openFrame({
+            name: 'formal_testfrm',
+            url: './formal_testfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'formal_testfrm'
+            },
+            bounces: false,
+            reload: true
+                // animation: {
+                //     type: "ripple",
+                //     subType: "from_right",
+                //     duration: 1000
+                // }
+        });
+    }
+
+    function goback() {
+        toast.alert({
+            title: '确定要退出定级测试吗？',
+            msg: '退出以后下次需要从头开始，你确认要退出吗？',
+            buttons: [{
+                name: '继续测试',
+                onclick: function() {
+                    toast.hide();
+                }
+            }, {
+                name: '退出',
+                onclick: function() {
+                    toast.hide();
+                    api.openFrame({
+                        name: 'index_start_test',
+                        url: './index_start_test.html',
+                        pageParam: {
+                            name: 'index_start_test'
+                        },
+                        bounces: false,
+                        reload: true
+                    });
+                }
+            }]
+        });
+    }
+</script>
+
+</html>

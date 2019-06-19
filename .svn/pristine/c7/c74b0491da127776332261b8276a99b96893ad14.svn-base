@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>阅读代言人</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/taskStyle/bookSpokesman.css">
+</head>
+<body id="body">
+    <div id="app" v-cloak>
+        <div class="top">
+            <div @click="exitShareFeedback" class="icon-btn">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-zuoyoujiantou"></use>
+                </svg>
+            </div>
+            <span class="rule" @click="ruleCover">活动规则</span>
+            <h4>邀请好友得好礼</h4>
+        </div>
+        <div class="center clearfix">
+            <h1>{{ActivityTitle}}</h1>
+            <h2>{{ActivityName}}</h2>
+            <div class="share" id="share">
+                <div class="person">
+                    <img :src="userImage" class="head">
+                    <h5>我是阅读代言人 {{shareInfo.StudentName}}</h5>
+                    <p class="title">每天30分钟，每年一起读50本书</p>
+                </div>
+                <div class="book-map">
+                    <img :src="BookCover" class="book-img">
+                    <div class="read-r">
+                        <span class="name">{{shareInfo.StudentName}} 在读</span>
+                        <span class="book-name">{{shareInfo.BookName}}</span>
+                        <span :style="{visibility: canShare ? '' : 'hidden'}" class="name">这是我读的第{{shareInfo.BookReadIndex}}本书</span>
+                    </div>
+                    <p class="talk">{{shareInfo.RecommendInfo ? shareInfo.RecommendInfo : bookDesc}}</p>
+                </div>
+                <div class="read-day">
+                    <div>
+                        <p>连续阅读天数</p>
+                        <span><strong>{{shareInfo.SerialReadingDays}}</strong>天</span>
+                    </div>
+                    <div>
+                        <p>连续阅读字数</p>
+                        <span><strong>{{shareInfo.TotalReadNumber}}</strong>字</span>
+                    </div>
+                </div>
+                <div class="code">
+                    <div class="code-p">
+                      <p>扫码即送7天VIP</p>
+                      <div class="make">长按二维码 一起读书吧</div>
+                      <!-- <div class="make"><img src="../../../common/image/avatar.png">嘀嗒伴我读书</div> -->
+                    </div>
+                    <div class="code-img">
+                      <img :src="newShareUrl" class="qrcode-img">
+                      <img  src="../../../common/image/112.png">
+                    </div>
+                </div>
+                <div class="invite-number">
+                     <div><img src="../../../common/image/girl@3x.png"><img src="../../../common/image/boy@3x.png">...已有<span>{{ shareInfo.BookHeart }}</span>人成功接受邀请</div>
+                </div>
+            </div>
+            <div :style="{background: !canShare ? '#ccc' : '#00afd9'}" class="invite" @click="inviteFriend">分享给好友，邀请一起读书</div>
+        </div>
+        <div class="cover" v-show="isShowRule" @click="ruleClose" style="display:none">
+            <div class="popup">
+                <svg class="icon" aria-hidden="true" @click="ruleClose">
+                    <use xlink:href="#icon-tongyongban_guanbianniu_anxia"></use>
+                </svg>
+                <p>如果您是VIP用户，每邀请一个新用户成功注册使用，您和新用户会分别获得7天VIP。<br>本次活动最终解释权归嘀嗒伴我读书所有。</p>
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<!-- <script type="text/javascript" src="../../../common/script/html2canvas.min.js"></script> -->
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/html2canvas.min.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                isShowRule: false,
+                shareInfo: '',
+                userImage: '../../../common/image/avatar.png',
+                BookCover: '../../../common/image/book_cover.png',
+                bookDesc: '读书给人以乐趣，给人以光彩，给人以才干。',
+                ActivityName: '',
+                ActivityTitle: '',
+                canShare: false,
+                contentUrl:'',
+                doc:'',
+                newShareUrl:'',
+                flag:false,
+                flag1:false
+            },
+            created:function(){
+              this.pullDownFresh();
+              this.loadInfo();
+              // this.qrcode();
+            },
+            mounted: function () {
+                var that = this;
+                FastClick.attach(document.body);
+                that.toast = new customToast();
+            },
+            methods: {
+                // 下拉刷新
+                pullDownFresh:function(){
+                  var that = this;
+                  // var bounce=true;
+                  // api.setFrameAttr({
+                  //     name: 'grow_up_frm',
+                  //     bounces: true,
+                  // });
+                  api.setRefreshHeaderInfo({
+                        visible: true,
+                        // loadingImg: '../image/timg.gif',
+                        bgColor: '#fff',
+                        textColor: '#ccc',
+                        textDown: '下拉刷新...',
+                        textUp: '松开刷新...',
+                        showTime: true
+                    }, function(ret, err) {
+                        // _this.taskListWait();
+                        console.log('下拉刷新')
+                        // that.loadData();
+                        // that.loadRadar("readRadar02");
+                        setTimeout('api.refreshHeaderLoadDone()', '500');
+                        // api.setFrameAttr({
+                        //     name: 'grow_up_frm',
+                        //     bounces: false,
+                        // });
+                    });
+                    setInterval(function(){
+
+                    },1000)
+                },
+                ruleCover: function () {
+                    this.isShowRule = true;
+                },
+                ruleClose: function () {
+                    this.isShowRule = false;
+                },
+                loadInfo: function () {
+                    var that = this;
+                    $weChatShare.getSpokesmanInfo(function (resp) {
+                        // console.log(JSON.stringify(resp))
+                        if (resp.errCode === 0) {
+                            // that.qrcode(resp.ReadEndorsementModel.ShareUrl);
+                            that.doc = resp.ReadEndorsementModel.RecommendInfo ? resp.ReadEndorsementModel.RecommendInfo : '读书给人以乐趣，给人以光彩，给人以才干。'
+                            console.log(that.doc)
+                            that.ActivityName = resp.Activitys[0].ActivityName;
+                            that.ActivityTitle = resp.Activitys[0].ActivityTitle;
+                            that.shareInfo = resp.ReadEndorsementModel;
+                            if(resp.ReadEndorsementModel.HeadImgUrl){
+                              api.imageCache({
+                                  url: $comm.resUri + resp.ReadEndorsementModel.HeadImgUrl
+                              }, function(ret, err) {
+                                  that.userImage = ret.url || '../../../common/image/avatar.png';
+                              });
+                            }
+
+                            // that.userImage = resp.ReadEndorsementModel.HeadImgUrl ? ($comm.resUri + resp.ReadEndorsementModel.HeadImgUrl) : '../../../common/image/avatar.png';
+                            that.desc = resp.ReadEndorsementModel.Description;
+                            that.url = resp.ReadEndorsementModel.ShareUrl;
+                            that.shareQrcode = resp.ReadEndorsementModel.ShareQrcode;
+                            // that.BookCover = $comm.resUri + resp.ReadEndorsementModel.BookCover;
+                            api.imageCache({
+                                url: $comm.resUri + resp.ReadEndorsementModel.BookCover
+                            }, function(ret, err) {
+                                that.BookCover = ret.url || '../../../common/image/book_cover.png';
+                            });
+                            that.canShare = true;
+                            // console.log(that.url)
+                            setTimeout(function(){
+                                that.qrcode(that.url);
+                            },500)
+
+                            // that.drawImg();
+                        } else if (resp.errCode === 1028) {
+                            that.ActivityName = resp.Activitys[0].ActivityName;
+                            that.ActivityTitle = resp.Activitys[0].ActivityTitle;
+                            that.shareInfo = {
+                                StudentName: JSON.parse($storage.getStorage('user-info')).userName,
+                                TotalReadNumber: 0,
+                                SerialReadingDays: 0,
+                                BookReadIndex: 0,
+                                BookName: '嘀嗒伴我读书'
+                            };
+                            that.userImage = JSON.parse($storage.getStorage('user-info')).headimgUrl ? $comm.resUri + JSON.parse($storage.getStorage('user-info')).headimgUrl : '../../../common/image/avatar.png';
+                            that.canShare = false;
+
+                        } else {
+                            that.canShare = false;
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+
+                },
+                exitShareFeedback: function () {
+                    api.closeFrame({});
+                },
+                //畫二維碼
+                qrcode:function (content) {
+                    var that = this;
+                    var FNScanner = api.require('FNScanner');
+                    FNScanner.encodeImg({
+                        content: content,
+                        saveToAlbum: false,
+                        saveImg: {
+                            path: 'fs://qrcode' + Math.floor((Math.random() * 100) + 1) + 'goodShare.png',
+                            w: 100,
+                            h: 100
+                        }
+                    }, function(ret, err) {
+                        // alert($api.jsonToStr(ret))
+                        if (ret.status) {
+                            // $api.dom('.qrcode-img').src = ret.imgPath;
+                            that.newShareUrl = ret.imgPath;
+                            that.flag = true
+                            // console.log(that.flag)
+                            if(that.flag){
+                              that.drawImg();
+                            }
+
+                            // alert(JSON.stringify(ret));
+                        } else {
+                            // alert(JSON.stringify(err));
+                        }
+                    });
+                },
+                //畫分享頁面
+                drawImg:function(){
+                    var that = this;
+                    html2canvas(document.querySelector('#share'),{
+                      useCORS:true
+                    }).then(function(canvas){
+                      var image = new Image();
+                      image.src = canvas.toDataURL("image/png", 1);
+                      var base64Str = image.src.split('base64,')[1];
+                      console.log(base64Str)
+                      var imgPath = "fs://qrcode/";
+                      var imgName = Math.floor((Math.random() * 100) + 1) + "share.png";
+                      // console.log(imgName)
+                      var trans = api.require('trans');
+                      trans.saveImage({
+                          base64Str: base64Str, //base64字符串不能包含data:image/png;base64,前缀
+                          album: false,
+                          imgPath: imgPath,
+                          imgName: imgName
+                      }, function(ret, err) {
+                          if (ret.status) {
+                              // console.log('success')
+                              that.contentUrl = imgPath + imgName;
+                          } else {
+                              // alert(JSON.stringify(err));
+                              console.log('fail');
+                          }
+                      });
+                    });
+                    // console.log(shareInfo)
+                    //這裏想象著用畫布畫出來，但是思前想後換行等一系列有問題，放棄
+                    // var drawing = document.getElementById("myCanvas");
+                    // if(drawing.getContext){
+                    //   var c=document.getElementById("myCanvas");
+                    //   var ctx=c.getContext("2d");
+                    //   var img = new Image();
+                    //   var img1 = new Image();
+                    //   // simg.src = 'https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1537549551&di=3f8d4d76679adcae225387f7d6b199aa&src=http://gss0.baidu.com/-4o3dSag_xI4khGko9WTAnF6hhy/lvpics/h=800/sign=b49dc48f8718367ab28972dd1e728b68/9922720e0cf3d7ca7f0736d0f31fbe096a63a9a6.jpg'
+                    //   img.src = '../../../common/image/shares.png';
+                    //   img1.src = $comm.resUri+shareInfo.BookCover;
+                    //   img1.width = '40px';
+                    //   img1.height = '40px'
+                    //   img.onload = function(){
+                    //     // alert('加载完毕');
+                    //     ctx.drawImage(img,0,0);
+                    //     ctx.font="30px Arial";
+                    //     // ctx.textAlign = "center";
+                    //     ctx.fillText(shareInfo.RecommendInfo,50,50);
+                    //     ctx.fillText(shareInfo.SerialReadingDays,150,1050);
+                    //     ctx.fillText(shareInfo.TotalReadNumber,500,1050);
+                    //     ctx.fillText(shareInfo.StudentName+'  在读',400,200);
+                    //     ctx.fillText(shareInfo.BookName,430,230);
+                    //     ctx.fillText('这是我读的第'+shareInfo.BookReadIndex+'本书',280,260)
+                    //   }
+                    //   img1.onload = function(){
+                    //     ctx.drawImage(img1,600,200,80,80)
+                    //   }
+                    //   //将画布上的内容转为base64编码
+                    //   var imgUrl = drawing.toDataURL("image/png");
+                    //   console.log(imgUrl)
+                    //
+                    // }else{
+                    //   console.log(456)
+                    // }
+                },
+                inviteFriend: function () {
+                    var that = this;
+                    // if(that.flag){
+                    //   that.drawImg();
+                    // }else{
+                    //   toast.fail({
+                    //     title:'请稍后...'
+                    //   })
+                    //   setTimeout(function(){
+                    //     that.drawImg();
+                    //   },2000)
+                    // }
+
+                    console.log(that.canShare)
+                    if (!that.canShare) {
+                        return that.toast.fail({
+                            title: '阅读后再分享哦'
+                        })
+                    }
+                    if (!that.url || !that.shareQrcode || !that.desc) {
+                        return;
+                    }
+                    var params = {
+                        desc: that.desc,
+                        realShareImageUrl:that.contentUrl,
+                        readerPresent:true,
+                        url: that.url,
+                        shareQrcode: that.shareQrcode
+
+                    };
+                    console.log(JSON.stringify(params));
+                    $wechatShareAlert.show(params, function (type, ret) {
+                        if (ret.status) {
+                            that.toast.success({
+                                title: '分享成功'
+                            })
+                        } else {
+                            that.toast.fail({
+                                title: '请稍后...'
+                            })
+                            that.drawImg();
+                        }
+                    })
+                },
+                funErr: function () {
+                    this.toast.fail({
+                        title: '网络异常，请检查网络链接'
+                    })
+                }
+            },
+        });
+    };
+</script>
+</html>

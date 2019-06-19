@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>引导页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" href="../../css/myBookshelfStyle/reading_guide.css">
+</head>
+<body id="body" class="body">
+<div id="exit" class="exit-book-info">
+    <svg id="exitChangeBooks" class="icon icon-logo-exit" aria-hidden="true">
+        <use xlink:href="#icon-tongyongban_guanbianniu_moren"></use>
+    </svg>
+</div>
+<img id="unitCover" src="">
+<div id="startReadAloud" class="unit">
+    <h2 id="unitIndex"></h2>
+    <h1 id="bookName"></h1>
+    <p>一段朗读让今天的读书更投入，开始吧</p>
+    <svg class="icon" aria-hidden="true">
+        <use xlink:href="#icon-shijian"></use>
+    </svg>
+    <p class="unit-t">30分钟</p>
+    <span>此单元建议阅读时长</span>
+</div>
+<div id="map" class="map" style="display: none;">
+    <div class="map-bottom">
+        <div></div>
+        <div class="map-clear">
+            <i></i>
+            <div class="map-box">
+                <div class="map-txt">点击任意位置进入朗读过程哦~</div>
+            </div>
+            <div class="map-btn" id="userKnow">知道了</div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        adaptationModel();
+        loadUnitInfo(api.pageParam.data);
+        bindEvent();
+    };
+
+    function bindEvent() {
+        $analysis.bindEvent($api.byId('startReadAloud'), 'touchend', function () {
+            goToReadAloud();
+        }, '单元封面点击开始');
+
+        $analysis.bindEvent($api.byId('exit'), 'touchend', function () {
+            api.sendEvent({
+                name: 'turn-the-page'
+            });
+            api.closeWin({});
+        }, '单元封面点击关闭');
+    }
+
+    function goToReadAloud() {
+        api.openFrame({
+            name: 'unitReadingAloudTest',
+            url: './unit_ReadingAloudTest_frm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            bounces: false,
+            reload: true,
+            pageParam: {
+                bcid: api.pageParam.bcid,
+                data: api.pageParam.data,
+                testId: api.pageParam.testId,
+                bookchaptersData: api.pageParam.bookchaptersData,
+                chapters: api.pageParam.chapters,
+                timeCount: api.pageParam.timeCount
+            }
+        });
+    }
+
+    function loadUnitInfo(resp) {
+        $api.attr($api.byId('unitCover'), 'src', $comm.resUri + resp.bcover);
+        api.pageParam.chapters.forEach(function (item, index) {
+            if (api.pageParam.bcid === item.bcid) {
+                $api.html($api.byId('bookName'), item.bcname);
+                index += 1;
+                $api.html($api.byId('unitIndex'), '第' + index + '单元');
+            }
+        })
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+</script>
+</html>

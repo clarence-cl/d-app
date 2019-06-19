@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>我的朗读</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/myRead.css">
+	<style media="screen">
+		audio {
+			display: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="app">
+		<!-- 返回 -->
+		<div class="top">
+			<div class="return" @touchend="goback">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-fh_"></use>
+					 </svg>
+			</div>
+			<h1>我的朗读</h1>
+			<div class="return">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon"></use>
+					 </svg>
+			</div>
+		</div>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+		var app = new Vue({
+			el: '#app',
+			data: {},
+			mounted: function() {
+				this.myReadCon()
+			},
+			methods: {
+				myReadCon() {
+					api.openFrame({
+						name: 'myReadCon',
+						url: './myReadCon.html',
+						slidBackEnabled:false,
+						rect: {
+							x: 0,
+							y: 60,
+							w: 'auto',
+							h: 'auto'
+						}
+					});
+				},
+				goback: function() {
+					api.sendEvent({
+							name: 'backEvent'
+					});
+					api.closeWin({});
+				},
+			}
+		});
+	};
+</script>
+
+</html>

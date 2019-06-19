@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>测试结果</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/test_resultsfrm.css">
+</head>
+
+<body id="body" class="body">
+    <!--<div id="exitTestResults" class="icon-wrap">-->
+        <!--<i class="iconfont font_family icon-btn">&#xe6fe;</i>-->
+    <!--</div>-->
+    <!--<div id="weChatShare" class="icon-wrap-right">-->
+        <!--<i class="iconfont font_family icon-btn">&#xe6f1;</i>-->
+        <!--<span class="share-text">分享</span>-->
+    <!--</div>-->
+    <header class="header">
+        <div class="text-wrap">
+            <span class="desc-desc">我的报告</span>
+        </div>
+    </header>
+    <div class="content-box">
+    <div class="content">
+        <div class="title-desc-top">此次测试总用时 <span id="minutes" class="grade"></span> 分 <span id="seconds" class="grade"></span>秒，朗读测试最高分 <span class="grade" id="totalScore"></span>分，一共答对 <span class="grade" id="rightChoice"></span> 道题，答错 <span class="grade" id="errChoice"></span>            道阅读理解题。</div>
+        <div class="title-desc"><span id="userGrade"></span>年级的你，阅读能力水平已经达到 <span id="userlevelgrade"></span>，特颁发<svg class="icon icon-data" aria-hidden="true">
+            <use xlink:href="#icon-dingjice_dengji_shiheyuedu"></use>
+        </svg>
+            <span class="grade" id="levelName"></span>证书，请继续加油</div>
+        <div class="data-map">
+            <div class="data-results">
+                <div id="integrity" class="data">
+                    <svg class="icon icon-data" aria-hidden="true">
+                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_wanzhengduicon"></use>
+                    </svg>
+                    <h6 class="score" id="scoreIntegrity"></h6>
+                    <h6 class="desc">完整度</h6>
+                </div>
+            </div>
+            <div>
+                <div class="data-results">
+                    <div id="accuracy" class="data">
+                        <svg class="icon icon-data" aria-hidden="true">
+                            <use xlink:href="#icon-dingjice_zuizhongjieguoye_zhengqueduicon"></use>
+                        </svg>
+                        <h6 class="score" id="scoreAccuracy"></h6>
+                        <h6 class="desc">正确度</h6>
+                    </div>
+                </div>
+                <!-- <div class="desc-text">朗读水平</div> -->
+            </div>
+            <div class="data-results">
+                <div id="fluency" class="data">
+                    <svg class="icon icon-data" aria-hidden="true">
+                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_liuliduicon"></use>
+                    </svg>
+                    <h6 class="score" id="scoreFluency"></h6>
+                    <h6 class="desc">流利度</h6>
+                </div>
+            </div>
+            <div class="data-circle">
+                <div>
+                    <svg width="180" height="180" viewbox="0 0 660 660">
+                        <circle cx="330" cy="330" r="220" stroke-width="120" stroke="#E8E8E8" fill="none"></circle>
+                        <circle cx="330" cy="330" r="220" stroke-width="120" stroke="#1cda95" fill="none" transform="matrix(0,-1,1,0,0,660)" stroke-dasharray="0 1382" stroke-linecap="none"></circle>
+                    </svg>
+                    <div class="desc-circle-wrap">
+                        <h1 class="desc-circle-text">超越</h1>
+                        <div id="percentage" class="desc-circle">82%</div>
+                    </div>
+                </div>
+                <h6 class="desc-result-top">共有<span id="testUserCount"></span>人完成了此项测试</h6>
+                <h6 class="desc-result">你超越了<span id="percentageSmall"></span>%的同龄人</h6>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="check-report-wrap">
+        <div id="exitTestResults" class="start-btn">开始选书</div>
+        <div class="check-report" id="goBack">
+            查看
+            <svg class="icon icon-check" aria-hidden="true">
+                <use xlink:href="#icon-dingjice_xiangxiacaidan"></use>
+            </svg>
+            证书
+        </div>
+        <div id="weChatShare" class="share-btn">炫耀一下</div>
+    </div>
+    <div id="maskWrap" class="mask-wrap">
+        <div class="mask">
+            <div class="icon-mask">
+                <svg id="maskIcon" class="icon mask-icon" aria-hidden="true">
+                    <use xlink:href="#icon-jiazaijindu2"></use>
+                </svg>
+                <div id="maskProgress" class="mask-progress"></div>
+            </div>
+            <div class="mask-text">
+                正在为你定制属于你自己的专属阅读书单
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var timer = null;
+    apiready = function() {
+        adaptationModel();
+        reloadResultUI(api.pageParam.data);
+        bindEvent();
+    };
+
+    function bindEvent() {
+        $api.byId('goBack').addEventListener('touchend', function() {
+            goBack();
+        });
+        $api.byId('weChatShare').addEventListener('touchend', function() {
+            $weChatShare.shareEntranceCertificate(funShareSuc, funErr)
+        }, '分享-入学测证书');
+        $api.byId('exitTestResults').addEventListener('touchend', function() {
+            loadMaskUI();
+        })
+    }
+
+    function funShareSuc (resp) {
+        if (resp.errCode === 0) {
+            var params = {
+                desc: resp.Description,
+                url: resp.ShareUrl,
+                shareQrcode: resp.ShareQrcode
+            };
+            $wechatShareAlert.show(params, function (type, ret) {
+                if (ret.status) {
+                    toast.success({
+                        title: '分享成功'
+                    })
+                } else {
+                    toast.success({
+                        title: '分享失败'
+                    })
+                }
+            })
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funErr () {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        })
+    }
+
+    function loadMaskUI() {
+        if (timer) {
+            return;
+        }
+        $api.css($api.byId('maskWrap'), 'display: flex');
+        var deg = 0;
+        var progress = 0;
+        timer = setInterval(function() {
+            deg += 10;
+            progress = progress + 5;
+            $api.html($api.byId('maskProgress'), progress + '%');
+            $api.css($api.byId('maskIcon'), 'transform: rotate(' + deg + 'deg)');
+            if (progress > 100) {
+                clearInterval(timer);
+                $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijinduwancheng"></use>');
+                $api.css($api.byId('maskIcon'), 'transform: rotate(0deg)');
+                $api.html($api.byId('maskProgress'), '');
+                setTimeout(function() {
+                    goToBooks()
+                }, 500)
+            }
+        }, 25);
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function testCircle(percent) {
+        var perimeter = Math.PI * 2 * 220;
+        var circle = document.querySelectorAll("circle")[1];
+        circle.setAttribute('stroke-dasharray', perimeter * percent + " " + perimeter * (1 - percent));
+    }
+
+    function reloadResultUI(data) {
+        if (!data) {
+            return;
+        }
+        testCircle(data.percentage / 100);
+        var startTime = $storage.getStorage('test-start-time');
+        var endTime = new Date().getTime();
+        var testUsedTime = endTime - Number(startTime);
+        var minutes = Math.floor(testUsedTime % 3600000 / 60000);
+        var seconds = Math.floor((testUsedTime % (1000 * 60)) / 1000);
+        $api.html($api.byId('minutes'), minutes);
+        $api.html($api.byId('seconds'), seconds);
+        var userInfo = JSON.parse($storage.getStorage('user-info'));
+        var integrity = (data.complete > 35 ? data.complete : 35) + '%';
+        var accuracy = (data.correct > 35 ? data.correct : 35) + '%';
+        var fluency = (data.fluency > 35 ? data.fluency : 35) + '%';
+        $api.css($api.byId('integrity'), 'height:' + integrity + ';');
+        $api.css($api.byId('accuracy'), 'height:' + accuracy + ';');
+        $api.css($api.byId('fluency'), 'height:' + fluency + ';');
+        $api.html($api.byId('percentage'), data.percentage + '%');
+        $api.html($api.byId('percentageSmall'), data.percentage);
+        $api.html($api.byId('testUserCount'), data.testcount);
+        $api.html($api.byId('scoreIntegrity'), data.complete);
+        $api.html($api.byId('scoreAccuracy'), data.correct);
+        $api.html($api.byId('scoreFluency'), data.fluency);
+        $api.html($api.byId('totalScore'), data.readscore);
+        $api.html($api.byId('rightChoice'), $storage.getStorage('test-choice-count') ? $storage.getStorage('test-choice-count') : 0);
+        $api.html($api.byId('errChoice'), (6 - Number($storage.getStorage('test-choice-count'))));
+        $api.html($api.byId('userlevelgrade'), levelgrade(userInfo.gradeScaleName));
+        $api.html($api.byId('levelName'), userInfo.gradeScaleName);
+        $api.html($api.byId('titleName'), userInfo.userName);
+        $api.html($api.byId('userGrade'), userInfo.grade);
+
+        var eventProperty = {
+            '朗读最终成绩': data.readscore,
+            '答对情况': $storage.getStorage('test-choice-count') ? $storage.getStorage('test-choice-count') : 0
+        };
+
+        // $analysis.bindZhuge('正式测结果页_进入结果页b', eventProperty);
+    }
+
+    function levelgrade(level) {
+        var levelgradeTxt = '';
+        var intLevel = parseInt(level);
+        var grade = Math.ceil(intLevel / 4);
+        var gradestep = intLevel % 4;
+        switch (gradestep) {
+            case 1:
+                levelgradeTxt = grade + '年级初级';
+                break;
+            case 2:
+                levelgradeTxt = grade + '年级中级';
+                break;
+            case 3:
+                levelgradeTxt = grade + '年级中级';
+                break;
+            case 0:
+                levelgradeTxt = grade + '年级高级';
+                break;
+        }
+        return levelgradeTxt;
+    }
+
+    function goBack() {
+        api.closeWin({});
+    }
+
+    function goToBooks() {
+        api.openFrame({
+            name: 'recommended_books_frm',
+            url: './recommended_books_frm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'recommended_books_frm'
+            },
+            bounces: false,
+            animation: {
+                type: "movein",
+                subType: "from_right",
+                duration: 300
+            }
+        });
+    }
+</script>
+
+</html>

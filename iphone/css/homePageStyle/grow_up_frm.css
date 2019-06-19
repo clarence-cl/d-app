@@ -1,0 +1,475 @@
+@font-face {
+    font-family: 'font_family';
+    src: url('../../../common/fontclass/iconfont.eot');
+    src: url('../../../common/fontclass/iconfont.eot?#iefix') format('embedded-opentype'), url('../../../common/fontclass/iconfont.woff') format('woff'), url('../../../common/fontclass/iconfont.ttf') format('truetype'), url('../../../common/fontclass/iconfont.svg#font_family') format('svg');
+}
+
+.font_family {
+    font-family: "font_family" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}
+
+body {
+    background-color: #f6f6f6;
+}
+
+.header {
+    width: 100%;
+    height: 15rem;
+    padding-top: 5.75rem;
+    /*background: url(../../../common/skin/chengzhang@3x.png) no-repeat;
+    background-size: 100% 100%;*/
+    background-color: #fff;
+    color: #000;
+    box-sizing: border-box;
+}
+
+.header-t {
+    float: left;
+    margin-left: 4rem;
+}
+
+.header-t h1 {
+    font-size: 3rem;
+}
+
+.header-t h3 {
+    font-size: 2rem;
+}
+
+.tab {
+    position: relative;
+    width: 21.4rem;
+    float: right;
+    height: 3.9rem;
+    display: flex;
+    margin-top: 0.6rem;
+    margin-right: 4rem;
+}
+
+.tab span {
+    flex: 1;
+    display: inline-block;
+    width: 50%;
+    background-color: #fff;
+    color: #333;
+    font-size: 1.8rem;
+    line-height: 3.9rem;
+    text-align: center;
+    border: 1px solid #333;
+    box-sizing: border-box;
+}
+
+.tab .select {
+    background-color: #333;
+    color: #fff;
+}
+
+.tabLeft {
+    border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.tabRight {
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.vip {
+    position: absolute;
+    top: -1rem;
+    right: -1rem;
+}
+
+.vip .icon {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 4rem;
+    color: #333;
+    margin-left: 4rem;
+}
+
+.content {
+  background-color: #f6f6f6;
+    width: 100%;
+}
+
+.content>div {
+    width: 100%;
+    background-color: #fff;
+    padding-top: 2.4rem;
+    box-sizing: border-box;
+    margin-top: 1rem;
+}
+
+.basic {
+    height: 20rem;
+}
+.basic span{
+    font-size: 2rem;
+}
+.basic p {
+    font-family: Futura-CondensedExtraBold;
+    font-size: 8rem;
+    line-height: 2rem;
+    color: #00aeef;
+    margin-bottom: 3rem;
+}
+
+.basicList {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: space-around;
+    font-size: 1.5rem;
+}
+
+.basicList>div {
+    text-align: center;
+}
+
+.recent {
+    height: 33rem;
+}
+.recentList {
+    margin-top: 2rem;
+    padding: 0 4rem;
+    box-sizing: border-box;
+}
+
+.recentList div {
+    position: relative;
+    float: left;
+    margin-right: 3.4rem;
+}
+.recentList div:last-child{
+  margin-right: 0;
+}
+
+.recentList span {
+    position: absolute;
+    font-size: 1.1rem;
+    text-align: center;
+    width: 8.35rem;
+    height: 2.1rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 0 0 0.6rem 0;
+    color: #fff;
+    line-height: 2.1rem;
+}
+
+.recentList img {
+    width: 18rem;
+    height: 19.8rem;
+    border: 1px solid #bfbfbf;
+    -webkit-box-shadow: 0 5px 5px #8a8a8a;
+    -moz-box-shadow: 0 5px 5px #8a8a8a;
+    box-shadow: 0 5px 5px #8a8a8a;
+    box-sizing: border-box;
+}
+
+.grade {
+    height: 40rem;
+}
+
+.grade .icon {
+    color: #666;
+    /*font-size: 1.85rem;*/
+    vertical-align: 0;
+    margin-left: 0.9rem;
+}
+
+.grade p {
+    font-family: Futura-CondensedExtraBold;
+    font-size: 13rem;
+    color: #8fc31f;
+    text-align: center;
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.grade p span {
+    font-family: PingFangSC-Regular;
+    font-size: 2.8rem;
+    color: #333;
+}
+
+.progress {
+    width: 33.3rem;
+    margin: 0 auto;
+}
+
+.plan {
+    display: inline-block;
+    height: 1rem;
+    background-color: #8fc31f;
+    width: 26rem;
+    border-radius: 4.5px;
+    position: relative;
+    margin-left: 1rem;
+    margin-right: 1.5rem;
+    vertical-align: 0.3rem;
+}
+
+.number {
+    position: absolute;
+    top: -1.5rem;
+    left: 6.1rem;
+    width: 4rem;
+    height: 4rem;
+    background-color: #ffffff;
+    border: solid 0.3rem #8fc31f;
+    border-radius: 4rem;
+    line-height: 3.8rem;
+    box-sizing: border-box;
+    font-size: 2rem;
+    color: #8fc31f;
+    text-align: center;
+}
+
+.progress span {
+    font-size: 2.5rem;
+    color: #8fc31f;
+}
+.grade .level-desc{
+  font-size: 1.6rem;
+  text-align: center;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.grade .level-desc span{
+  color: #8fc31f;
+}
+
+.radar{
+  height: 90rem;
+  position: relative;
+}
+.radar .radar-p{
+  position: absolute;
+  width: 20%;
+  display: block;
+  right: 5rem;
+  font-size: 3rem;
+  color: #000;
+}
+#readRadar,#readRadar02{
+  height: 79rem;
+}
+.content .readingTime {
+    padding-top: 1.9rem;
+    height: 63.8rem;
+}
+
+.calendar {
+    float: left;
+    height: 6rem;
+    background-color: #00afd9;
+    border-radius: 0.6rem;
+    line-height: 6rem;
+    font-size: 2.5rem;
+    text-align: center;
+    color: #fff;
+}
+
+.readingTime h2 {
+    float: left;
+    line-height: 6rem;
+    margin-right: 2rem;
+}
+
+.calendar .icon {
+    vertical-align: 0;
+    font-size: 2rem;
+}
+
+.calendar .prev,
+.calendar .next {
+    width: 4.5rem;
+    height: 6rem;
+}
+
+.calendar .prev {
+    float: left;
+}
+
+.calendar .next {
+    transform: rotateZ(180deg);
+    float: right;
+}
+
+.btn {
+    float: right;
+    margin-right: 4rem;
+    padding: 0.9rem 1.8rem;
+    text-align: center;
+    border-radius: 0.6rem;
+    border: solid 1px #fe6e9b;
+    box-sizing: border-box;
+    color: #fe6e9b;
+    font-size: 1.8rem;
+}
+
+.btn.sel {
+    background-color: #fe6e9b;
+    color: #fff;
+}
+
+.footmark {
+    height: 38rem;
+}
+
+.footmark>p {
+    font-size: 2rem;
+    margin-top: 1.5rem;
+    margin-left: 4rem;
+    color: #666;
+    margin-bottom: 2.8rem;
+}
+
+.markAll {
+    width: 100%;
+    height: 26rem;
+    overflow: scroll;
+}
+
+.mark {
+    width: 100%;
+    overflow: scroll;
+    font-size: 2rem;
+    color: #333;
+}
+
+.dateLeft {
+    position: relative;
+    float: left;
+    width: 13.2rem;
+    height: 100%;
+    text-align: center;
+}
+.dateLeft>span{
+  color: #333;
+  font-size: 2rem;
+}
+
+.dateRight {
+    float: left;
+}
+
+.dateLeft>div {
+    position: relative;
+}
+
+.dateLeft i {
+    position: absolute;
+    top: 0.8rem;
+    right: -0.5rem;
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 1rem;
+    background-color: #ccc;
+}
+
+.dateRight {
+    border-left: 1px solid #999;
+    padding-left: 2.2rem;
+    font-size: 2rem;
+}
+
+.dateRight span {
+    color: #ccc;
+    font-size: 2rem;
+    margin-right: 2.5rem;
+}
+
+.dateRight p {
+    margin-bottom: 2rem;
+}
+
+.report {
+    display: none;
+}
+
+.report h3 {
+    font-family: PingFangSC-Medium;
+    font-size: 2.1rem;
+    color: #00aeef;
+    margin-left: 4rem;
+    border-left: 4px solid #00aeef;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+}
+
+.report .grade {
+    height: 45rem;
+}
+
+.report .readingTime h3 {
+    margin-bottom: 1rem;
+}
+.cover{
+  top:0;
+  left: 0;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+.cover .read—ability{
+  font-size: 2rem;
+  width: 50%;
+  background-color: #fff;
+  padding: 6rem;
+  box-sizing: border-box;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  border-radius: 1.5rem;
+  font-size: 3.5rem;
+}
+.cover .icon{
+  position: absolute;
+  left: 1.5rem;
+  top: 1.5rem;;
+}
+@media screen and (min-width: 750px) {
+  .cover .read—ability{
+    font-size: 4rem;
+  }
+  .radar{
+    height: 100rem;
+  }
+  #readRadar{
+    height: 91rem;
+  }
+}
+@media screen and (min-width: 640px) {
+  .radar{
+    height: 100rem;
+  }
+  #readRadar{
+    height: 91rem;
+  }
+}
+@media only screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3){
+  .header,.content>div{
+      padding: 0 6rem;
+  }
+  .header {
+      padding-top: 5.75rem;
+  }
+}

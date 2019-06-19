@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>测试</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/loginNewStyle/test.css">
+</head>
+<body>
+    <div id="app">
+      <h1>五分钟测出你的真实阅读水平</h1>
+      <h3>定制专属于你的阅读书单</h3>
+      <div class="content">
+           <div class="box">
+              <div class="border"><img src="../../../common/image/test/1.png"></div>
+              <p>海量数据模型分析</p>
+          </div>
+          <div class="box">
+              <div class="border"><img src="../../../common/image/test/1.png"></div>
+              <p>实时匹配精准定位</p>
+          </div>
+          <div class="box">
+              <div class="border"><img src="../../../common/image/test/1.png"></div>
+              <p>国际阅读素养标准</p>
+          </div>
+          <div class="box">
+              <div class="border"><img src="../../../common/image/test/1.png"></div>
+              <p>语文新课程标准</p>
+          </div>
+          <div class="box">
+              <div class="border"><img src="../../../common/image/test/1.png"></div>
+              <p>中文分级阅读标准</p>
+          </div>
+          <div class="box">
+              <div class="border"><img src="../../../common/image/test/1.png"></div>
+              <p>国际学生评价体系</p>
+          </div>
+      </div>
+      <button @click="currentBegin">立即开始</button>
+      <span>已有53665人进行测评</span>
+    </div>
+</body>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-login-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+apiready = function () {
+    // 竖屏
+    // api.setScreenOrientation({
+    //     orientation: 'portrait_up'
+    // });
+
+    var app = new Vue({
+      el:'#app',
+      data:{
+
+      },
+      mounted:function(){
+        // alert(2)
+      },
+      //去个人信息完善页面
+      personalInformation:function(){
+
+      },
+      methods:{
+        currentBegin:function(){
+          // console.log('我说')
+          api.setScreenOrientation({
+              orientation: 'landscape_left'
+          });
+          api.openWin({
+              // name: 'strat_testfrm',
+              // url: '../gradingTest/strat_testfrm.html',
+              name:'perfect_information',
+              url:'../personalCenter/perfect_information_first.html',
+              rect: {
+                  x: 0,
+                  y: 0,
+                  w: 'auto',
+                  h: 'auto'
+              },
+              pageParam: {
+                  name: 'perfect_information_first'
+              },
+              bounces: false,
+              slidBackEnabled: false
+          });
+        }
+      }
+    })
+};
+</script>
+
+</html>

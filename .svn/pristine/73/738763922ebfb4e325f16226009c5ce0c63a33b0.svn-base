@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>专属推荐</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/intelligentRecommendation.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- <div class="top">
+            <div class="return" @touchend="exit">
+                <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon-fh_"></use>
+         </svg>
+            </div>
+            <h1>专属推荐</h1>
+            <div class="return">
+                <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon"></use>
+         </svg>
+            </div>
+        </div> -->
+        <div class="center" style="padding-top:0;">
+            <div class="lead">
+                <img src="../../../common/image02/bg04.png">
+            </div>
+            <div class="book">
+                <div class="box" v-for="(item , index) in listData" @touchstart="start($event)" @touchend="goBookDetail($event,index,item.bookID)">
+                    <div class="bookImg">
+                        <img :src="resUrl+item.bookCover">
+                        <span class="type" v-for="(item1, index1) in item.dimensions" v-if="item1.dimensionTypeCode=='TSFL'?true:false">{{item1.dimensionName}}</span>
+                        <span class="level">{{item.level}}级</span>
+                    </div>
+                    <h2>{{item.bookName}}</h2>
+                    <p class="profile">
+                      {{item.description}}
+                    </p>
+                    <div class="hard">
+                        <span>难度</span>
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                        <i class="color"></i>
+                        <i class="color"></i>
+                    </div>
+                </div>
+                <!-- <div class="box">
+                    <div class="bookImg">
+                        <img src="../../../common/image02/book.png">
+                        <span class="type">科普</span>
+                        <span class="level">19级</span>
+                    </div>
+                    <h2>亚马孙雨林的故事</h2>
+                    <p class="profile">作品简介是作品简介是长袜子皮皮的作品简介的作品简介是作品简介是长袜子皮皮的作品简介的作品简介是作品简介是长袜子 皮皮的作品简介的作品简介是
+                    </p>
+                    <div class="hard">
+                        <span>难度</span>
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                        <i class="color"></i>
+                        <i class="color"></i>
+                    </div>
+                </div>
+                <div class="box">
+                    <div class="bookImg">
+                        <img src="../../../common/image02/book.png">
+                        <span class="type">科普</span>
+                        <span class="level">19级</span>
+                    </div>
+                    <h2>亚马孙雨林的故事</h2>
+                    <p class="profile">作品简介是作品简介是长袜子皮皮的作品简介的作品简介是作品简介是长袜子皮皮的作品简介的作品简介是作品简介是长袜子 皮皮的作品简介的作品简介是
+                    </p>
+                    <div class="hard">
+                        <span>难度</span>
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                        <i class="color"></i>
+                        <i class="color"></i>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+        <p v-if="onoff" style="text-align:center;height:2rem;color: #98aca8;">{{loadData}}</p>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+    apiready = function() {
+        var app = new Vue({
+            el: '#app',
+            data: {
+              listData:[],
+              resUrl:null,
+              page:1,
+              onoff:false,
+              loadData:"加载中...",
+              x1:0,
+              y1:0,
+              isHaveNextPage:true
+            },
+            mounted() {
+              this.resUrl = $comm.resUri
+              //this.getData(1)
+              this.pullDownFresh()
+              this.scroll()
+            },
+            methods: {
+              start(event){
+                this.x1 = event.touches[0].pageX
+                this.y1 = event.touches[0].pageY
+              },
+              goBookDetail(event,index,id){
+                var calX = event.changedTouches[0].pageX - this.x1||0
+                var calY = event.changedTouches[0].pageY - this.y1||0
+                if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+                  api.openWin({
+                      name: 'bookInfo',
+                      url: '../myBookshelf/VIPUser_bookInfo_win.html',
+                      bgColor:'#fff',
+                      slidBackEnabled:false,
+                      pageParam: {
+                          thisBookId: id
+                      }
+                  });
+                }
+              },
+            getData(pages) {
+                var data = {
+                  page:pages
+                }
+                $comm.socket(2014,data,(res)=>{
+                  if(res){
+                    console.log("智能推荐----------"+res)
+                    ret = JSON.parse(res)
+                    if(ret.error == 0){
+                      api.refreshHeaderLoadDone()
+                      Data = JSON.parse(ret.datas)
+                      // console.log("加载数据------"+Data.bookList)
+                        if(pages!=1){
+                          this.listData = (this.listData).concat(Data.bookList)
+                        }else{
+                          this.listData = Data.bookList
+
+                        }
+                      if(Data.isHaveNextPage){
+                        this.isHaveNextPage = Data.isHaveNextPage
+                        this.loadData = "没有更多了..."
+                      }
+                    }
+                  }
+                })
+                },
+                pullDownFresh: function() {
+                  var that = this;
+                  api.refreshHeaderLoading()
+                  api.setRefreshHeaderInfo({
+                    visible: true,
+                    loadingImg: '../image/timg.gif',
+                    bgColor: '#fff',
+                    textColor: '#ccc',
+                    textDown: '下拉更新...',
+                    textUp: '松开刷新...',
+                    showTime: true
+                  }, function(ret, err) {
+                    that.page = 1
+                    that.isHaveNextPage = true
+                    that.getData(1)
+                    // setTimeout(()=>{
+                    //   api.refreshHeaderLoadDone()
+                    // }, '1000');
+                  });
+                },
+                scroll() {
+                  var that = this
+                  api.addEventListener({
+                    name: 'scrolltobottom',
+                    extra: {
+                      threshold: 10 //设置距离底部多少距离时触发，默认值为0，数字类型
+                    }
+                  }, function(ret, err) {
+                    that.onoff= true
+                    that.loadData = "加载中..."
+                    console.log(that.page++)
+                    if(that.isHaveNextPage){
+                      that.getData(that.page++)
+                    }
+                  });
+                },
+                exit() {
+                    api.closeWin({})
+                }
+            }
+        })
+    }
+</script>
+
+</html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>默读页</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+	<script src="../../../common/fontclass/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+
+		// document.body.addEventListener('touchstart', function () { });
+	</script>
+	<link rel="stylesheet" href="../../css/myBookshelfStyle/readBooks_frm.css">
+</head>
+<body>
+<!-- <body style="-webkit-touch-callout:none;-webkit-user-select:text;-khtml-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-o-user-select:none;"> -->
+	<!-- <div id="reader-content" class="reader-content" style="width: 100%;  overflow-y: hidden;background-color: #CCE8CF;"> -->
+			<div id="reader-content" class="reader-content" style="width: 100%;  overflow-y: hidden;">
+	    <div class="go_bookfl">回朗读</div>
+	    <div id="goToTest" class="go_book">去测试</div>
+	    <!-- 菜单 -->
+		<div id="topMenu" class="top-menu">
+			<div class="text-color">
+				<div id="q_return" class="menu-fs">
+					<i class="iconfont icon-btn font_family">&#xe7a0;</i>
+					<span style="margin-right: 6rem;">返回</span>
+				</div>
+				<span id="menuUnitName" style="font-size: 2.4rem"></span>
+				<div style="float: right;" class="menu-fs">
+					<i class="iconfont  icon-btn font_family">&#xe721;</i>
+					<a href="#" style="color: #fff;">获取图书</a>
+				</div>
+			</div>
+		</div>
+		<div id="prevBtn" class="btn-prev" >
+			<div class="read-unit-name"><span id="menuUnitNameReading">单元名称</span></div>
+			<div class="positive-timing-read">
+				<i id="dot2" class='dot'></i><span id="time02"></span>
+			</div>
+		</div>
+		<!-- 气泡菜单 -->
+		<div id="divqp" class="btn-prev" style="z-index:1000;display:none;boder:1px solid 	#228B22; height:60px;width:50px;left:500px;top:400px;opacity:0.9;background-color:#00CD00;color:#FFFAFA">
+			<span style="boder:3px solid 	red;font-size:18px;">朗读</span>
+			<br>
+			<span style="boder:3px solid 	red;font-size:18px;">笔记</span>
+		</div>
+		<div id="box" class="text-wrap" style="width:100%;">
+			<div id="area"  style="width: 100%;"></div>
+		</div>
+		<div id="bottomMenu" class="bottom-menu">
+			<div class="text-color">
+				<div id="big_menu" class="menu-fs">
+					<i class="iconfont  icon-btn font_family">&#xe720;</i>
+					<span>目录</span>
+				</div>
+        <div class="text-color" style="float:right;">
+					<div class="menu-fs">
+            <i class="iconfont  icon-btn font_family"></i>
+            <span id="spanEye" style="color: #fff;">开启护眼</span>
+					</div>
+					<!--<span id="pageIndex">3/11</span>-->
+				</div>
+				<div style="float: right;font-size: 1.6rem;">
+					<div class="positive-timing">
+						<i id="dot" class='dot'></i><span id="time01"></span>
+					</div>
+					<!--<span id="pageIndex">3/11</span>-->
+				</div>
+			</div>
+		</div>
+		<!-- 目录列表 -->
+		<div class="map-menu" id='Map' style="display: none;"></div>
+		<div class="bigMenu" id="bigMenu" style="display: none;">
+			<div class="menu-h">
+				<div class="menu-t">
+					<img id="unitCover" src="">
+					<div class="menu-tr">
+						<h1 id="bookName"></h1>
+						<p id="unitName"></p>
+					</div>
+					<div class="pro-s">
+						<div class="plan">
+							<div id="readingProgressBar" class="progress-bar"></div>
+						</div>
+						<span id="readPlan"></span>
+					</div>
+				</div>
+			</div>
+			<div class="menu-f">
+				<div id="goToReadingAloud" class="li-dom">
+					<i class="iconfont font_family">&#xe71f;</i>
+					<p>嘀嗒朗读</p></div>
+				<ul id="ulWrap">
+				</ul>
+				<div id="goToChoice" class="li-dom">
+					<i class="iconfont font_family">&#xe723;</i>
+					<p>嘀嗒阅读测</p>
+					<span id="choice" class="iconfont font_family" style="color: #000000">&#xe724;</span>
+				</div>
+				<div class="menu-f-m"><i class="iconfont font_family">&#xe720;</i>目录</div>
+			</div>
+		</div>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/epub.min.js"></script>
+<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script> -->
+<script type="text/javascript" src="../../../common/script/libs/jszip315.min.js"></script>
+<script type="text/javascript" src="../../../common/script/hooks.js"></script>
+<!-- 存储在离线磁盘的缓存库，h5的只有5M -->
+<script type="text/javascript" src="../../../common/script/libs/localforage.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../newbieGuide/readBooks-guide.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-epubExtV1.js"></script>
+<script type="text/javascript">
+	// var Book = null;
+	// var Rendition=null;
+	//   var Displayed=null;
+	var timeCount = 0;
+	var interval = null;
+	var spinePosTo;
+	var spinePosFrom;
+	var readingPercentage = 0;
+	var toc;
+    var choiceComplete = false;
+    var toast = new customToast();
+    var finishCfi;
+    var bookPercentageEnd;
+		var arr = [];
+		var ReadWordCount;
+		var wordData;
+		//调用有效接口次数
+		var countWordIndex=0;
+		//在当前页阅读的有效字数
+		var readWordNumCount=0;
+		//打开阅读字数记录的次数
+		var recordID="";
+		var selectWordText="";//记录每次选择的文字
+		var isMove = false;
+		var moveX = 0;
+		var moveY = 0;
+		var startX, startY, moveEndX, moveEndY, X, Y, gesturesDirection;
+
+    apiready = function() {
+			//改为先打开图书
+		openEbook(api.pageParam.bookPath);
+		readLoadPage();
+	};
+function readLoadPage()
+{
+	timeCount = api.pageParam.timeCount ? api.pageParam.timeCount : 0;
+	refreshUIInfo();
+	initUIInfo();
+			loadMenuInfoUI();
+			bindEvent();
+	timeCountFun();
+}
+	function bindEvent() {
+        // $api.byId('prevBtn').addEventListener('touchstart',function(e) {
+				// }, false);
+        // $api.byId('prevBtn').addEventListener('touchmove', function(e) {
+				// 					e.preventDefault();
+				// 			});
+        // $api.byId('prevBtn').addEventListener('touchend', function(e)  {e.preventDefault();});
+
+		$api.byId('goToReadingAloud').addEventListener('touchend', function() {
+            $api.css($api.byId('bigMenu'), 'display:none');
+            $api.css($api.byId('Map'), 'display:none');
+		    goToReadAloud();
+		});
+
+		$api.byId('goToChoice').addEventListener('touchend', function() {
+            if (choiceComplete) {
+                $api.css($api.byId('bigMenu'), 'display:none');
+                $api.css($api.byId('Map'), 'display:none');
+                goToChoiceTest();
+			}
+		});
+		$api.byId('q_return').addEventListener('touchend', function() {
+            var eventProperty = {
+                '图书名称': api.pageParam.data.bname
+            };
+            // $analysis.bindZhuge('阅读返回', eventProperty);
+			goback();
+		});
+		$api.byId('goToTest').addEventListener('touchend', function() {
+			// $analysis.bindZhuge('阅读页去测试');
+            goToChoiceTest();
+		});
+		$api.byId('big_menu').addEventListener('touchend', function() {
+            var eventProperty = {
+                '是否VIP图书': api.pageParam.data.vipbook,
+                '图书名称': api.pageParam.data.bname,
+                '图书等级': api.pageParam.data.gradeScaleName,
+                '作者': api.pageParam.data.author,
+                '已读人数': api.pageParam.data.readingNumber,
+                '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+                '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+            };
+            // $analysis.bindZhuge('阅读目录', eventProperty);
+			$api.css($api.byId('bigMenu'), 'display:block');
+			$api.css($api.byId('Map'), 'display:block');
+            showMenu();
+		});
+		//气泡菜单
+						$api.byId('divqp').addEventListener('touchstart', function() {
+								$api.css(this, 'display:none;');
+								isDivqpDispay=false;
+							if(selectWordText)
+							{
+								alert("请大声朗读："+selectWordText);
+							}
+							else {
+								alert('没用获取到文字');
+							}
+						});
+    //护眼模式
+    $api.byId('spanEye').addEventListener('touchend', function() {
+      var spanEyeHmtl=$api.html($api.byId('spanEye'));
+      if(spanEyeHmtl=="关闭护眼")
+      {
+        $api.html($api.byId('spanEye'),"开启护眼");
+        $api.css($api.byId('box'), 'background:white');
+        $api.setStorage('isSpanEye', 'OFF');//关闭
+
+      }
+      else
+      {
+        var hmtl=$api.html($api.byId('area'));
+      //  alert(hmtl);
+        $api.html($api.byId('spanEye'),"关闭护眼");
+        $api.css($api.byId('box'), 'background:#FFFFE0');
+        $api.setStorage('isSpanEye', 'ON');//开启
+      }
+
+		});
+		$api.byId('Map').addEventListener('touchend', function() {
+			$api.css($api.byId('bigMenu'), 'display:none');
+			$api.css($api.byId('Map'), 'display:none');
+		});
+		$api.byId('ulWrap').addEventListener('touchend', function(e) {
+		    if (e.target && e.target.nodeName.toLowerCase() === 'p' && !isMove) {
+                $api.css($api.byId('bigMenu'), 'display:none');
+                $api.css($api.byId('Map'), 'display:none');
+								Rendition.display(e.target.id);
+			}
+		});
+        $api.byId('ulWrap').addEventListener('touchmove', function(e) {
+            moveX = moveX - e.pageX;
+            moveY = moveY - e.pageY;
+            if (Math.abs(moveX) > 10 || Math.abs(moveY) > 10) {
+                isMove = true;
+            } else {
+                isMove = false;
+            }
+        });
+        $api.byId('ulWrap').addEventListener('touchstart', function(e) {
+            isMove = false;
+            moveX = e.pageX;
+            moveY = e.pageY;
+        });
+	}
+
+	function goToReadAloud () {
+        clearInterval(interval);
+				if(Book)
+				{
+					Book.destroy();
+				}
+        api.openWin({
+            name: 'unit_ReadAloud',
+            url: './unit_ReadingAloudTest_frm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            bounces: false,
+						slidBackEnabled:false,
+			reload: true,
+            pageParam: {
+                bcid: api.pageParam.bcid,
+                testId: api.pageParam.testId,
+                data: api.pageParam.data,
+                bookchaptersData: api.pageParam.bookchaptersData,
+                chapters: api.pageParam.chapters
+            }
+        });
+	}
+
+	function loadMenuInfoUI() {
+		try
+		{
+		var bookInfo = api.pageParam.data;
+		$api.html($api.byId('bookName'), bookInfo.bname);
+        api.pageParam.chapters.forEach(function(item, index) {
+            if (item.bcid === api.pageParam.bcid) {
+				var unitIndex = index + 1;
+				$api.attr($api.byId('unitCover'), 'src',item.bccover === '' ? '../../../common/image/fengmian3@3x.png' : $comm.resUri + item.bccover);
+				$api.html($api.byId('unitName'), item.bcname);
+				$api.html($api.byId('menuUnitName'), item.bcname);
+				$api.html($api.byId('menuUnitNameReading'), item.bcname);
+				$api.html($api.byId('readPlan'), '已读' + item.readingPercentage + '%');
+				$api.byId('readingProgressBar').style.width = item.readingPercentage + '%';
+				if (item.choiceComplete) {
+                    choiceComplete = true;
+                    $api.byId('choice').style.display = 'none';
+                }
+                toc = item.toc ? item.toc : [];
+			}
+		});
+        toc.length > 0 && toc.forEach(function (item, index) {
+            var liDom = '<li><p id="'+ item.cfi +'">' + item.label + '</p></li>';
+            $api.append($api.byId('ulWrap'), liDom);
+        });
+        //设置背景颜色#EEE8AA/white
+        var spanEyeBackgroundColor=  $api.getStorage('isSpanEye');
+        if(spanEyeBackgroundColor)
+        {
+          if(spanEyeBackgroundColor=="ON")
+          {
+            $api.html($api.byId('spanEye'),"关闭护眼");
+            $api.css($api.byId('box'), 'background:#FFFFE0');
+          }
+          else
+          {
+            $api.html($api.byId('spanEye'),"开启护眼");
+            $api.css($api.byId('box'), 'background:white');
+          }
+        }
+			}
+			catch(e)
+			{
+				toast.fail({
+						title: "网络在偷偷在打盹儿哦，请重新打开吧~"
+				});
+				setTimeout(api.closeWin(),1000);
+			}
+	}
+
+	function timeCountFun() {
+		$api.byId('time01').innerHTML = timeCount + '分钟' ;
+		$api.byId('time02').innerHTML = timeCount + '分钟' ;
+		interval = setInterval(function() {
+			timeCount++;
+            $api.byId('time01').innerHTML = timeCount + '分钟';
+			$api.byId('time02').innerHTML = timeCount + '分钟';
+			if (timeCount >= 30) {
+                $api.css($api.byId('dot'), 'background-color: #428a32');
+				$api.css($api.byId('time01'), 'color: #428a32');
+				$api.css($api.byId('dot2'), 'background-color: #428a32');
+				$api.css($api.byId('time02'), 'color: #428a32')
+			}
+        }, 60000);
+	}
+
+	function initUIInfo() {
+		//将UI布局中主要对象的宽,高记录到localStorage中,以备后续使用(而不用临时再计算)
+		var uiInfo = $storage.getUIInfo();
+		$api.css($api.byId('reader-content'), 'height:' + uiInfo.content_h + 'px');
+		// $api.css($api.byId('box'), 'height:' + uiInfo.content_h + 'px');
+		// $api.css($api.byId('area'), 'height:' + uiInfo.content_h - 190 + 'px');
+		api.parseTapmode();
+	}
+
+	function pageChangingEnd () {
+console.log('pageChangingEnd结束');
+		var currentChapter = Book.currentChapter;
+        if (currentChapter.spinePos === Number(spinePosTo)) {
+			$api.byId('goToTest').style.display = 'block';
+            $homeService.pageChanging({
+                testId: api.pageParam.testId,
+                cfi : finishCfi,
+                percentage : 100,
+                bookpercentage : bookPercentageEnd
+            }, funSuc, funErr);
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	function pageChangingStart () {
+		console.log('pageChangingStart开始');
+        var currentChapter = Book.currentChapter;
+        if (currentChapter.spinePos === Number(spinePosFrom)) {
+            return false;
+        } else {
+            return true;
+        }
+	}
+
+	function goToChoiceTest() {
+        $homeService.finishReading( api.pageParam.testId, 100, funSucFinishRead, funErr);
+	}
+
+	function funSucFinishRead (resp) {
+	    if (resp.errCode === 0) {
+            clearInterval(interval);
+						if(Book)
+						{
+							//Book.destroy();
+						}
+            api.openWin({
+                name: 'unitChoiceTest',
+                url: './unit_choiceTest_frm.html',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                bounces: false,
+                reload: true,
+								slidBackEnabled:false,
+                pageParam: {
+                    bcid: api.pageParam.bcid,
+                    data: api.pageParam.data,
+                    testId: api.pageParam.testId,
+                    bookchaptersData: api.pageParam.bookchaptersData,
+                    chapters: api.pageParam.chapters,
+					timeCount: timeCount
+                }
+            });
+		} else {
+		}
+	}
+var setTimeoutWord=null;
+	function openEbook(filepath) {
+		wordData=null;
+		var uiInfo = $storage.getUIInfo();
+        var bookuri = $comm.resetFsUri(filepath);
+        var cssHref= $comm.resUri+'/Static/reader_pad.css?time=' + new Date().getTime();
+				 //cssHref="../../../ipad/css/reader_pad.css"
+				 //设置图书参数
+				 let bookParam={
+				 	bcid:api.pageParam.bcid,//当前单元的ID
+				 	cusTomchapters:api.pageParam.chapters,//自定义书目的json数据
+				 	bookSetParam:{
+				 		bookUri:bookuri,//打开当前书目的URL
+				 		dispayCfi:api.pageParam.cfi,//定位到书的某个cfi位置
+				 		dispayDiv:"area",//呈现的容器
+				 		smethod:"default",
+				 		sheight:api.winHeight-100,
+				 		swidth:api.winWidth-100,
+				 		stylesheet:cssHref,//"../../../ipad/css/reader_pad.css"//本地目录样式为什么不行？路径解析变了找不到文件？,// [cssHref],
+				 		flow:"auto"//ginated 分屏显示左边一段右边一段(一屏两页)//scrolled-doc一屏展示//auto
+				 	}
+				};
+				console.log('准备完毕')
+	setTimeout(function()
+	{
+		$epubExt.readBook(bookParam,bookCallback);
+	},100);
+		console.log('调用完毕')
+	}
+
+	function prevPage() {
+		if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+			$api.removeCls($api.byId('topMenu'), 'menu-show');
+			$api.addCls($api.byId('topMenu'), 'menu-hide');
+			$api.removeCls($api.byId('bottomMenu'), 'menu-show');
+			$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+			return;
+		}
+		if (Rendition) {
+			if(!isDivqpDispay)
+			{
+			Rendition.prev();
+			}
+			else {
+				alert('请取消选区，否则跳转到下一页默认（第一次）选中的文字获取不到')
+			}
+		}
+	}
+
+	function nextPage() {
+		if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+			$api.removeCls($api.byId('topMenu'), 'menu-show');
+			$api.addCls($api.byId('topMenu'), 'menu-hide');
+			$api.removeCls($api.byId('bottomMenu'), 'menu-show');
+			$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+			return;
+		}
+		if (Rendition) {
+			if(!isDivqpDispay)
+			{
+				Rendition.next();
+			}
+			else {
+				alert('请取消选区，否则跳转到下一页默认（第一次）选中的文字获取不到')
+			}
+		}
+	}
+
+	function funSucPageChanging(resp) {
+
+		if (resp.errCode === 0) {
+
+				$storage.setStorage('pageInfo',{
+					pagecount:finishCfi,
+					pageBcid:api.pageParam.bcid
+				});
+		} else {
+
+		}
+	}
+	function funSuc(resp) {
+
+		if (resp.errCode === 0) {
+			ReadWordCount = resp.ReadWordCount
+			toast.alert({
+				title: '是否去测试？',
+				msg: "本次阅读增加了<span style='color:#8fc31f;font-weight:bold'>"+readWordNumCount+"</span>有效阅读字数",
+					buttons: [{
+							name: '取消',
+							onclick: function() {
+									toast.hide();
+							}
+					}, {
+							name: '去测试',
+							onclick: function() {
+									goToChoiceTest();
+							}
+					}]
+			});
+
+				$storage.setStorage('pageInfo',{
+					pagecount:finishCfi,
+					pageBcid:api.pageParam.bcid
+				});
+		} else {
+			toast.alert({
+						// title: '本次阅读增加了'+ReadWordCount+'有效字数阅读量',
+					msg: '用小测试检验下阅读成果吧！',
+					buttons: [{
+							name: '取消',
+							onclick: function() {
+									toast.hide();
+							}
+					}, {
+							name: '去测试',
+							onclick: function() {
+									goToChoiceTest();
+							}
+					}]
+			});
+		}
+	}
+	function funErr(err) {
+        toast.fail({
+            title: "网络异常，请检查网络链接"
+        });
+	}
+
+    function funSucFinish (resp) {
+        if (resp.errCode === 0) {
+            $homeService.finishReading( api.pageParam.testId, parseInt(readingPercentage), funSucFinishReading, funErr);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funSucFinishReading (resp) {
+	    if (resp.errCode === 0) {
+            clearInterval(interval);
+            //api.closePopoverWin();
+            // api.openWin({
+            //     name: 'bookInfo',
+            //     url: './VIPUser_bookInfo_win.html',
+            //     pageParam: {
+            //         name: 'test'
+            //     }
+            // });
+
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+		}
+	}
+
+	//页面UI数据刷新
+	function refreshUIInfo() {
+		$comm.showLoading();
+		//记录UI宽高等信息
+		var uiInfo = {
+			win_h : api.winHeight,
+			win_w : api.winWidth,
+			frame_h : api.frameHeight,
+			frame_w : api.frameWidth,
+			//header_h : headerPosH,
+			//footer_h : footerPosH,
+			content_h : api.frameHeight,
+			content_w : api.frameWidth
+		};
+		//将UI布局中主要对象的宽,高记录到localStorage中,以备后续使用(而不用临时再计算)
+		$storage.setUIInfo(uiInfo);
+	}
+
+	function showMenu() {
+        if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+			$api.removeCls($api.byId('topMenu'), 'menu-show');
+			$api.addCls($api.byId('topMenu'), 'menu-hide');
+			$api.removeCls($api.byId('bottomMenu'), 'menu-show');
+			$api.addCls($api.byId('bottomMenu'), 'menu-hide');
+			// $api.byId('q_return').innerHTML = "";
+		} else {
+			$api.addCls($api.byId('topMenu'), 'menu-show');
+			$api.removeCls($api.byId('topMenu'), 'menu-hide');
+			$api.addCls($api.byId('bottomMenu'), 'menu-show');
+			$api.removeCls($api.byId('bottomMenu'), 'menu-hide');
+			// $api.byId('q_return').innerHTML = "返回";
+			}
+		}
+
+	function goback() {
+        $homeService.readingFinishCurrent(api.pageParam.bcid, api.pageParam.testId, 2, funSucFinish, funErr);
+        clearInterval(interval);
+				if(Book)
+				{
+					//Book.destroy();//释放时epub偶尔可能报错
+				}
+        api.closeToWin({
+					name:'bookInfo'
+				});
+        api.sendEvent({
+            name: 'turn-the-page',
+						extra: finishCfi
+        });
+	}
+	/*记录阅读图书的文字
+	*/
+	function writeWordNum(ret)
+	{
+		if(ret)
+		{
+			wordData=ret;
+					countWordIndex++;
+					if(setTimeoutWord)
+					{
+						clearTimeout(setTimeoutWord);
+					}
+					setTimeoutWord=setTimeout(function()
+					{
+						var wordText=wordData.word;
+						var cfi=wordData.cfi;
+						//console.log("获取到文字：----"+wordText);
+						var sum =-1;
+						if(wordText)
+						{
+								re = /[\u4E00-\u9FA5]/g; //测试中文字符的正则
+								if (re.test(wordText)) //使用正则判断是否存在中文
+								{
+										sum=wordText.match(re).length;
+								}
+								//记录阅读字数
+								readWordNumCount+=sum;
+								if(recordID)
+								{
+									var writeData={
+										recordID:recordID,
+										wordCount:sum
+									}
+									//console.log(JSON.stringify(writeData))
+									$homeService.RecordWordCount(writeData,
+									function(ret){
+										//console.log(JSON.stringify(ret))
+										if(ret.errCode==0)
+										{
+											//alert('记录成功：'+ret.WordCount)
+										}
+										else {
+											//记录失败
+										}
+									},funErr);
+								}
+								else {
+									//翻页时触发，放在加载页面时触发epubjs会加载不出图书
+									OpenWriteNum(sum);
+								}
+								//console.log('api.pageParam.testId='+api.pageParam.testId+'   cfi='+cfi+"             索引："+countWordIndex+' 页面停留够5秒调用一次接口记录字数：'+sum);
+						}
+
+					},5000);
+		}
+		else {
+			//没有获取到文字，报错
+		}
+	}
+
+	//打开图书阅读记录器
+	function OpenWriteNum(sum)
+	{
+		var openData={
+			bid: api.pageParam.data.bid,
+			bcid :api.pageParam.bcid
+		};
+
+			$homeService.BeginRecordWordCount(openData,
+			function(ret){
+
+				if(ret.errCode==0)
+				{
+					recordID=ret.RecordID;
+					if(sum&&sum>0)
+					{
+						//console.log('sum>0说明第一次进入该方法记录一下字数')
+						var writeData={
+							recordID:recordID,
+							wordCount:sum
+						}
+						$homeService.RecordWordCount(writeData,
+						function(ret){
+							if(ret.errCode==0)
+							{
+									//console.log('sum>0说明第一次进入该方法记录一下字数成功:'+sum)
+								//alert('记录成功：'+ret.WordCount)
+							}
+							else {
+								//记录失败
+							}
+						},funErr);
+					}
+				}
+				else {
+					//OpenWriteNum();
+				}
+			},funErr);
+	}
+	//************************************************************************************************************
+	//****************************************************书内的操作事件相关************************************
+	//************************************************************************************************************
+//图书相关回调
+function bookCallback(opea,data)
+{
+	switch (opea) {
+		case "disPlayBook":
+			$comm.hideLoading();//加载完成图书隐藏进度条
+			break;
+			case "noMoveScreen"://
+			console.log('点击屏幕')
+			break;
+			case "leftScreen":
+				console.log('左滑屏幕翻页')
+			break;
+			case "rightScreen":
+				console.log('右滑屏幕翻页')
+			break;
+			case "bookLastPage":
+				console.log('已经是本书的最后一章的最后一页了!');//电子书本身还有些结尾信息到这里其实书里面还有最后几页
+			break;
+			case "bookFristPage":
+				console.log('本书的第一章第一页!');
+				break;
+			case "fristPage":
+				console.log('自定义章节的第一章第一页：自定义章节是把原始多个章节合并到一个中');
+				break;
+			case "lastPage":
+					console.log('自定义章节的最后一章最后一页');
+					break;
+			case "selectWordText":
+			  console.log("选择的文字："+data);
+			break;
+		default:
+
+	}
+}
+
+	//选择的图书文字
+	function selectedWord(cfi,wordText)
+	{
+		  console.log(wordText);
+		if(wordText)
+		{
+
+			selectWordText=wordText;
+			//--------------------------------------气泡菜单逻辑---------------------------------开始-----
+					var classStyle='display:block;';
+					//classStyle = classStyle+"left:"+(touchendPageX+20)+"px;";
+						classStyle = classStyle+"top:"+(touchendPageY+120)+"px;";
+					$api.css($api.byId('divqp'), classStyle);
+					isDivqpDispay=true;
+					  console.log("气泡菜单");
+			//--------------------------------------气泡菜单逻辑---------------------------------结束-----
+		}
+
+	}
+</script>
+</html>

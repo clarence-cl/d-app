@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>默读页</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+	<script src="../../../common/fontclass/iconfont.js"></script>
+	<script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/myBookshelfStyle/readBooks_frm.css">
+</head>
+<body>
+<!-- <div id="reader-content" class="reader-content" style="width: 100%;  overflow-y: hidden;background-color: #CCE8CF;"> -->
+	<div id="reader-content" class="reader-content" style="width: 100%;  overflow-y: hidden;">
+	<div class="go_bookfl">回朗读</div>
+	<div id="goToTest" class="go_book">去测试</div>
+	<!-- 菜单 -->
+	<div id="topMenu" class="top-menu">
+		<div class="text-color">
+			<div id="q_return" class="menu-fs">
+				<i class="iconfont icon-btn font_family">&#xe700;</i>
+				<span style="margin-right: 6rem;">返回</span>
+			</div>
+			<!-- <span id="menuUnitName" style="font-size: 2.4rem;float: right"></span> -->
+			<!-- <div style="float: right;" class="menu-fs">
+				<i class="iconfont  icon-btn font_family">&#xe721;</i>
+				<a href="#" style="color: #fff;">获取纸书</a>
+			</div> -->
+		</div>
+	</div>
+	<div id="prevBtn" class="btn-prev">
+		<div class="read-unit-name"><span id="menuUnitNameReading">单元名称</span></div>
+		<div class="positive-timing-read">
+			<i id="dot2" class='dot'></i><span id="time02"></span>
+		</div>
+	</div>
+	<div id="box" class="text-wrap">
+		<div id="area"  style="width: 100%;"></div>
+	</div>
+	<div id="bottomMenu" class="bottom-menu">
+		<div class="text-color">
+			<div id="big_menu" class="menu-fs">
+				<i class="iconfont  icon-btn font_family">&#xe720;</i>
+				<span>目录</span>
+			</div>
+			<div style="float: right;font-size: 1.6rem;">
+				<div class="positive-timing">
+					<i id="dot" class='dot'></i><span id="time01"></span>
+				</div>
+				<!--<span id="pageIndex">3/11</span>-->
+			</div>
+		</div>
+	</div>
+	<!-- 目录列表 -->
+	<div class="map-menu" id='Map' style="display: none;"></div>
+	<div class="bigMenu" id="bigMenu" style="display: none;">
+		<div class="menu-h">
+			<div class="menu-t">
+				<img id="unitCover" src="">
+				<div class="menu-tr">
+					<h1 id="bookName"></h1>
+					<p id="unitName"></p>
+				</div>
+				<div class="pro-s">
+					<div class="plan">
+						<div id="readingProgressBar" class="progress-bar"></div>
+					</div>
+					<span id="readPlan"></span>
+				</div>
+			</div>
+		</div>
+		<div class="menu-f">
+			<div id="goToReadingAloud" class="li-dom">
+				<i class="iconfont font_family">&#xe71f;</i>
+				<p>嘀嗒朗读</p></div>
+			<ul id="ulWrap">
+			</ul>
+			<div id="goToChoice" class="li-dom">
+				<i class="iconfont font_family">&#xe723;</i>
+				<p>嘀嗒阅读测</p>
+				<span id="choice" class="iconfont font_family" style="color: #000000">&#xe724;</span>
+			</div>
+			<div class="menu-f-m" id="closeMenu"><i class="iconfont font_family">&#xe700;</i>返回</div>
+		</div>
+	</div>
+</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/epub.js"></script>
+<script type="text/javascript" src="../../../common/script/hooks.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/localforage.min.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/zip.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-epubExt.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/readBooks-guide.js"></script> -->
+<script type="text/javascript">
+    var Book = null;
+    var timeCount = 0;
+    var interval = null;
+    var spinePosTo;
+    var spinePosFrom;
+    var readingPercentage = 0;
+    var toc;
+    var choiceComplete = false;
+    var toast = new customToast();
+    var finishCfi;
+    var bookPercentageEnd;
+
+    apiready = function() {
+        timeCount = api.pageParam.timeCount ? api.pageParam.timeCount : 0;
+        refreshUIInfo();
+        initUIInfo();
+        loadMenuInfoUI();
+        openEbook(api.pageParam.bookPath);
+        bindEvent();
+        timeCountFun();
+    };
+
+    function bindEvent() {
+        var isMove = false;
+        var moveX = 0;
+        var moveY = 0;
+
+        var startX, startY, moveEndX, moveEndY, X, Y, gesturesDirection;
+
+        $api.byId('prevBtn').addEventListener('touchstart', function(e) {
+            gesturesDirection = 'noMove';
+            e.preventDefault();
+            startX = e.touches[0].pageX;
+            startY = e.touches[0].pageY;
+        }, false);
+
+        $api.byId('prevBtn').addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            moveEndX = e.changedTouches[0].pageX;
+            moveEndY = e.changedTouches[0].pageY;
+            X = moveEndX - startX;
+            Y = moveEndY - startY;
+            if ( Math.abs(X) > Math.abs(Y) && X > 0 ) {
+                gesturesDirection = 'right';
+            } else if ( Math.abs(X) > Math.abs(Y) && X < 0 ) {
+                gesturesDirection = 'left';
+            } else if ( Math.abs(Y) > Math.abs(X) && Y > 0) {
+            } else if ( Math.abs(Y) > Math.abs(X) && Y < 0 ) {
+            } else{
+                gesturesDirection = 'noMove';
+            }
+        });
+        $api.byId('prevBtn').addEventListener('touchend', function () {
+            switch (gesturesDirection) {
+                case 'right':
+                    // $analysis.bindZhuge('阅读翻页');
+                    prevPage();
+                    break;
+                case 'left':
+                    // $analysis.bindZhuge('阅读翻页');
+                    nextPage();
+                    break;
+                case 'noMove':
+                    showMenu();
+                    break;
+            }
+        });
+
+        $api.byId('goToReadingAloud').addEventListener('touchend', function() {
+            $api.css($api.byId('bigMenu'), 'display:none');
+            $api.css($api.byId('Map'), 'display:none');
+            goToReadAloud();
+        });
+
+        $api.byId('goToChoice').addEventListener('touchend', function() {
+            if (choiceComplete) {
+                $api.css($api.byId('bigMenu'), 'display:none');
+                $api.css($api.byId('Map'), 'display:none');
+                goToChoiceTest();
+            }
+        });
+        $api.byId('q_return').addEventListener('touchend', function() {
+            var eventProperty = {
+                '图书名称': api.pageParam.data.bname
+            };
+            // $analysis.bindZhuge('阅读返回', eventProperty);
+            goback();
+        });
+        $api.byId('goToTest').addEventListener('touchend', function() {
+            // $analysis.bindZhuge('阅读页去测试');
+            goToChoiceTest();
+        });
+        $api.byId('big_menu').addEventListener('touchend', function() {
+            var eventProperty = {
+                '是否VIP图书': api.pageParam.data.vipbook,
+                '图书名称': api.pageParam.data.bname,
+                '图书等级': api.pageParam.data.gradeScaleName,
+                '作者': api.pageParam.data.author,
+                '已读人数': api.pageParam.data.readingNumber,
+                '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+                '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+            };
+            // $analysis.bindZhuge('阅读目录', eventProperty);
+            $api.css($api.byId('bigMenu'), 'display:block');
+            $api.css($api.byId('Map'), 'display:block');
+            showMenu();
+        });
+        $api.byId('closeMenu').addEventListener('touchend', function() {
+            $api.css($api.byId('bigMenu'), 'display:none');
+            $api.css($api.byId('Map'), 'display:none');
+        });
+        $api.byId('ulWrap').addEventListener('touchend', function(e) {
+            if (e.target && e.target.nodeName.toLowerCase() === 'p' && !isMove) {
+                $api.css($api.byId('bigMenu'), 'display:none');
+                $api.css($api.byId('Map'), 'display:none');
+                Book.goto(e.target.id);
+            }
+        });
+        $api.byId('ulWrap').addEventListener('touchmove', function(e) {
+            moveX = moveX - e.pageX;
+            moveY = moveY - e.pageY;
+            if (Math.abs(moveX) > 10 || Math.abs(moveY) > 10) {
+                isMove = true;
+            } else {
+                isMove = false;
+            }
+        });
+        $api.byId('ulWrap').addEventListener('touchstart', function(e) {
+            isMove = false;
+            moveX = e.pageX;
+            moveY = e.pageY;
+        });
+    }
+
+    function goToReadAloud () {
+        clearInterval(interval);
+        api.setScreenOrientation({
+            orientation: 'landscape_left'
+        });
+        api.openFrame({
+            name: 'unit_ReadAloud',
+            url: './unit_ReadingAloudTest_frm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            bounces: false,
+            reload: true,
+            pageParam: {
+                bcid: api.pageParam.bcid,
+                testId: api.pageParam.testId,
+                data: api.pageParam.data,
+                bookchaptersData: api.pageParam.bookchaptersData,
+                chapters: api.pageParam.chapters
+            }
+        });
+    }
+
+    function loadMenuInfoUI() {
+        var bookInfo = api.pageParam.data;
+        $api.html($api.byId('bookName'), bookInfo.bname);
+        api.pageParam.chapters.forEach(function(item, index) {
+            if (item.bcid === api.pageParam.bcid) {
+                var unitIndex = index + 1;
+                $api.attr($api.byId('unitCover'), 'src',item.bccover === '' ? '../../../common/image/fengmian3@3x.png' : $comm.resUri + item.bccover);
+                $api.html($api.byId('unitName'), item.bcname);
+                // $api.html($api.byId('menuUnitName'), item.bcname);
+                $api.html($api.byId('menuUnitNameReading'), item.bcname);
+                $api.html($api.byId('readPlan'), '已读' + item.readingPercentage + '%');
+                $api.byId('readingProgressBar').style.width = item.readingPercentage + '%';
+                if (item.choiceComplete) {
+                    choiceComplete = true;
+                    $api.byId('choice').style.display = 'none';
+                }
+                toc = item.toc ? item.toc : [];
+            }
+        });
+        toc.length > 0 && toc.forEach(function (item, index) {
+            var liDom = '<li><p id="'+ item.cfi +'">' + item.label + '</p></li>';
+            $api.append($api.byId('ulWrap'), liDom);
+        })
+    }
+
+    function timeCountFun() {
+        $api.byId('time01').innerHTML = timeCount + '分钟' ;
+        $api.byId('time02').innerHTML = timeCount + '分钟' ;
+        interval = setInterval(function() {
+            timeCount++;
+            $api.byId('time01').innerHTML = timeCount + '分钟';
+            $api.byId('time02').innerHTML = timeCount + '分钟';
+            if (timeCount >= 30) {
+                $api.css($api.byId('dot'), 'background-color: #428a32');
+                $api.css($api.byId('time01'), 'color: #428a32');
+                $api.css($api.byId('dot2'), 'background-color: #428a32');
+                $api.css($api.byId('time02'), 'color: #428a32')
+            }
+        }, 60000);
+    }
+
+    function initUIInfo() {
+        //将UI布局中主要对象的宽,高记录到localStorage中,以备后续使用(而不用临时再计算)
+        var uiInfo = $storage.getUIInfo();
+        $api.css($api.byId('reader-content'), 'height:' + uiInfo.content_h + 'px');
+        $api.css($api.byId('box'), 'height:' + uiInfo.content_h + 'px');
+        $api.css($api.byId('area'), 'height:' + uiInfo.content_h - 190 + 'px');
+        api.parseTapmode();
+    }
+
+    function pageChangingEnd () {
+        var currentChapter = Book.currentChapter;
+        if (currentChapter.spinePos === Number(spinePosTo)) {
+            $api.byId('goToTest').style.display = 'block';
+            $homeService.pageChanging({
+                testId: api.pageParam.testId,
+                cfi : finishCfi,
+                percentage : 100,
+                bookpercentage : bookPercentageEnd
+            }, funSuc, funErr);
+            toast.alert({
+                title: '恭喜你完成阅读',
+                msg: '用小测试检验下阅读成果吧！',
+                buttons: [{
+                    name: '取消',
+                    onclick: function() {
+                        toast.hide();
+                    }
+                }, {
+                    name: '去测试',
+                    onclick: function() {
+                        goToChoiceTest();
+                    }
+                }]
+            });
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function pageChangingStart () {
+        var currentChapter = Book.currentChapter;
+        if (currentChapter.spinePos === Number(spinePosFrom)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    function goToChoiceTest() {
+        $homeService.finishReading( api.pageParam.testId, 100, funSucFinishRead, funErr);
+    }
+
+    function funSucFinishRead (resp) {
+        if (resp.errCode === 0) {
+            clearInterval(interval);
+            api.setScreenOrientation({
+                orientation: 'landscape_left'
+            });
+            api.openFrame({
+                name: 'unitChoiceTest',
+                url: './unit_choiceTest_frm.html',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                bounces: false,
+                reload: true,
+                pageParam: {
+                    bcid: api.pageParam.bcid,
+                    data: api.pageParam.data,
+                    testId: api.pageParam.testId,
+                    bookchaptersData: api.pageParam.bookchaptersData,
+                    chapters: api.pageParam.chapters,
+                    timeCount: timeCount
+                }
+            });
+        } else {
+            console.log('err_funSucFinishReaded')
+        }
+    }
+
+    function openEbook(filepath) {
+        api.pageParam.bookchaptersData.chapters.forEach(function (item, index) {
+            if (item.bcid === api.pageParam.bcid) {
+                spinePosTo = item.spinePosTo;
+                spinePosFrom = item.spinePosFrom;
+            }
+        });
+        var uiInfo = $storage.getUIInfo();
+        var bookuri = $comm.resetFsUri(filepath);
+        // when i wrote this, only God and i understood what i was doing
+        // now, only God knows
+        var fs = api.require('fs');
+        fs.readDir({
+            path: 'fs://chivox'
+        }, function(ret, err) {
+            if (ret.status) {
+                console.log(JSON.stringify(ret));
+            } else {
+                console.log(JSON.stringify(err));
+            }
+        });
+        fs.readDir({
+            path: 'fs://book'
+        }, function(ret, err) {
+            if (ret.status) {
+                console.log(JSON.stringify(ret));
+            } else {
+                console.log(JSON.stringify(err));
+            }
+        });
+        var cssHref= $comm.resUri+'/Static/reader_phone.css?time=' + new Date().getTime();
+        Book = ePub(bookuri, {
+            width: uiInfo.content_w - 30,
+            height: uiInfo.content_h - 190,
+            restore: false,
+            spreads: false,
+            //storage : true,
+            fromStorage : false,
+            fixedLayout : false,
+            funcEnd : pageChangingEnd,
+            funcStart: pageChangingStart,
+            customStyleLinks: [cssHref]
+        });
+        if (Book) {
+            Book.renderTo('area');
+            api.pageParam.cfi && Book.goto(api.pageParam.cfi);
+        }
+        setTimeout(function () {
+            $comm.hideLoading();
+        }, 5000);
+        $epubExt.initEpubExt(api.pageParam.data.bid, Book, api.pageParam.chapters, function(ret) {
+            if (ret.func === 'pagelist') {
+                $comm.hideLoading();
+            } else if (ret.func === 'pagechange') {
+                readingPercentage = ret.chapterPercentage;
+                finishCfi = ret.cfi;
+                bookPercentageEnd = ret.bookPercentage;
+                $homeService.pageChanging({
+                    testId: api.pageParam.testId,
+                    cfi : ret.cfi,
+                    percentage : ret.chapterPercentage,
+                    bookpercentage : ret.bookPercentage
+                }, funSuc, funErr);
+            }
+        });
+    }
+    function resetEbookUri(filePath) {
+        //'../image/demo.zip'
+        var path = filePath.replace(/fs:\/\//g, '');
+        path = 'file:///' + api.fsDir + '/' + path;
+        return path;
+    }
+    function prevPage() {
+        if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+            $api.removeCls($api.byId('topMenu'), 'menu-show');
+            $api.addCls($api.byId('topMenu'), 'menu-hide');
+            $api.removeCls($api.byId('bottomMenu'), 'menu-show');
+            $api.addCls($api.byId('bottomMenu'), 'menu-hide');
+            return;
+        }
+        if (Book) {
+            Book.prevPage();
+        }
+    }
+
+    function nextPage() {
+        if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+            $api.removeCls($api.byId('topMenu'), 'menu-show');
+            $api.addCls($api.byId('topMenu'), 'menu-hide');
+            $api.removeCls($api.byId('bottomMenu'), 'menu-show');
+            $api.addCls($api.byId('bottomMenu'), 'menu-hide');
+            return;
+        }
+        if (Book) {
+            Book.nextPage();
+        }
+    }
+
+    function funSuc(resp) {
+        if (resp.errCode === 0) {
+            console.log('翻页成功')
+        } else {
+            console.log('翻页err')
+        }
+    }
+    function funErr(err) {
+        toast.fail({
+            title: "网络异常，请检查网络链接"
+        });
+        console.log(err);
+    }
+
+    function funSucFinish (resp) {
+        if (resp.errCode === 0) {
+            $homeService.finishReading( api.pageParam.testId, parseInt(readingPercentage), funSucFinishReading, funErr);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funSucFinishReading (resp) {
+        if (resp.errCode === 0) {
+            clearInterval(interval);
+            //api.closePopoverWin();
+            // api.openWin({
+            //     name: 'bookInfo',
+            //     url: './VIPUser_bookInfo_win.html',
+            //     pageParam: {
+            //         name: 'test'
+            //     }
+            // });
+
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    //页面UI数据刷新
+    function refreshUIInfo() {
+        $comm.showLoading();
+        //记录UI宽高等信息
+        var uiInfo = {
+            win_h : api.winHeight,
+            win_w : api.winWidth,
+            frame_h : api.frameHeight,
+            frame_w : api.frameWidth,
+            //header_h : headerPosH,
+            //footer_h : footerPosH,
+            content_h : api.frameHeight,
+            content_w : api.frameWidth
+        };
+        //将UI布局中主要对象的宽,高记录到localStorage中,以备后续使用(而不用临时再计算)
+        $storage.setUIInfo(uiInfo);
+    }
+
+    function showMenu() {
+        if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+            $api.removeCls($api.byId('topMenu'), 'menu-show');
+            $api.addCls($api.byId('topMenu'), 'menu-hide');
+            $api.removeCls($api.byId('bottomMenu'), 'menu-show');
+            $api.addCls($api.byId('bottomMenu'), 'menu-hide');
+            // $api.byId('q_return').innerHTML = "";
+        } else {
+            $api.addCls($api.byId('topMenu'), 'menu-show');
+            $api.removeCls($api.byId('topMenu'), 'menu-hide');
+            $api.addCls($api.byId('bottomMenu'), 'menu-show');
+            $api.removeCls($api.byId('bottomMenu'), 'menu-hide');
+            // $api.byId('q_return').innerHTML = "返回";
+        }
+    }
+
+    function goback() {
+        $homeService.readingFinishCurrent(api.pageParam.bcid, api.pageParam.testId, 2, funSucFinish, funErr);
+        api.setScreenOrientation({
+            orientation: 'landscape_left'
+        });
+        api.closeWin();
+        api.sendEvent({
+            name: 'turn-the-page'
+        });
+    }
+</script>
+</html>

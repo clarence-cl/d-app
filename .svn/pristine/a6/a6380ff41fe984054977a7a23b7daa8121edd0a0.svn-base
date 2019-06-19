@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>成长记录</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/grow_up_frm.css">
+</head>
+
+<body class="body">
+    <div id="app">
+        <div class="header">
+            <div class="header-t">
+                <h1 id="titleName">我的成长</h1>
+                <!-- <h3 id="titleType">成长记录</h3> -->
+            </div>
+            <div class="tab">
+                <span class="tabLeft" :class="[isSelTab ? 'select' : '']" @click="tabLeftClick">成长记录</span>
+                <span class="tabRight" :class="[isSelTab ? '' : 'select']" @click="tabRightClick">阅读报告</span>
+                <div class="vip">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-chengchang-VIP"></use>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="basic">
+                <h2>基本信息</h2>
+                <div class="basicList">
+                    <div>
+                        <p>{{growUpInfo.StudentReadingBookCount}}</p><span>在读的书</span></div>
+                    <div>
+                        <p>{{growUpInfo.HaveReadBookCount}}</p><span>读过的书</span></div>
+                    <div>
+                        <p>{{growUpInfo.LightUpBookCount}}</p><span>点亮的书</span></div>
+                    <div>
+                        <p>{{growUpInfo.LightUpChapterCount}}</p><span>完成的阅读单元</span></div>
+                    <div>
+                        <p>{{growUpInfo.TotalWordNumbers}}</p><span>总阅读字数</span></div>
+                </div>
+            </div>
+        </div>
+        <div v-show="isSelTab" class="content">
+            <div class="recent">
+                <h2>最近阅读</h2>
+                <div class="recentList" id="recentlyReadingBook">
+                    <div v-for="bookItem in recentlyReadingBook">
+                        <span>图书难度等级{{bookItem.GradeScaleName}}</span>
+                        <img :src="bookItem.CoverUrl">
+                    </div>
+                </div>
+            </div>
+            <div class="grade">
+                <h2>阅读能力等级<i class="icon font_family" @click="showLeverCover">&#xe77b;</i></h2>
+                <p>{{growUpInfo.SutdentLevel}}级</p>
+                <div class="progress">
+                    <span>1</span>
+                    <div class="plan">
+                        <div id="readingProgressBar" class="progress-bar"></div>
+                        <div class="number" :style="{left: levelWidth + 'rem'}">{{growUpInfo.SutdentLevel}}</div>
+                    </div>
+                    <span>24</span>
+                </div>
+                <div class="level-desc">阅读能力相当于<span>{{levelDesc}}</span>水平</div>
+            </div>
+            <div class="radar">
+                <h2>阅读能力雷达图</h2>
+                <div class="radar-p">
+                    <p>信息经验水平： <span>{{infoScore}}</span> </p>
+                    <p>文学经验水平： <span>{{literatureScore}}</span></p>
+                </div>
+                <div id="readRadar02"></div>
+            </div>
+            <div class="readingTime">
+                <div class="clearfix" style="z-index: 99">
+                    <h2>读书时长</h2>
+                    <div class="calendar">
+                        <div class="prev" @click="prevClick"><i class="icon font_family">&#xe78c;</i></div>
+                        <span>{{timeText}}</span>
+                        <div class="next" @click="nextClick"><i class="icon font_family">&#xe78c;</i></div>
+                    </div>
+                    <div class="btn" :class="[isSel ? 'sel' : '']" @click="aloudReadingTimeClick('readingline')">朗读时长</div>
+                    <div class="btn" :class="[isSel ? '' : 'sel']" style="margin-right: 1.5rem;" @click="readSilentlyTimeClick('readingline')">阅读时长</div>
+                </div>
+                <div class="readingline" id="readingline" style="height:60rem;"></div>
+            </div>
+            <div class="footmark">
+                <h2>阅读足迹</h2>
+                <p>仅显示最近100条</p>
+                <div class="markAll">
+                    <div class="mark" v-for="item in readingLog">
+                        <div :style="{visibility: item.day ? '' : 'hidden'}" class="dateLeft">
+                            <span>{{item.month + '.' + item.day}}</span>
+                        </div>
+                        <div class="dateRight">
+                            <p><span>{{item.hour + ":" + item.minute}}</span> {{"阅读图书《" + item.bookName + "》" + item.chapterName + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;共计" + item.readTime + "分钟&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;完成朗读：" + item.readScore + "分，阅读理解：" +
+                                item.choiceScore + "分"}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content" v-show="!isSelTab">
+            <div class="grade">
+                <!-- <h3>阅读能力</h3> -->
+                <h2>阅读能力等级<i class="icon font_family" @click="showLeverCover">&#xe77b;</i></h2>
+                <p>{{growUpInfo.SutdentLevel}}级</p>
+                <div class="progress">
+                    <span>1</span>
+                    <div class="plan">
+                        <!-- <div id="readingProgressBar" class="progress-bar"></div> -->
+                        <div class="number" :style="{left: levelWidth + 'rem'}">{{growUpInfo.SutdentLevel}}</div>
+                    </div>
+                    <span>24</span>
+                </div>
+                <div class="level-desc">阅读能力相当于<span>{{levelDesc}}</span>水平</div>
+            </div>
+            <div class="radar">
+                <h2>阅读能力雷达图</h2>
+                <div class="radar-p">
+                    <p>信息经验水平： <span>{{infoScore}}</span> </p>
+                    <p>文学经验水平： <span>{{literatureScore}}</span></p>
+                </div>
+                <div id="readRadar"></div>
+            </div>
+            <div class="readingTime" style="height: 70rem;">
+                <div class="clearfix" style="z-index: 99">
+                    <!-- <h3>阅读质量</h3> -->
+                    <h2>读书时长</h2>
+                    <div class="btn" :class="[isSel ? 'sel' : '']" @click="aloudReadingTimeClick('aloudline')">朗读时长</div>
+                    <div class="btn" :class="[isSel ? '' : 'sel']" style="margin-right: 1.5rem;" @click="readSilentlyTimeClick('aloudline')">阅读时长</div>
+                </div>
+                <div id="aloudline" class="aloudline" style="height: 60rem;"></div>
+            </div>
+            <div class="readingTime">
+                <h2>阅读量</h2>
+                <div id="readingNumber" style="height: 60rem;"></div>
+            </div>
+            <div class="readingTime">
+                <div class="clearfix" style="z-index: 99">
+                    <h2>读书成果</h2>
+                    <div class="btn" :class="[isSelAvg ? 'sel' : '']" @click="avgReadScoreClick">朗读平均分</div>
+                    <div class="btn" :class="[isSelAvg ? '' : 'sel']" style="margin-right: 1.5rem;" @click="avgChoiceScoreClick">阅读测平均分</div>
+                </div>
+                <div id="scoreline" style="height: 60rem;"></div>
+            </div>
+        </div>
+        <div class="cover" v-show="isShow" @click="closeShowCover">
+            <div class="read—ability">
+                <svg class="icon" aria-hidden="true" id="read-close">
+                    <use xlink:href="#icon-tongyongban_guanbianniu_anxia"></use>
+                </svg> 阅读能力等级来源于你在阅读能力大挑战和平时阅读表现的综合评估，根据阅读能力等级，嘀嗒会为你推荐合适难度的书籍。
+                <br>阅读合适难度的书籍，有助于不断激发你的阅读兴趣和阅读潜能、以超越同龄人1.5倍的速度获得阅读能力上的成长。
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-grow_up_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/echarts.min.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/charts.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                growUpInfo: {
+                    StudentReadingBookCount: '',
+                    HaveReadBookCount: '',
+                    LightUpBookCount: '',
+                    LightUpChapterCount: '',
+                    TotalWordNumbers: ''
+                },
+                recentlyReadingBook: [],
+                levelDesc: '',
+                levelWidth: 0,
+                timeText: '',
+                readingLog: [],
+                isDay: 0,
+                isSel: false,
+                isSelTab: true,
+                infoScore: '',
+                literatureScore: '',
+                isSelAvg: false,
+                isShow: false,
+            },
+            mounted: function() {
+                FastClick.attach(document.body);
+                this.toast = new customToast();
+                this.prevTimeText = this.getDateStr(new Date(), -6);
+                this.nowTimeText = this.getDateStr(new Date(), 0);
+                this.timeText = this.prevTimeText + '~' + this.nowTimeText;
+                //加载数据
+                this.loadData();
+                this.loadRadar("readRadar02");
+                var that = this;
+                api.addEventListener({
+                    name: 'turn-the-page-bookInfo'
+                }, function() {
+                    that.loadData();
+                });
+            },
+            methods: {
+                loadData: function() {
+                    this.loadGrowInfo();
+                    this.studentReadTimeCount(this.prevTimeText, this.nowTimeText);
+                    this.loadReadingLog();
+                },
+                loadGrowInfo: function() {
+                    var that = this;
+                    $growService.userGrowupInfo(function(resp) {
+                        if (resp.errCode === 0) {
+                            that.recentlyReadingBook = resp.growupInfo.RecentlyReadingBook.map(function(item) {
+                                item.CoverUrl = $comm.resUri + item.CoverUrl;
+                                return item;
+                            });
+                            resp.growupInfo.SutdentLevel = that.userLevel(resp.growupInfo.SutdentLevel);
+                            resp.growupInfo.TotalWordNumbers = that.wordNumbersLimit(resp.growupInfo.TotalWordNumbers);
+                            that.growUpInfo = resp.growupInfo;
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                userLevel: function(userLevel) {
+                    var level = userLevel.slice(0, userLevel.length - 1);
+                    this.levelWidth = 16.6 / 24 * level - 1.5;
+                    this.levelDesc = this.levelGrade(level);
+                    return level;
+                },
+                levelGrade: function(level) {
+                    var levelGradeTxt = '';
+                    var intLevel = parseInt(level);
+                    var grade = Math.ceil(intLevel / 4);
+                    var gradeStep = intLevel % 4;
+                    switch (gradeStep) {
+                        case 1:
+                            levelGradeTxt = grade + '年级初级';
+                            break;
+                        case 2:
+                            levelGradeTxt = grade + '年级中级';
+                            break;
+                        case 3:
+                            levelGradeTxt = grade + '年级中级';
+                            break;
+                        case 0:
+                            levelGradeTxt = grade + '年级高级';
+                            break;
+                    }
+                    return levelGradeTxt;
+                },
+                getDateStr: function(nowtime, AddDayCount) {
+                    var dd = nowtime;
+                    dd.setDate(dd.getDate() + AddDayCount); //获取AddDayCount天后的日期
+                    var y = dd.getFullYear();
+                    var m = (dd.getMonth() + 1) < 10 ? "0" + (dd.getMonth() + 1) : (dd.getMonth() + 1); //获取当前月份的日期，不足10补0
+                    var d = dd.getDate() < 10 ? "0" + dd.getDate() : dd.getDate(); //获取当前几号，不足10补0
+                    return y + "-" + m + "-" + d;
+                },
+                loadReadingLog: function() {
+                    var that = this;
+                    $growService.studentReadingLog(function(resp) {
+                        if (resp.errCode === 0) {
+                            var readingLogInfo = resp.ReadingLog;
+                            that.readingLog = readingLogInfo.map(function(item, index) {
+                                var time = new Date($comm.timeStamp(item.time));
+                                item.month = time.getMonth() + 1;
+                                item.day = time.getDate();
+                                item.hour = time.getHours() < 10 ? "0" + time.getHours() : time.getHours();
+                                item.minute = time.getMinutes() < 10 ? "0" + time.getMinutes() : time.getMinutes();
+                                if (that.isDay === 0) {
+                                    that.isDay = item.day
+                                } else {
+                                    if (that.isDay === item.day) {
+                                        item.day = false;
+                                    } else {
+                                        item.day = time.getDate();
+                                        that.isDay = item.day
+                                    }
+                                }
+                                return item;
+                            });
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                studentReadTimeCount: function(time, nextTime) {
+                    var that = this;
+                    $growService.studentReadTimeCountLog(time, nextTime, function(resp) {
+                        if (resp.errCode === 0) {
+                            that.readTimeCountLogData = resp.ReadTimeCountLog;
+                            $charts.readingTimeCharts("readingline", resp.ReadTimeCountLog, false);
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                prevClick: function() {
+                    this.nowTimeText = this.prevTimeText;
+                    this.prevTimeText = this.getDateStr(new Date(this.nowTimeText), -6);
+                    this.timeText = this.prevTimeText + '~' + this.nowTimeText;
+                    this.studentReadTimeCount(this.prevTimeText, this.nowTimeText);
+                },
+                nextClick: function() {
+                    var time = this.nowTimeText;
+                    if (time < $comm.jsDateFormat(new Date(), "yyyy-MM-dd")) {
+                        var _now = this.getDateStr(new Date(time), 0);
+                        var _next = this.getDateStr(new Date(time), 6);
+                        this.nowTimeText = _next;
+                        this.prevTimeText = _now;
+                        this.timeText = _now + '~' + _next;
+                        this.studentReadTimeCount(_now, _next);
+                    }
+                },
+                aloudReadingTimeClick: function(type) {
+                    this.isSel = true;
+                    $charts.readingTimeCharts(type, this.readTimeCountLogData, true);
+                },
+                readSilentlyTimeClick: function(type) {
+                    this.isSel = false;
+                    $charts.readingTimeCharts(type, this.readTimeCountLogData, false);
+                },
+                tabLeftClick: function() {
+                    this.isSelTab = true;
+                    this.loadRadar("readRadar02");
+                    console.log(1)
+                },
+                tabRightClick: function() {
+                    this.isSelTab = false;
+                    this.loadRadar("readRadar");
+                    this.studentReadNum();
+                    this.studentReadAvgScore();
+                },
+                studentReadNum: function() {
+                    var that = this;
+                    var _n = that.getDateStr(new Date(), 0);
+                    var _p = that.getDateStr(new Date(), -6);
+                    $growService.studentReadWordCountLog(_p, _n, function(resp) {
+                        if (resp.errCode === 0) {
+                            that.readWorzDate = resp.ReadWordLog;
+                            $charts.readWordCountCharts("readingNumber", that.readWorzDate);
+                            $charts.readingTimeCharts("aloudline", that.readTimeCountLogData, false);
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                studentReadAvgScore: function() {
+                    var that = this;
+                    var _n = that.getDateStr(new Date(), 0);
+                    var _p = that.getDateStr(new Date(), -6);
+                    $growService.studentReadAvgScoreLog(_p, _n, function(resp) {
+                        if (resp.errCode === 0) {
+                            that.readAvgScoreChartsData = resp.ReadAvgScoreLog;
+                            $charts.readAvgScoreCharts("scoreline", that.readAvgScoreChartsData, false);
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                avgReadScoreClick: function() {
+                    this.isSelAvg = true;
+                    $charts.readAvgScoreCharts("scoreline", this.readAvgScoreChartsData, true);
+                },
+                avgChoiceScoreClick: function() {
+                    this.isSelAvg = false;
+                    $charts.readAvgScoreCharts("scoreline", this.readAvgScoreChartsData, false);
+                },
+                showLeverCover: function() {
+                    this.isShow = true;
+                },
+                closeShowCover: function() {
+                    this.isShow = false;
+                },
+                loadRadar: function(rader) {
+                    var that = this;
+                    $growService.getReadingRadar(function(resp) {
+                        if (resp.errCode === 0) {
+                            var arr = [];
+                            that.infoScore = resp.InfoScore;
+                            that.literatureScore = resp.LiteratureScore;
+                            delete resp.errCode;
+                            delete resp.errMsg;
+                            delete resp.DefaultTime;
+                            delete resp.InfoScore;
+                            delete resp.LiteratureScore;
+                            for (var key in resp) {
+                                switch (key) {
+                                    case 'DimA1Score':
+                                        arr[0] = resp[key];
+                                        break;
+                                    case 'DimB2Score':
+                                        arr[5] = resp[key];
+                                        break;
+                                    case 'DimB3Score':
+                                        arr[4] = resp[key];
+                                        break;
+                                    case 'DimC4Score':
+                                        arr[3] = resp[key];
+                                        break;
+                                    case 'DimC5Score':
+                                        arr[2] = resp[key];
+                                        break;
+                                    default:
+                                        arr[1] = resp[key];
+                                }
+                            }
+                            $charts.readingTestRadar(rader,arr);
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr);
+                },
+                wordNumbersLimit: function(wordNumber) {
+                    if (wordNumber !== 0 && wordNumber > 1000000) {
+                        return parseInt(wordNumber / 10000) + '万'
+                    } else {
+                        return wordNumber;
+                    }
+                },
+                funErr: function(e) {
+                    this.toast.fail({
+                        title: '网络异常，请检查网络链接'
+                    })
+                }
+            }
+        })
+    }
+</script>
+
+</html>

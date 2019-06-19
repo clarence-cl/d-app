@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>图书详情</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <link rel="stylesheet" href="../../css/swiper.min.css">
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/VIPUser_bookInfo_win.css">
+</head>
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+        <!-- 返回 -->
+        <div class="top">
+            <div class="return" @touchend="back">
+               <svg class="icon" aria-hidden="true">
+                   <use xlink:href="#icon-fh_"></use>
+               </svg>
+            </div>
+            <div class="tab"><h1 class="select">读书<i></i></h1><h1>讲解<i></i></h1></div>
+            <div class="return">
+               <svg class="icon" aria-hidden="true">
+                   <use xlink:href="#icon"></use>
+               </svg>
+            </div>
+        </div>
+        <div class="read">
+           <!-- 推荐弹窗 -->
+           <div class="tip" v-show="tipIsShow">
+             <!-- <img src="../../../common/image02/head.png"> -->
+             <p v-if="resData.bookRecommendInfoList!=null&&resData.bookRecommendInfoList.length>0">{{ resData.bookRecommendInfoList[0].recommendInfo ? resData.bookRecommendInfoList[0].recommendInfo :'' }}</p>
+
+             <svg class="icon" aria-hidden="true" @touchend="closeTip">
+                 <use xlink:href="#icon-gb_-copy"></use>
+             </svg>
+           </div>
+           <!-- 图书详情 -->
+           <div class="book">
+             <div class="bookLeft">
+                <div class="recommend">
+                  <img :src="bookCover">
+                  <svg class="icon" aria-hidden="true" style="display:none">
+                      <use xlink:href="#icon-ks_h"></use>
+                  </svg>
+                </div>
+                <div :class="!give ? 'like' : 'like like1'">
+                  <svg class="icon" aria-hidden="true" @touchend="giveXin">
+                    <use xlink:href="#icon-geiwoyigehaoping" v-if="!give"></use>
+                    <use xlink:href="#icon-geiwoyigehaoping-red" v-if="give"></use>
+                  </svg>
+                  {{ resData ? resData.bookStatistics.heartCount :0 }}人觉得很棒！
+                </div>
+             </div>
+             <div class="bookRight">
+                 <h2>{{ resData.bookName }}</h2>
+                 <h3>{{ resData.author }}</h3>
+                 <div class="summary" @touchend="more">
+                    <div class="sel" :style="{transform:(hasLine?'rotate(180deg)':'rotate(0deg)')}">
+                      <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-sel"></use>
+                      </svg>
+                    </div>
+                    <p :class='[hasLine? " " : "oriline"]'>{{ resData.description }}</p>
+                 </div>
+                <div class="label">
+                    <span :class="tag.flag==1 ? 'tag01' :'tag02'" v-for="(tag,index) in labelArr" :key="index">{{ tag.dimensionName }}</span>
+                </div>
+             </div>
+           </div>
+           <!-- 图书字数，级别，单元 -->
+           <div class="number">
+             <div class="numberLeft">
+               <div>
+                 <span class="p1">{{resData.totalWord}}<span class="p2">字</span></span>
+                 <span class="p3">阅读量</span>
+               </div>
+               <div>
+                 <span class="p1">{{ bookChapterList.length }}<span class="p2">个</span></span>
+                 <span class="p3">阅读单元</span>
+               </div>
+               <!-- <div>
+                 <span class="p1">{{resData.suitableAge}}<span class="p2">+</span></span>
+                 <span class="p3">适龄</span>
+               </div> -->
+               <div>
+                 <span class="p1">{{resData.level}}<span class="p2">级</span></span>
+                 <span class="p3">图书难度</span>
+               </div>
+             </div>
+             <div class="numberRight">
+               <div>
+                 <span class="p1">{{  resData.bookStatistics.readCount }}<span class="p2">人在读</span></span>
+                 <span class="p3">{{  resData.bookStatistics.completeCount }}人已完成</span>
+               </div>
+               <div class="people">
+                 <img v-for="(item,index) in headInfo" :src="item.headImgUrl ? item.headImgUrl : '../../../common/image02/head.png'"  :key="index" v-if="index<4">
+                 <!-- <img src="../../../common/image02/logo.png">
+                 <img src="../../../common/image02/logo.png">
+                 <img src="../../../common/image02/logo.png"> -->
+                 <svg class="icon" aria-hidden="true">
+        						 <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+        				 </svg>
+               </div>
+             </div>
+           </div>
+           <!-- 进入阅读特效 -->
+           <div id="maskWrap" class="mask-wrap">
+            <div class="mask">
+                <div class="icon-mask">
+                    <svg id="maskIcon" class="icon mask-icon" aria-hidden="true">
+                        <use xlink:href="#icon-jiazaijindu2"></use>
+                    </svg>
+                    <div id="maskProgress" class="mask-progress"></div>
+                </div>
+                <div class="mask-text">
+                    正在进入在线阅读模式
+                </div>
+            </div>
+          </div>
+           <!-- 阅读目标 -->
+           <div class="target">
+               <h4>阅读目标</h4><span class="unitNumber">共{{ bookChapterList.length }}个阅读单元</span>
+               <!-- 阅读单元  swiper-->
+               <div class="unit">
+                 <div class="swiper-container">
+                     <div class="swiper-wrapper">
+                       <div class="swiper-slide" v-for="(item,index) in bookChapterList" :key="index" @click="goUnit(item.chapterIndex,item.chapterID,item.cfiFrom,item)">
+                         <div class="bookCover">
+                           <!-- 单元封面 -->
+                           <div class="bookMask">
+                             <img :src="item.chapterCover">
+                             <div class="mask01">
+                                <span class="span01">第{{ item.chapterIndex }}章</span>
+                                <span class="span02">{{ item.chapterName }}</span>
+                                <span class="span03">30分钟</span>
+                                <span class="span04">第{{ item.chapterIndex }}日</span>
+                                <svg class="icon" aria-hidden="true" v-if="item.isComplete">
+                                  <use xlink:href="#icon-yz_"></use>
+                                </svg>
+                             </div>
+                           </div>
+                           <!-- 锁 -->
+                           <div class="mask02">
+                             <svg class="icon" aria-hidden="true" v-if="resData.isCanRead===false">
+                               <use xlink:href="#icon-shangsuo-copy"></use>
+                             </svg>
+                           </div>
+                          </div>
+                          <div  class="list">
+                             <div class="box">
+                               <svg class="icon" aria-hidden="true">
+                                 <use xlink:href="#icon-ds-"></use>
+                               </svg>
+                               <!-- 星星 -->
+                               <div class="start" v-if="item.readStar === 0">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.readStar === 1">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.readStar === 2">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.readStar === 3">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                               </div>
+                             </div>
+                             <div class="box">
+                               <svg class="icon" aria-hidden="true">
+                                 <use xlink:href="#icon-ld_-"></use>
+                               </svg>
+                               <!-- 星星 -->
+                               <div class="start" v-if="item.readAloudStar === 0">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.readAloudStar === 1">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.readAloudStar === 2">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.readAloudStar === 3">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                               </div>
+                             </div>
+                             <div class="box">
+                               <svg class="icon" aria-hidden="true">
+                                 <use xlink:href="#icon-cs-"></use>
+                               </svg>
+                               <!-- 星星 -->
+                               <div class="start" v-if="item.choiceStar === 0">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.choiceStar === 1">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.choiceStar === 2">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                   </svg>
+                               </div>
+                               <div class="start" v-else-if="item.choiceStar === 3">
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                                   <svg class="icon" aria-hidden="true">
+                                       <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                   </svg>
+                               </div>
+                             </div>
+                          </div>
+                       </div>
+                     </div>
+                  </div>
+               </div>
+
+           </div>
+           <!-- 图书信息 -->
+           <div class="information">
+             <h5>图书信息</h5>
+             <p>版权信息方：春风文艺出版社</p>
+             <p>出版社：春风文艺出版社</p>
+             <p>ISBN: 978-7-5313-5260-0</p>
+             <p>出版日期：2017-05-01</p>
+           </div>
+           <!-- 开始读书，加入书架 -->
+           <div class="bottom">
+               <div class="btnLeft" @touchend="isAddBookShelf">
+                 <svg class="icon" aria-hidden="true" v-if="isInBookBox==false">
+                     <use xlink:href="#icon-jr_"></use>
+                 </svg>
+                 <svg class="icon" aria-hidden="true" v-if="isInBookBox==true">
+                     <use xlink:href="#icon-yc_"></use>
+                 </svg>
+                 <span>{{ isInBookBox==true ? '移除书架' : '加入书架' }}</span>
+               </div>
+               <div class="btnRight" @touchend="startReadGoal">
+                 <svg class="icon" aria-hidden="true" v-if="!resData.isCanRead">
+                     <use xlink:href="#icon-shangsuo-copy"></use>
+                 </svg>
+                 <span>开始第{{ days }}日阅读目标</span>
+               </div>
+           </div>
+        </div>
+        <div class="explain"></div>
+        <!-- 弹窗-解锁 -->
+        <div class="popup" v-show="unlockFlag">
+            <!-- 解锁内容 -->
+            <div class="unlock" v-show="unlockContent">
+              <svg class="icon close" aria-hidden="true" @touchend="closeVipToast">
+                  <use xlink:href="#icon-gb_-copy"></use>
+              </svg>
+              <h1>解锁完整内容</h1>
+              <svg class="icon lock" aria-hidden="true">
+                  <use xlink:href="#icon-jiesuo"></use>
+              </svg>
+              <h4>1年会员权限</h4>
+              <span @touchend="vipRight">了解并查看VIP详情</span>
+              <button @touchend="buyVip">388元/年</button>
+            </div>
+            <!-- 阅读方式 -->
+            <div class="readType" v-show="readOnline">
+              <svg class="icon close" aria-hidden="true" @touchend="closeRead">
+                  <use xlink:href="#icon-gb_-copy"></use>
+              </svg>
+              <h1>选择你的阅读方式</h1>
+              <div class="type">
+                <span :class="bookType==1 ? 'bgc' : 'bgc1'" @touchend="readNet">
+                  <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-zaixianyuedu-"></use>
+                  </svg>
+                  在线阅读
+                </span>
+                <span @touchend="readPaper">
+                  <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-sj_mr-"></use>
+                  </svg>
+                  纸书阅读
+                </span>
+              </div>
+              <span :class="isClickWantOnLine ? 'apply click' :'apply'" @touchend="apply">
+                <svg class="icon" aria-hidden="true" v-if="!isClickWantOnLine">
+                    <use xlink:href="#icon-fasong-"></use>
+                </svg>
+                <svg class="icon" aria-hidden="true" v-if="isClickWantOnLine">
+                    <use xlink:href="#icon-fasong-1"></use>
+                </svg>
+                已有{{ resData.bookStatistics.wantOnLineCount }}人申请上架本书
+              </span>
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/require.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script src="../../../common/script/lib-analysis.js"></script>
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript" src="../../../common/script/swiper.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript">
+// alert(9)
+    apiready = function (){
+    var swiper02 = new Swiper('.swiper-container', {
+        // slidesPerView : '2',
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+    });
+      var app = new Vue({
+        el:'#app',
+        data: {
+          hasLine:false,
+          bookType:null,
+          isBook:null,
+          needReadChapterId:'',
+          originPng:'../../../common/image02/logo.png',
+          chapterTocListData1:[],
+          resData: {},
+          headInfo:[],
+          days:null,
+          boxId:'',
+          readType:null,
+          boxChapterId:'',//阅读单元记录id
+          chapterTocListData:[],//原生章节列表
+          bookChapterList:[],//自定义章节列表
+          bookItem:[],
+          hasApply:false,
+          downloadPercent:null,
+          bookStatistics:null,
+          saveBookPath:'',
+          chapterID:'',
+          chapters:[],
+          readCFI:'',
+          cfiFrom:'',
+          bcid:'',
+          swiper:null,
+          needReadChapterIndex:null,
+          publisher:'',
+          unlockFlag:false,
+          unlockContent:false,
+          readOnline:false,
+          isInBookBox:false,
+          isClickWantOnLine:false,
+          labelArr:[],
+          give:false,
+          chapterCover:'',
+          needReadChapterName:'',
+          // outlineFlag:true,
+          bookCover:'',
+          tipIsShow:false,
+          fitGoal:null,
+          readStar:['#icon-dianliangqiang_tushuxiangqing_xingji_dianliang','#icon-dianliangqiang_tushuxiangqing_xingji_dianliang','#icon-dianliangqiang_tushuxiangqing_xingji_dianliang'],
+          readAloudStar:['#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang','#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang','#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang'],
+          choiceStar:['#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang','#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang','#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang'],
+        },
+        created(){
+          this.loadBookInfoData(api.pageParam.thisBookId);
+          // this.loadReadGoal('adebedb1-a470-4679-a5fe-0fb3dc7b261e');
+          // this.loadDownBook()
+          // console.log(this.resData.author+99999)
+        },
+        mounted(){
+          // alert(require('../../../commom/image02/head.png'))
+          this.toast = new customToast();
+          this.watchOnLine();
+          // this.circle();
+          // $api.css($api.byId('footer'), 'display:none');
+          //             $api.css($api.byId('top'), 'display:none');
+          //             $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijindu2"></use>');
+          //             $api.css($api.byId('maskIcon'), 'transform: rotate(0deg)');
+          //             $api.html($api.byId('maskProgress'), '');
+          // this.loadBookInfoData('adebedb1-a470-4679-a5fe-0fb3dc7b261e');
+        },
+        methods:{
+          giveXin(){
+            var data = {
+              boxId:this.boxId
+            }
+            $comm.socket(2015,data,res=>{
+              if(res){
+                res = JSON.parse(res);
+                if(res.error==0){
+                  this.give = !this.give;
+                  this.loadBookInfoData(api.pageParam.thisBookId);
+                }else{
+                  api.toast({
+                      msg: res.errMsg,
+                      duration: 2000,
+                      location: 'bottom'
+                  });
+                }
+              }
+            })
+          },
+          //监听在线
+          watchOnLine(){
+            var that = this;
+            api.addEventListener({
+                name: 'isOnline'
+            }, function(ret, err){
+                if( ret ){
+                    //  alert( JSON.stringify( ret ) );
+                    api.openWin({
+                        name: 'refresh404',
+                        url: '../../../refresh.html',
+                        pageParam: {
+                            // name: 'test'
+                        }
+                    });
+
+                }else{
+                     alert( JSON.stringify( err ) );
+                }
+            });
+
+            api.addEventListener({
+                name:'online'
+            }, function(ret, err){
+              // that.outlineFlag = false;
+              that.loadBookInfoData(api.pageParam.thisBookId);
+                alert('已连接到网络');
+            });
+
+            api.addEventListener({
+                name:'offline'
+            }, function(ret, err){
+              // that.outlineFlag = true
+              // $comm.showLoading('数据加载中','请稍后')
+              // setTimeout(function(){
+              //   $comm.hideLoading();
+              // },5000)
+
+              // that.loadBookInfoData(api.pageParam.thisBookId);
+                alert('网络异常');
+            });
+
+            api.addEventListener({
+                name: 'turn-the-page'
+            }, function(ret, err){
+                if( ret ){
+                    //  alert( JSON.stringify( ret ) );
+                    that.readOnline = false;
+                    that.unlockFlag = false;
+                    that.unlockContent = false;
+                    that.loadBookInfoData(ret.value.id);
+                    that.$forceUpdate();
+                }else{
+                     alert( JSON.stringify( err ) );
+                }
+            });
+          },
+          //点击更多
+          more(){
+            this.hasLine = !this.hasLine;
+          },
+          //点击删除tip
+          closeTip(){
+            this.tipIsShow = false;
+          },
+          // 申请上架这本书
+          apply(){
+            console.log(this.boxId)
+            var data = {
+              BoxId:this.boxId
+            }
+            $comm.socket(2006,data,res=>{
+              res = JSON.parse(res);
+              if(res.error===0 && JSON.parse(res.datas).flg){
+                // this.hasApply = !this.hasApply;
+                this.loadBookInfoData(api.pageParam.thisBookId)
+              }
+            })
+          },
+          //下载图书
+          loadDownBook(bid,bookUri){
+            var that = this;
+            if(that.resData.isCanRead){
+              // console.log(123)
+              that.saveBookPath = 'fs://book/bb_' + bid + '.epub';
+              // var url=$comm.wsUri + '/Reading/DownloadBook?bid=' + bid;
+              var url=$comm.resUri + bookUri;
+              console.log('_____'+that.saveBookPath)
+              console.log(url)
+
+              api.download({
+                  url: url,//,
+                  savePath: that.saveBookPath,
+                  report: true,
+                  cache: true,
+                  allowResume: true
+              }, function(ret, err) {
+                  that.downloadPercent = ret.percent;
+                  console.log('进度：'+that.downloadPercent)
+                  if (ret.state === 1) {
+                    console.log(bid)
+                      $storage.setStorage(bid, that.saveBookPath);
+                      // that.bookIsDownLoad = true;
+                      // that.isDownloading = false;
+                      // that.startRead();
+                  } else {
+                  }
+              })
+            }else{
+              // console.log(321)
+            }
+          },
+          //返回
+          back(){
+            api.sendEvent({
+                name: 'backResh'
+            });
+
+            api.closeWin({});
+          },
+          //点击阅读目标子单元
+          goUnit(chapterIndex,chapterID,cfiFrom,item){
+            console.log(chapterID)
+            this.readType = 2;
+            this.boxChapterId = item.boxChapterId;
+            // alert(this.boxChapterId)
+            // this.getNewReadRecord(this.readType)
+            this.needReadChapterIndex = chapterIndex;
+            this.needReadChapterId = chapterID;
+            this.chapterID = chapterID;
+            this.cfiFrom = cfiFrom;
+            this.bookItem = item;
+            this.getChapterTocList(this.boxId,this.boxChapterId)
+            if(!this.resData.isCanRead){
+              this.unlockFlag = true;
+              this.unlockContent = true;
+              // this.unlockFlag = false;
+              this.readOnline = false;
+            }else{
+              // this.unlockFlag = true;
+              this.unlockContent = false;
+              this.unlockFlag = true
+              this.readOnline = true;
+            }
+          },
+          //进入阅读转圈效果
+          circle(type){
+            $api.css($api.byId('maskWrap'), 'display: flex');
+            var deg = 0;
+            var progress = 0;
+            timer = setInterval(()=>{
+              deg += 10;
+              if(this.downloadPercent==100){
+                progress += 5;
+              }else{
+                progress = this.downloadPercent;
+              }
+              $api.html($api.byId('maskProgress'), progress + '%');
+              $api.css($api.byId('maskIcon'), 'transform: rotate(' + deg + 'deg)');
+              if(progress>=100){
+                clearInterval(timer);
+                $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijinduwancheng"></use>');
+                $api.css($api.byId('maskIcon'), 'transform: rotate(0deg)');
+                $api.html($api.byId('maskProgress'), '');
+                if(type==1){
+                  this.getNewReadRecord(this.readType,true)
+                }else{
+                  // alert(this.readType)
+                  this.getNewReadRecord(this.readType,true)
+                  // $api.css($api.byId('maskWrap'), 'display: none');
+                  // $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijindu2"></use>');
+                  // // alert(this.needReadChapterIndex)
+                  // api.openWin({
+                  //     name: 'readPaper',
+                  //     url: './paperBooks.html',
+                  //     slidBackEnabled: false,
+                  //     pageParam: {
+                  //         chapterIndex: this.needReadChapterIndex,
+                  //         bookCover:this.bookCover,
+                  //         publisher:this.publisher,
+                  //         // chapterTocListData:this.chapterTocListData,
+                  //         name:this.resData.bookName,
+                  //         thisBookId:api.pageParam.thisBookId,
+                  //         chapterIndex: this.needReadChapterIndex,
+                  //         bcid:this.resData.bcid,
+                  //         bookCover:this.bookCover,
+                  //         bookName:this.resData.bookName,
+                  //         saveBookPath:this.saveBookPath,
+                  //         chapterID:this.chapterID,
+                  //         readCFI:this.readCFI,
+                  //         cfiFrom:this.cfiFrom,
+                  //         chapters:this.resData.chapters,
+                  //         bookChapterList:this.bookChapterList,
+                  //         chapterTocListData:this.chapterTocListData,
+                  //         bookInfo:this.bookItem,
+                  //         boxId:this.boxId,
+                  //         needBoxChapterId:this.boxChapterId,
+                  //         recordData:this.recordData,
+                  //         needReadChapterId:this.needReadChapterId,
+                  //         author:this.resData.author
+                  //     },
+                  //     reload:true
+                  // });
+                }
+
+              }
+            },50)
+          },
+          //获取原声章节列表
+          getChapterTocList(boxId,boxChapterId){
+            var data = {
+              BoxId:boxId,
+              BoxChapterId:boxChapterId
+            }
+            $comm.socket(2004,data,res=>{
+              console.log(res+'尴尬囊')
+              if(res){
+                res = JSON.parse(res);
+              }
+              if(res.error===0){
+                this.chapterTocListData = JSON.parse(res.datas).chapterTocList;
+                this.chapterTocListData1 = this.chapterTocListData.sort(this.compare('tocSpinePos'))
+                this.chapterTocListData = this.chapterTocListData1;
+              }
+            })
+          },
+          //数组排序
+          compare(pro){
+            return function(a,b){
+                var value1 = a[pro];
+                var value2 = b[pro];
+                return value1 - value2;
+            }
+          },
+          //获取最新阅读记录
+          getNewReadRecord(readType,isFirst){
+              var data = {
+                ReadType:readType,
+                BoxId:this.boxId,
+                BoxChapterId:this.boxChapterId
+              }
+            $comm.socket(3001,data,res=>{
+              console.log(res+'=++++++++++____')
+              if(res){
+                res = JSON.parse(res)
+              }else{
+                alert('网络不太好，请稍后再试')
+              }
+              if(res.error===0){
+                // console.log(res.datas)
+                this.recordData = JSON.parse(res.datas).readLog;
+                this.readCFI = this.recordData.readCFI;
+                this.needReadChapterId = this.recordData.readBoxChapterId;
+
+                // this.readBoxChapterId = this.recordData.readBoxChapterId
+                this.getChapterTocList(this.recordData.readBoxId,this.recordData.readBoxChapterId)
+                // console.log(this.chapterID);
+                if(readType==1 && !isFirst){
+                  console.log(8889999)
+                  console.log('++++++++++'+JSON.stringify(this.bookChapterList)+'++++++++++++')
+                  this.bookChapterList.map((v,i)=>{
+                    if(v.boxChapterId===this.recordData.readBoxChapterId){
+                      this.days = i+1;
+                      console.log('开始的日子'+this.days);
+                      console.log(JSON.stringify(this.bookChapterList))
+                      this.boxChapterId = this.recordData.readBoxChapterId;
+                      // alert(this.boxChapterId)
+                      this.bookChapterList.map((v,i)=>{
+                        if(this.boxChapterId==v.boxChapterId){
+                          this.needReadChapterIndex = v.chapterIndex;
+                          // alert(this.needReadChapterIndex)
+                        }
+                      })
+                      this.needReadChapterName = this.bookChapterList[i].chapterName;
+                    }
+                  })
+                }
+                // alert(this.readType+'--'+isFirst)
+                // console.log(JSON.stringify(this.chapterTocListData)+'传出去的数据')
+                if(this.isBook==true){
+                  this.isBook=null;
+                  $api.css($api.byId('maskWrap'), 'display: none');
+                  $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijindu2"></use>');
+                  // alert(this.needReadChapterIndex)
+                  api.openWin({
+                      name: 'readPaper',
+                      url: './paperBooks.html',
+                      slidBackEnabled: false,
+                      pageParam: {
+                          chapterIndex: this.needReadChapterIndex,
+                          bookCover:this.bookCover,
+                          publisher:this.publisher,
+                          // chapterTocListData:this.chapterTocListData,
+                          name:this.resData.bookName,
+                          thisBookId:api.pageParam.thisBookId,
+                          chapterIndex: this.needReadChapterIndex,
+                          bcid:this.resData.bcid,
+                          bookCover:this.bookCover,
+                          bookName:this.resData.bookName,
+                          saveBookPath:this.saveBookPath,
+                          chapterID:this.chapterID,
+                          readCFI:this.readCFI,
+                          cfiFrom:this.cfiFrom,
+                          chapters:this.resData.chapters,
+                          bookChapterList:this.bookChapterList,
+                          chapterTocListData:this.chapterTocListData,
+                          bookInfo:this.bookItem,
+                          boxId:this.boxId,
+                          needBoxChapterId:this.boxChapterId,
+                          recordData:this.recordData,
+                          needReadChapterId:this.needReadChapterId,
+                          author:this.resData.author
+                      },
+                      reload:true
+                  });
+                }else if(this.isBook==false){
+                  this.isBook = null;
+                  var fs = api.require('fs');
+                  var ret = fs.existSync({
+                      path: this.saveBookPath
+                  });
+                  if (ret.exist) {
+                    // this.readOnline = false;
+                    $api.css($api.byId('maskWrap'), 'display: none');
+                    $api.html($api.byId('maskIcon'), '<use xlink:href="#icon-jiazaijindu2"></use>');
+                    console.log('++++++++***********^^^^^^^^^^^^'+JSON.stringify(this.chapterTocListData1)+'++++++++++')
+                    // console.log('++++++++'+this.bookChapterList+'++++++++++')
+                    // console.log(this.chapterID+'+++++++++++++++++++++++++++')
+                    api.openWin({
+                      name:'readNet',
+                      url:'./readBooks_frm.html',
+                      slidBackEnabled:false,
+                      pageParam: {
+                          thisBookId:api.pageParam.thisBookId,
+                          chapterIndex: this.needReadChapterIndex,
+                          needReadChapterName:this.needReadChapterName,
+                          bcid:this.resData.bcid,
+                          bookCover:this.bookCover,
+                          bookName:this.resData.bookName,
+                          saveBookPath:this.saveBookPath,
+                          chapterID:this.chapterID,
+                          readCFI:this.readCFI,
+                          cfiFrom:this.cfiFrom,
+                          chapters:this.resData.chapters,
+                          bookChapterList:this.bookChapterList,
+                          chapterTocListData:this.chapterTocListData,
+                          bookInfo:this.bookItem,
+                          boxId:this.boxId,
+                          needBoxChapterId:this.boxChapterId,
+                          recordData:this.recordData,
+                          author:this.resData.author
+                      },
+                      reload:true,
+                      allowEdit:false
+                    })
+                  } else {
+                      alert(JSON.stringify(err));
+                  }
+
+                }
+
+              }else{
+                api.toast({
+                    msg: res.errMsg,
+                    duration: 2000,
+                    location: 'middle'
+                });
+
+                // alert(res.errorMsg)
+                // this.toast.fail({
+                //   title:res.errorMsg
+                // })
+              }
+            })
+          },
+          //开始第几日阅读目标
+          startReadGoal(){
+            this.readType = 1;
+            if(!this.resData.isCanRead){
+              this.unlockFlag = true;
+              this.unlockContent = true;
+              // this.unlockFlag = false;
+              this.readOnline = false;
+            }else{
+              // console.log(67)
+              // this.unlockFlag = true;
+              this.unlockContent = false;
+              this.unlockFlag = true
+              this.readOnline = true;
+            }
+          },
+          //点击在线阅读
+          readNet(){
+            // alert(7)
+            this.isBook = false;
+            this.readOnline = false;
+            this.unlockFlag = false;
+            if(this.bookType==2){
+              return;
+            }
+            this.circle(1);
+          },
+          //点击纸书阅读
+          readPaper(){
+            this.isBook = true;
+            this.readOnline = false;
+            this.unlockFlag = false;
+            this.circle(2);
+          },
+          //关闭阅读弹窗
+          closeRead(){
+            this.unlockFlag = false;
+            this.readOnline = false;
+          },
+          //点击加入书架
+          isAddBookShelf(){
+            var that = this;
+            var data = {
+              BoxId:that.boxId
+              // method:that.isInBookBox==true ? 2 : 1
+            }
+            $comm.socket(2005,data,function(res){
+              console.log(res)
+              if(res){
+                res = JSON.parse(res);
+              }else{
+                api.toast({
+                    msg: '网络错误',
+                    duration: 2000,
+                    location: 'middle'
+                });
+
+              }
+              // console.log(res.error);
+              // console.log(JSON.parse(res.datas).flg);
+              if(res.error===0 && JSON.parse(res.datas).flg===true){
+                that.isInBookBox = !that.isInBookBox;
+                that.loadBookInfoData(api.pageParam.thisBookId);
+                api.toast({
+                  msg: that.isInBookBox ==true ? '成功加入书架' :'成功移除书架',
+                  duration: 2000,
+                  location: 'middle'
+                });
+
+              }else{
+                api.toast({
+                    msg: res.errorMsg,
+                    duration: 2000,
+                    location: 'middle'
+                });
+
+                // this.toast.fail({
+                //   title:res.errorMsg
+                // })
+              }
+            })
+          },
+          closeVipToast(){
+            this.unlockFlag = false;
+          },
+          vipRight(){
+            console.log('123')
+            api.openWin({
+                name: 'vipRight',
+                url: '../personalCenter/vip.html',
+                slidBackEnabled: false,
+                pageParam: {
+                    // name: 'test'
+                },
+                reload:true
+            });
+          },
+          buyVip(){
+
+          },
+          //记载阅读单元列表
+          loadReadGoal(id){
+            var data ={
+              BoxId:id,
+            }
+            console.log('调用2003')
+            $comm.socket(2003,data,res=>{
+              console.log(res+'2003')
+              res = JSON.parse(res);
+              console.log(res.datas+'9999999999999999999999999999999999999999999999999999999999999')
+              var bookChapterList1 = JSON.parse(res.datas).bookChapterList.sort(this.compare('chapterIndex'));
+              this.bookChapterList = bookChapterList1;
+
+              // this.chapterAllNum =
+              this.bookChapterList.map((v,i)=>{
+                v.chapterCover = $comm.resUri + v.chapterCover;
+              })
+              this.$nextTick(()=>{
+                this.swiper = new Swiper('.swiper-container', {
+                    // slidesPerView : '2',
+                    slidesPerView: 'auto',
+                    spaceBetween: 16,
+                });
+              })
+              this.getNewReadRecord(1,false);
+            })
+          },
+          //加载数据
+          loadBookInfoData(id){
+
+            var data = {
+              BID:id
+            }
+            $comm.socket(2002,data,this.funSuc)
+          },
+          // errory(){
+          //   alert('chulile')
+          //   api.openWin({
+          //       name: 'refresh403',
+          //       url: '../../../refresh.html',
+          //       pageParam: {
+          //           // name: 'test'
+          //       }
+          //   });
+          // },
+          //图书详情页面数据成功回调
+          funSuc(res){
+            console.log(res+'真的臭！！！！')
+            res = JSON.parse(res);
+            if(res.error===0 && JSON.parse(res.datas)){
+              // console.log(res.datas+'数据')
+              this.loadReadGoal(JSON.parse(res.datas).boxId);
+              this.boxId = JSON.parse(res.datas).boxId;
+console.log('-------------------------------------------------------------'+res.datas);
+              this.resData = JSON.parse(res.datas).book;
+              // this.resData.bookStatistics.topReadUsers.map((v,i)=>{
+              //   if(v.headImgUrl==''){
+              //     // alert(i);
+              //     v.headImgUrl = '../../../common/image02/logo.png'
+              //   }
+              // })
+              this.resData.bookStatistics.topReadUsers = this.resData.bookStatistics.topReadUsers.reverse();
+              console.log(this.resData.bookStatistics.topReadUsers+'%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+
+              this.headInfo = this.resData.bookStatistics.topReadUsers;
+              console.log(JSON.stringify(this.headInfo)+'jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj')
+
+              this.resData.totalWord = this.resData.totalWord>=10000 ? Math.floor(this.resData.totalWord/100)/100+'万' : this.resData.totalWord;
+
+              this.bookType = this.resData.bookType;
+              console.log('++++++++++++'+this.bookType)
+              this.isInBookBox = this.resData.isInBookBox;
+              this.give = this.resData.isClickHeart;
+              this.isClickWantOnLine = this.resData.isClickWantOnLine;
+              // console.log(JSON.stringify(this.resData));
+              this.loadDownBook(this.resData.bookId,this.resData.bookUri)
+              this.bookCover = this.resData.bookCover==='' ? '../../../common/image/fengmian3@3x.png' : $comm.resUri + this.resData.bookCover;
+              this.publisher = this.resData.publisher;
+              console.log(this.resData.bookStatistics.topReadUsers);
+              this.resData.bookStatistics.topReadUsers.map((v,i)=>{
+                v.headImgUrl = $comm.resUri+v.headImgUrl
+              })
+              this.resData.dimensions = this.resData.dimensions.map(function (item) {
+                  item.flag = 1;
+                  return item;
+              });
+              this.resData.category = this.resData.category.map(function (item) {
+                  if (item.dimensionName.indexOf('共读') !== -1) {
+                      item.flag = 2
+                  } else {
+                      item.flag = 3
+                  }
+                  return item;
+              });
+              this.labelArr = this.resData.dimensions.concat(this.resData.category);
+              // console.log(JSON.stringify(this.labelArr)+'________<<<>>')
+
+            }else{
+              api.toast({
+                  msg: res.errorMsg,
+                  duration: 2000,
+                  location: 'middle'
+              });
+
+                // this.toast.fail({
+                //     title: res.errorMsg
+                // })
+              }
+          },
+
+        }
+      })
+    }
+</script>
+
+</html>

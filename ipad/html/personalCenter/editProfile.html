@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>编辑个人资料</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/personalCenterStyle/editProfile.css">
+</head>
+
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+        <!-- 返回 -->
+
+        <div class="edit" style="padding-top: 6rem;">
+            <div class="box" @touchstart="start($event)" @touchend="photo($event)">
+                <span>头像</span>
+                <div class="photo">
+                    <img :src="userImage!=null?userImage:userInfo.headImgUrl?imageUrl+userInfo.headImgUrl:'../../../common/image02/head.png'">
+                    <input id='photoPicker' type='file' style='visibility:hidden;width:7rem;' accept='image/*'>
+                </div>
+            </div>
+            <div class="box" @touchstart="start($event)" @touchend="name($event)">
+                <span>姓名</span>
+                <span :class="userInfo.name?'color':'right'">{{userInfo.name?userInfo.name:'神秘同学'}}</span>
+            </div>
+            <div class="box" @touchstart="start($event)" @touchend="introductionSelf($event)">
+                <span>介绍自己</span>
+                <span :class="userInfo.sign?'color':'right'">{{userInfo.sign?userInfo.sign:"打个招呼吧！"}}</span>
+            </div>
+            <div class="box" @touchstart="start($event)" @touchend="fixGender($event)">
+                <span>性别</span>
+                <span :class="userInfo.gender!=0?'color':'right'">{{userInfo.gender ? (userInfo.gender === 1 ? '男' : '女'): '未输入'}}</span>
+            </div>
+            <div class="box" @touchstart="start($event)"  @touchend="fixUserGrader($event)">
+                <span>年级</span>
+
+                <span :class="userInfo.grade!=0?'color':'right'">{{userInfo.grade|gradeNameFil}}</span>
+            </div>
+            <div class="box" @touchend="">
+                <span style="color:#c9c9c9;">班级</span>
+                <span class="right">填写班级码</span>
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    apiready = function() {
+            Vue.filter('gradeNameFil', function(val) {
+                let itemArr = ['未输入', '一年级', '二年级', '三年级', '四年级', '五年级', '六年级']
+                return itemArr[val];
+            });
+            var app = new Vue({
+                        el: '#app',
+                        data: {
+                            userInfo: JSON.parse($storage.getStorage('user-info')),
+                            gradeName: '', //{{userInfo.Grade!=0?itemArr[userInfo.Grade]:"未输入"}}
+                            userImage: null,
+                            placeholder: '',
+                            imageUrl: null
+                        },
+                        conmputed: {
+                            gradeName() {
+                                return this.userInfo.grade != 0 ? this.itemArr[this.userInfo.grade] : "未输入"
+                            }
+                        },
+                        mounted: function() {
+                            FastClick.attach(document.body);
+                            this.imageUrl = $comm.resUri
+                            this.editProfile()
+                            this.upData()
+                            this.userImage = null
+                        },
+                        methods: {
+                            start(event) {
+                                this.x1 = event.touches[0].pageX
+                                this.y1 = event.touches[0].pageY
+                            },
+                            upData() {
+                                api.addEventListener({
+                                    name: 'updata'
+                                }, (ret, err) => {
+                                    this.userInfo = JSON.parse($storage.getStorage('user-info'))
+                                });
+                            },
+                            editProfile() {
+                                api.openFrame({
+                                    name: 'editProfileHead',
+                                    url: './editProfileHead.html',
+                                    bounces: false,
+                                    rect: {
+                                        x: 0,
+                                        y: 0,
+                                        w: 'auto',
+                                        h: 65
+                                    }
+                                });
+                            },
+                            bindEvent: function() {
+                                var that = this;
+                                api.addEventListener({
+                                    name: 'change_userInfo'
+                                }, function() {
+                                    that.loadUserInfo();
+                                });
+                            },
+                            loadUserInfo: function() {
+                                var that = this;
+                                this.gradeName = itemArr[parseInt(this.userInfo.grade) - 1];
+                                this.userInfo = JSON.parse($storage.getStorage('user-info'));
+                                if (this.userInfo.headimgUrl === '') {
+                                    this.userImage = this.userInfo.gender === 1 ? '../../../common/image02/head.png' : '../../../common/image02/head.png';
+                                } else {
+                                    api.imageCache({
+                                        url: $comm.resUri + that.userInfo.headimgUrl,
+                                        thumbnail: false
+                                    }, function(ret, err) {
+                                        that.userImage = ret.url;
+                                    });
+                                }
+                            },
+                            exit: function() {
+                                api.closeWin({});
+                            },
+                            fixGender: function(event) {
+
+                                        var calX = event.changedTouches[0].pageX - this.x1 || 0
+                                        var calY = event.changedTouches[0].pageY - this.y1 || 0
+                                        if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                                            var that = this;
+                                            $actionSheet.show({
+                                                title: '请选择你的性别',
+                                                items: ['男生', '女生'],
+                                                onclick: function(ret) {
+                                                    var gender = ret === '男生' ? 1 : 2;
+                                                    that.btnSure(gender, 0)
+                                                    that.userInfo.gender = gender
+                                                }
+                                            });
+                                        }
+
+                                    },
+                                    fixUserGrader: function(event) {
+                                      var calX = event.changedTouches[0].pageX - this.x1 || 0
+                                      var calY = event.changedTouches[0].pageY - this.y1 || 0
+                                      if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                                        var that = this;
+                                        itemArr = ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级'];
+                                        $actionSheet.show({
+                                            title: '请选择你的年级',
+                                            items: itemArr,
+                                            onclick: function(ret) {
+                                                let Grade = itemArr.indexOf(ret) + 1
+                                                that.btnSure(0, Grade)
+                                                if(Grade==0){
+                                                  that.userInfo.grade = that.userInfo.grade
+                                                }else{
+                                                  that.userInfo.grade = Grade
+                                                }
+
+                                            }
+                                        });
+                                      }
+                                    },
+                                    escLogin: function() {
+                                        // var zhuge = api.require('zhuge');
+                                        // zhuge.flush();
+                                        var buyVIPInfo = $storage.getStorage('buy-vip-info');
+                                        $comm.clearAllData();
+                                        $storage.setStorage('buy-vip-info', buyVIPInfo);
+                                        api.closeToWin({
+                                            name: 'root'
+                                        });
+                                        api.sendEvent({
+                                            name: 'exit-App'
+                                        });
+                                    },
+                                    introductionSelf: function(event) {
+                                                var calX = event.changedTouches[0].pageX - this.x1 || 0
+                                                var calY = event.changedTouches[0].pageY - this.y1 || 0
+                                                if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                                                    api.openWin({
+                                                        name: 'introductionSelf',
+                                                        url: '../personalCenter/introductionSelf.html',
+                                                        bounces: false,
+                                                        bgColor: '#fff',
+                                                        slidBackEnabled: false,
+                                                        pageParam: {
+                                                            introductionCon: this.userInfo.sign
+                                                        }
+                                                    });
+                                                }
+                                            },
+                                            name: function(event) {
+                                                        var calX = event.changedTouches[0].pageX - this.x1 || 0
+                                                        var calY = event.changedTouches[0].pageY - this.y1 || 0
+                                                        if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                                                            api.openWin({
+                                                                name: 'name',
+                                                                url: '../personalCenter/name.html',
+                                                                //          pageParam: {},
+                                                                bounces: false,
+                                                                bgColor: '#fff',
+                                                                slidBackEnabled: false,
+                                                                pageParam: {
+                                                                    name: this.userInfo.name
+                                                                }
+                                                            });
+                                                        }
+
+                                                    },
+                                                    classCode: function() {
+                                                        api.openFrame({
+                                                            name: 'classCode',
+                                                            url: '../personalCenter/introductionSelf.html',
+                                                            //          pageParam: {},
+                                                            bounces: false,
+                                                            bgColor: '#fff',
+                                                            slidBackEnabled: false,
+                                                            animation: {
+                                                                type: "flip", //动画类型（详见动画类型常量）
+                                                                subType: "from_right", //动画子类型（详见动画子类型常量）
+                                                                duration: 600 //动画过渡时间，默认300毫秒
+                                                            }
+                                                        });
+                                                    },
+                                                    apiGetphoto(type) {
+                                                        var that = this
+                                                        api.getPicture({
+                                                            sourceType: type, //camera library
+                                                            encodingType: 'jpg',
+                                                            destinationType: 'base64'
+                                                        }, function(ret, err) {
+                                                            if (ret) {
+                                                                // console.log(ret.data)
+                                                                that.userImage = ret.data
+                                                                $myCenter.changeUserInfo({
+                                                                        UserHead: ret.base64Data,
+                                                                        imageType: '.jpg'
+                                                                    }, (res) => {
+                                                                        ret = JSON.parse(res)
+                                                                        if (ret.error == 0) {
+                                                                            rep = JSON.parse(ret.datas)
+                                                                            if (rep.sucessce) {
+                                                                                that.$set(that.userInfo, 'headImgUrl', rep.user.headImgUrl)
+                                                                                $storage.setStorage('user-info', that.userInfo);
+                                                                                api.sendEvent({
+                                                                                    name: 'updata',
+                                                                                    extra: {
+                                                                                        imgUrl: that.userImage
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        }
+                                                                    })
+                                                                    // var data = {
+                                                                    //     UserHeadBase64: ret.base64Data,
+                                                                    //     ImageType: '.jpg',
+                                                                    //     SName: '',
+                                                                    //     Sign: '',
+                                                                    //     Gender: 0,
+                                                                    //     Grade: 0
+                                                                    // }
+                                                                    // $comm.socket(1003, data, (res) => {
+                                                                    //     res = JSON.parse(res);
+                                                                    //     json = JSON.parse(res.data)
+                                                                    //         // if(json.sucessce){
+                                                                    //         //   console.log("成功")
+                                                                    //         // }
+                                                                    //})
+
+
+                                                            } else {
+                                                                // api.toast({
+                                                                //   msg:"权限获取失败",
+                                                                //   duration: 2000,
+                                                                //   location: "middle"
+                                                                // });
+                                                            }
+                                                        });
+                                                    },
+                                                    photo(event) {
+                                                        var calX = event.changedTouches[0].pageX - this.x1 || 0
+                                                        var calY = event.changedTouches[0].pageY - this.y1 || 0
+                                                        if (Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2)) == 0) {
+                                                            var that = this
+                                                            itemArr = ['拍照换头像', '从相册选择新头像'];
+                                                            $actionSheet.show({
+                                                                title: "",
+                                                                items: itemArr,
+                                                                onclick: function(ret) {
+                                                                    if (ret == itemArr[0]) {
+                                                                        that.apiGetphoto("camera")
+                                                                    } else {
+                                                                        that.apiGetphoto("library")
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+                                                    },
+                                                    uploadHeadPhoto: function() {
+                                                        getPicture(function(base64, param) {
+                                                            //以图片中心剪裁为正方形,正方形边长512px
+                                                            $comm.cutAndResizeImg(base64, 512, function(ret) {
+                                                                var itemKey = 'headimgurl';
+                                                                var itemValue = ret.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+                                                                $myCenter.my_PersonInfoSetting(itemKey, itemValue, onPhotoUploadSucceed, function() {
+                                                                    // toast.fail({
+                                                                    //     title: '网络异常'
+                                                                    // })
+                                                                    api.toast({
+                                                                        msg: "网络异常，请检查网络链接",
+                                                                        duration: 2000,
+                                                                        location: 'middle'
+                                                                    });
+                                                                })
+                                                            });
+                                                        }, function(err, param) {
+                                                            funErrPhoto(false);
+                                                        }, function(param) {});
+                                                    },
+                                                    funErr: function() {
+                                                        // this.toast.fail({
+                                                        //     title: "网络异常，请检查网络链接"
+                                                        // });
+                                                        api.toast({
+                                                            msg: "网络异常，请检查网络链接",
+                                                            duration: 2000,
+                                                            location: 'middle'
+                                                        });
+                                                    },
+                                                    btnSure: function(Gender, Grade) {
+                                                        var that = this
+                                                        $myCenter.changeUserInfo({
+                                                                gender: Gender,
+                                                                grade: Grade
+                                                            }, (res) => {
+                                                                res = JSON.parse(res);
+                                                                ret = JSON.parse(res.datas)
+                                                                if (ret.sucessce) {
+                                                                    that.userInfo.gender = Gender == 0 ? that.userInfo.gender : Gender
+                                                                    that.userInfo.grade = Grade == 0 ? that.userInfo.grade : Grade
+                                                                    $storage.setStorage('user-info', that.userInfo);
+                                                                }
+                                                            })
+                                                            // var data = {
+                                                            //     UserHeadBase64: '',
+                                                            //     ImageType: '',
+                                                            //     SName: '',
+                                                            //     Sign: '',
+                                                            //     Gender: Gender,
+                                                            //     Grade: Grade,
+                                                            // }
+                                                            // $comm.socket(1003, data, (res) => {
+                                                            //     res = JSON.parse(res);
+                                                            //     ret = JSON.parse(res.data)
+                                                            //     if (ret.sucessce) {
+                                                            //         // this.exit()
+                                                            //         $storage.setStorage('user', that.userInfo);
+                                                            //         console.log("成功")
+                                                            //     }
+                                                            // })
+                                                    },
+                                            }
+                                    });
+                        };
+
+                        // function onPhotoUploadSucceed(resp) {
+                        //     if (resp && resp.errCode === 0) {
+                        //         $storage.setStorage('user-info', resp.user);
+                        //         sendEvent();
+                        //         funErrPhoto(true);
+                        //     } else {
+                        //         toast.fail({
+                        //             title: resp.errMsg
+                        //         })
+                        //     }
+                        // }
+                        //
+                        // function sendEvent() {
+                        //     api.sendEvent({
+                        //         name: 'change_userInfo'
+                        //     });
+                        // }
+
+                        function getPicture(onsuccess, onfailed, onpicload, param) {
+                            var inputFile = document.getElementById('photoPicker');
+                            //关联事件
+
+                            if (!inputFile.onchange) {
+                                inputFile.onchange = function() {
+                                    if (inputFile.files.length === 1) {
+                                        var file = inputFile.files[0];
+                                        var reader = new FileReader();
+                                        reader.onload = function() {
+                                            if (onpicload !== undefined && onpicload !== null) {
+                                                onpicload(param);
+                                            }
+                                            var base64 = this.result;
+                                            if (base64.indexOf("data:base64,") === 0) {
+                                                base64 = base64.replace(/^data:base64,/, "data:image/jpeg;base64,");
+                                            }
+                                            onsuccess(base64, param);
+                                            //取消事件
+                                            inputFile.onchange = undefined;
+                                        };
+                                        reader.readAsDataURL(file);
+                                    } else {
+                                        //取消事件
+                                        inputFile.onchange = undefined;
+                                    }
+                                };
+                            }
+                            //执行click
+                            inputFile.click();
+                        }
+
+                        function funErrPhoto(isErr) {
+                            if (isErr) {
+                                // toast.success({
+                                //     title: '头像修改成功！',
+                                //     duration: "2000"
+                                // })
+                                api.toast({
+                                    msg: "头像修改成功！",
+                                    duration: 2000,
+                                    location: 'middle'
+                                });
+                            } else {
+                                // toast.fail({
+                                //     title: '头像修改失败！',
+                                //     duration: "2000"
+                                // })
+                                api.toast({
+                                    msg: "头像修改失败！",
+                                    duration: 2000,
+                                    location: 'middle'
+                                });
+                            }
+
+                        }
+</script>
+
+</html>

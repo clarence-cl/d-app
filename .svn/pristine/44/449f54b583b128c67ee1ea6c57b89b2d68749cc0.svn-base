@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>图书分享</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css"/>
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/shareBook.css">
+</head>
+<body>
+  <div id="app">
+    <div class="return">
+       <svg class="icon" aria-hidden="true">
+           <use xlink:href="#icon-fh_"></use>
+       </svg>
+    </div>
+    <div class="content">
+      <h2>分享免费领取</h2>
+      <span>每7天时间嘀嗒就会为你智能精选一本最适合你的好书，成功分享这本书籍，即可领取它。</span>
+      <img src="../../../common/image02/book.png" class="bookImg">
+      <h1>长袜子皮皮</h1>
+      <div class="btn">
+        <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-xqfx_-copy"></use>
+        </svg>
+        立即分享
+      </div>
+    </div>
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+// apiready = function () {
+//     var app = new Vue({
+//         el: '#app',
+//         data: {
+//             isShowRule: false,
+//             name:'',
+//             shareInfo: '',
+//             audioPath:'',
+//             canShare: false,
+//             contentUrl:'',
+//             popup:false,
+//         },
+//         created:function(){
+//           // this.loadInfo();
+//           swiper
+//         },
+//         mounted: function () {
+//             var that = this;
+//             that.toast = new customToast();
+//         },
+//         methods: {
+//             // 下拉刷新
+//             pullDownFresh:function(){
+//               var that = this;
+//               api.setRefreshHeaderInfo({
+//                     visible: true,
+//                     // loadingImg: '../image/timg.gif',
+//                     bgColor: '#fff',
+//                     textColor: '#ccc',
+//                     textDown: '下拉刷新...',
+//                     textUp: '松开刷新...',
+//                     showTime: true
+//                 }, function(ret, err) {
+//                     // _this.taskListWait();
+//                     console.log('下拉刷新')
+//                     setTimeout('api.refreshHeaderLoadDone()', '500');
+//                 });
+//                 setInterval(function(){
+//
+//                 },1000)
+//             },
+//
+//             initSwiper: function(initialSlide, length) {
+//               mySwiper = new Swiper('.swiper-container', {
+//                   initialSlide: initialSlide, //初始化页面索引
+//                   speed: 1000,
+//                   loop: true,
+//                   centeredSlides: true,
+//                   slidesPerView: 3,
+//                   loopedSlides: length,
+//                   pagination: '.swiper-pagination',
+//                   paginationClickable: true,
+//                   paginationType: 'fraction'
+//               });
+//             },
+//             goReadresults: function () {
+//                 api.openFrame({
+//                     name: 'Readresults_detailShare',
+//                     url: 'Readresults_detailShare.html',
+//                     bounces: false,
+//                     bgColor:'#fff',
+//                     slidBackEnabled: false,
+//                     animation: {
+//                         type: "fade", //动画类型（详见动画类型常量）
+//                         subType: "from_right", //动画子类型（详见动画子类型常量）
+//                         duration: 600 //动画过渡时间，默认300毫秒
+//                     }
+//                 });
+//             },
+//             funErr: function () {
+//                 this.toast.fail({
+//                     title: '网络异常，请检查网络链接'
+//                 })
+//             },
+//             swiper:function () {
+//               var swiper = new Swiper('.swiper-container', {
+//                   pagination: '.swiper-pagination',
+//                   paginationClickable: true
+//               })
+//             }
+//         },
+//     });
+// };
+
+
+    var swiper01 = new Swiper('.swiper01', {
+        pagination: '.swiper-pagination',
+        paginationClickable: true
+    })
+    var swiper02 = new Swiper('.swiper02', {
+        // slidesPerView : '2',
+        slidesPerView: 'auto',
+        spaceBetween: 16,
+    });
+</script>
+
+</html>

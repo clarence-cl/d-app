@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>点亮墙</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css"/>
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/bookshelf_frm.css">
+</head>
+
+<body id="body" class="body">
+    <div id="readingTabItem" class="item">
+        <div class="item">
+        <header class="header-bar">
+            <div class="logo-wrap">
+                <img src="../../../common/image/logo@3x.png">
+            </div>
+            <div class="header-user">
+                <img id="headImg" src="../../../common/image/girl@3x.png" id="headImg">
+                <!-- <svg id="hourglass" class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-VIPbiaoshi"></use>
+                </svg> -->
+                <span id="userName"></span>
+                <img id="hourglass" src="../../../common/skin/VIP@3x.png" class="vip">
+                <div class="leaf-right" id=leafShop>
+                    <span>0</span>
+                    <i></i>
+                </div>
+                <div>
+                </div>
+            </div>
+            <!--<div id="task" class="task">任务</div>-->
+        </header>
+        <div class="books-content">
+            <div class="unlock-book">
+                <div style="width: 100%; height: 100%">
+                    <div id="unlockBookBtn" class="unlock">
+                        <svg class="icon icon-header" aria-hidden="true">
+                            <use xlink:href="#icon-dianliangqiang_daohang_shu_suoicon_bukedian"></use>
+                        </svg>
+                        <h1 id="unlockTime" class="lock-text"></h1>
+                        <h1 id="lockText" class="lock-text">解锁图书</h1>
+                        <div class="lock-bar"></div>
+                    </div>
+                    <img class="book-cover" src="../../../common/image/cover.png" alt="cover">
+                </div>
+            </div>
+            <div id="bookSwipe" class="swiper-container" style="width: 100%; height: 46rem;">
+                <div class="swiper-wrapper" style="height: 40rem" id="bookSwipeWrap">
+                </div>
+            </div>
+            <div class="swiper-pagination" style="margin-top: 30rem; font-size: 3rem"></div>
+        </div>
+        <div id="changeBooks" class="change-books">换书</div>
+        <div id="vipButton" class="vip-button">
+            <span id="vipTime"></span>
+            <span id="goToVIP" class="renew">续费VIP</span>
+        </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/swiper.min.css">
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/swiper.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-vipCardAlert.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+    var toast = new customToast();
+    var booksInfo;
+    var recommendedBookTime;
+    var unlockBookTime;
+    var nowTime;
+    var canUnlock = false;
+    var unlockBid;
+    var userVipInfo = null;
+    var userInfo;
+    var mySwiper;
+    apiready = function () {
+        adaptationModel();
+        loadUserInfo();
+        loadReadingBookInfo();
+        countDownLockBook();
+        bindEvent();
+        iap = api.require('iap');
+        iap.setTransactionListener(false, function (ret, err) {
+            if (ret && ret.state === 1) {
+                var buyVIPInfo = {
+                    Receipt: ret.receipt,
+                    State: ret.state,
+                    ProductId: ret.productId,
+                    TransactionId: ret.transactionId,
+                    BillNo: JSON.parse($storage.getStorage('buy-vip-info')).BillNo,
+                    SID: JSON.parse($storage.getStorage('buy-vip-info')).SID,
+                };
+                $storage.setStorage('buy-vip-results');
+                buyVIP(buyVIPInfo)
+            } else if (ret.state !== 0) {
+                api.sendEvent({
+                    name: 'bug-vip-err',
+                    extra: ret.errorMsg
+                });
+            }
+        });
+        api.addEventListener({
+            name:'smartupdatefinish'
+        }, function(ret, err){
+            api.rebootApp();
+        });
+    };
+    function buyVIP (params) {
+        $myCenter.buyVIPNotify(params, function(resp) {
+            if (resp.errCode === 0) {
+                $storage.delStorage('buy-vip-results');
+                iap.finishTransaction({
+                    transactionId: params.TransactionId
+                });
+                $myCenter.VIPInfo(function (resp) {
+                    if (resp.errCode === 0) {
+                        api.sendEvent({
+                            name: 'change_userVip'
+                        });
+                        $storage.setStorage('userVipInfo', resp.VIPInfo);
+                    }
+                }, funErr);
+            } else {
+                api.sendEvent({
+                    name: 'bug-vip-err',
+                    extra: resp.errCode
+                });
+                console.log(resp.errCode);
+            }
+        }, function (err) {
+            api.sendEvent({
+                name: 'bug-vip-err',
+                extra: '网络请求超时'
+            });
+            console.log(JSON.stringify(err));
+        })
+    }
+    function funSucFirstReg(resp) {
+        if (resp.errCode === 0 && resp.ProductList.length > 0) {
+            var params = {
+                productName: resp.ProductList[0].ProductName,
+                vipTime: resp.ProductList[0].Days
+            };
+            $vipCardAlert.alert(params,function () {
+                $vipCardAlert.hide()
+            });
+        } else {
+            console.log(resp.errCode);
+        }
+    }
+    function initSwiper(initialSlide, length) {
+        mySwiper = new Swiper('.swiper-container', {
+            initialSlide: initialSlide,
+            speed: 1000,
+            loop: true,
+            centeredSlides: true,
+            slidesPerView: 5,
+            loopedSlides: length,
+            pagination: '.swiper-pagination',
+            paginationClickable: true,
+            paginationType: 'fraction',
+            breakpoints: {
+                750: {
+                    slidesPerView: 3,
+                    spaceBetween: 20,
+                },
+            }
+        });
+    }
+
+    function loadUserInfo() {
+        userInfo = JSON.parse($storage.getStorage('user-info'));
+        userVipInfo = JSON.parse($storage.getStorage('userVipInfo'));
+        $api.byId('userName').innerText = userInfo.userName;
+        if (userVipInfo.IsVIP && userVipInfo.EndTime !== userVipInfo.BeginTime) {
+            if (Number(userVipInfo.VIPHasDays) <= 7) {
+                $api.byId('vipButton').style.display = 'flex';
+                $api.byId('vipTime').innerText = 'VIP到期时间:' + userVipInfo.EndTime;
+                $api.byId('goToVIP').innerText = '续费VIP'
+            } else {
+                $api.byId('vipButton').style.display = 'none';
+            }
+        } else {
+            $api.byId('vipButton').style.display = 'flex';
+            $api.byId('vipTime').innerText = '开通VIP，畅读所有好书！';
+            $api.byId('goToVIP').innerText = '购买VIP';
+        }
+        if (userInfo.headimgUrl === '') {
+            $api.attr($api.byId('headImg'), 'src', userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+        } else {
+            $api.attr($api.byId('headImg'), 'src', $comm.resUri + userInfo.headimgUrl);
+        }
+        if (!userVipInfo.IsVIP) {
+            $api.css($api.byId('hourglass'), 'display: none');
+        } else {
+            $api.css($api.byId('hourglass'), 'display: block');
+        }
+    }
+
+    function bindEvent() {
+        var isMove = true;
+        var moveX = 0;
+        var moveY = 0;
+        $analysis.bindEvent($api.byId('changeBooks'), 'touchstart', function () {
+            api.openFrame({
+                name: 'changeBook',
+                url: './change_book.html',
+                bgColor: 'rgba(0,0,0,0)',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                pageParam: {
+                    bookInfo: booksInfo
+                },
+                bounces: false,
+                animation: {
+                    type: "fade", //动画类型（详见动画类型常量）
+                    subType: "from_right", //动画子类型（详见动画子类型常量）
+                    duration: 300 //动画过渡时间，默认300毫秒
+                }
+            });
+        }, '点亮墙_换书b');
+
+        // $api.byId('task').addEventListener('touchend', function (e) {
+        //     $api.html($api.byId('change'), '<use xlink:href="#icon-dianliangqiang_daohang_tihuan_moren"></use>');
+        //     toast.fail({
+        //         title: '暂未开放'
+        //     });
+        // });
+        $api.byId('bookSwipeWrap').addEventListener('click', function (e) {
+            if (e.target.id !== 'bookSwipeWrap' && e.target.id !== '' && !isMove) {
+                getBookInfo(e.target.id);
+            }
+        });
+        $api.byId('bookSwipeWrap').addEventListener('touchmove', function (e) {
+            moveX = moveX - e.pageX;
+            moveY = moveY - e.pageY;
+            if (Math.abs(moveX) > 0 || Math.abs(moveY) > 0) {
+                isMove = true;
+            } else {
+                isMove = false;
+            }
+        });
+        $api.byId('bookSwipeWrap').addEventListener('touchstart', function (e) {
+            isMove = false;
+            moveX = e.pageX;
+            moveY = e.pageY;
+        });
+
+        $analysis.bindEvent($api.byId('unlockBookBtn'), 'touchstart', function () {
+            if (canUnlock) {
+                $homeService.unlockBook(unlockBid, funSucUnlockBook, funErr);
+            }
+        }, '点亮墙_解锁_领取b');
+
+        $analysis.bindEvent($api.byId('headImg'), 'touchend', function () {
+            api.sendEvent({
+                name: 'goTo-myCenter'
+            })
+        }, '点亮墙_头像b');
+        $analysis.bindEvent($api.byId('goToVIP'), 'touchend', function () {
+            // var zhugeDesc = '书房' + $api.byId('goToVIP').innerText;
+            // $analysis.bindZhuge(zhugeDesc);
+            goToVIP();
+        });
+        api.addEventListener({
+            name: 'changeBook-info'
+        }, function () {
+            if (mySwiper) {
+                mySwiper.detachEvents();
+                mySwiper.destroy();
+            }
+            //showBookChangeBtn(false);
+            loadReadingBookInfo();
+        });
+        api.addEventListener({
+            name: 'back-bookshelf'
+        }, function () {
+            api.setFullScreen({ fullScreen: false});
+            loadReadingBookInfo();
+        });
+        api.addEventListener({
+            name: 'turn-the-page-bookInfo'
+        }, function () {
+            api.setFullScreen({ fullScreen: false});
+            loadReadingBookInfo();
+        });
+        api.addEventListener({
+            name: 'change_userInfo'
+        }, function () {
+            loadUserInfo();
+        });
+        api.addEventListener({
+            name: 'change_userVip'
+        }, function () {
+            loadUserInfo();
+        });
+        api.addEventListener({
+            name: 'close-change-btn'
+        }, function () {
+            //showBookChangeBtn(false);
+        });
+        // api.addEventListener({
+        //     name: 'aTab'
+        // }, function () {
+        //     if (mySwiper) {
+        //         mySwiper.detachEvents();
+        //         mySwiper.destroy();
+        //     }
+        //     loadUserInfo();
+        //     loadReadingBookInfo();
+        //     countDownLockBook();
+        // });
+        api.addEventListener({
+            name: 'bookshelf-mask'
+        }, function () {
+            $myCenter.firstReg(funSucFirstReg, funErr);
+        });
+        var userProperties = {
+            '性别': userInfo.gender,
+            'vip': userInfo.vip,
+            '名称': userInfo.userName,
+            '能力等级': userInfo.gradeScaleName,
+            '电话号码': JSON.parse($storage.getStorage('user-info')).userMobile
+
+        };
+        $analysis.identify(userInfo.userName, userProperties);
+        // $analysis.bindZhuge('进入书房');
+
+        $api.byId('leafShop').addEventListener('touchend', function() {
+            goLeafShop();
+        });
+    }
+
+    function goToVIP () {
+        api.openFrame({
+            name: 'vip',
+            url: '../personalCenter/vip.html',
+            bounces: false,
+            slidBackEnabled: false,
+            animation: {
+                type: "fade", //动画类型（详见动画类型常量）
+                subType: "from_right", //动画子类型（详见动画子类型常量）
+                duration: 600 //动画过渡时间，默认300毫秒
+            }
+        });
+    }
+
+    function funSucUnlockBook(resp) {
+        if (resp.errCode === 0) {
+            // $analysis.bindZhuge('点亮墙_领取成功b');
+            if (mySwiper) {
+                mySwiper.detachEvents();
+                mySwiper.destroy();
+            }
+            loadReadingBookInfo();
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+            var eventProperty = {
+                '失败原因': resp.errMsg
+            };
+            // $analysis.bindZhuge('点亮墙_领取失败b', eventProperty);
+        }
+    }
+
+    //解锁倒计时
+    function countDownLockBook() {
+        var time;
+        if (!unlockBid) {
+            time = '暂无可';
+            $api.byId('lockText').innerText = '领取新书';
+            $api.byId('unlockTime').innerText = time;
+            return
+        }
+        nowTime = new Date().getTime();
+        var countTime = unlockBookTime - nowTime;
+        var days = parseInt(countTime / (1000 * 60 * 60 * 24));
+        var hours = parseInt((countTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        var minutes = parseInt((countTime % (1000 * 60 * 60)) / (1000 * 60));
+        var seconds = (countTime % (1000 * 60)) / 1000;
+        if (days > 0) {
+            time = days + "天" + hours + "时后";
+        } else if (hours > 0) {
+            time = hours + "时" + minutes + '分后';
+        } else if (minutes > 0) {
+            time = minutes + '分后';
+        } else {
+            time = '点击';
+            canUnlock = true;
+            $api.byId('lockText').innerText = '领取新书';
+
+        }
+        $api.byId('unlockTime').innerText = time;
+    }
+
+    function adaptationModel() {
+        api.setFullScreen({ fullScreen: false});
+        $api.css($api.byId('body'), 'width:' + api.framewidth + 'px');
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.fixStatusBar($api.byId('body'));
+    }
+
+    function goToChangeBook(bookInfo) {
+        var eventProperty = {
+            '图书名称': bookInfo.bname,
+            '用户当前级别': userInfo.gradeScaleName,
+            '图书等级': bookInfo.gradeScaleName,
+            '用户已读单元数': bookInfo.readingPercentage,
+            '图书是否必读': bookInfo.required
+        };
+        // $analysis.bindZhuge('换书(流程)_换这本b', eventProperty);
+    }
+
+    function goToBuyVIP() {
+        //showBookChangeBtn(false);
+        api.openFrame({
+            name: 'vip',
+            url: '../personalCenter/vip.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'vip'
+            },
+            bounces: false
+        });
+    }
+
+    function goToBookInfo(bid) {
+        var url = '';
+        var userinfo = JSON.parse($storage.getStorage('user-info'));
+        // if(resp && resp.vipbook && userinfo && userinfo.vip){
+        //     url =  '../myBookshelf/VIPUser_bookInfo_win.html';
+        // }
+        // else{
+        //     url =  '../myBookshelf/bookInfo_frm.html';
+        // }
+        url = '../myBookshelf/VIPUser_bookInfo_win.html';
+        api.openWin({
+            name: 'bookInfo',
+            url: url,
+            bgColor: 'rgba(0,0,0,0)',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'bookInfo',
+                bid: bid
+            },
+            bounces: false,
+            slidBackEnabled: false,
+            animation: {
+                type: "flip", //动画类型（详见动画类型常量）
+                subType: "from_right", //动画子类型（详见动画子类型常量）
+                duration: 600 //动画过渡时间，默认300毫秒
+            }
+        });
+        setTimeout(function () {
+            if (mySwiper) {
+                mySwiper.detachEvents();
+                mySwiper.destroy();
+            }
+        }, 600);
+    }
+
+    function loadReadingBookInfo() {
+        $homeService.getMyBooks(funSucGetMyBooks, funErr)
+    }
+
+    function postChangBooks() {
+        $homeService.changBook(formbid, tobid, funSucChangBook, funErr)
+    }
+
+    function getBookInfo(bid) {
+        goToBookInfo(bid);
+        //$homeService.bookInformation(bid, funSucGetBookInfo, funErr)
+    }
+
+
+    function downLoadBook() {
+        $homeService.downloadBook(bid, funSucDownLoadBook, funErr)
+    }
+
+    function funSucDownLoadBook(resp) {
+        if (resp.errorCode === 0) {
+            //下载成功
+        } else {
+            toast.fail({
+                title: resp.errMsg,
+                duration: "2000"
+            })
+        }
+    }
+
+    function funSucGetBookInfo(resp) {
+        if (resp.errCode === 0) {
+            //$storage.setStorage('book-info' + resp.bid, resp);
+            goToBookInfo(resp);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funSucChangBook(resp) {
+        if (resp.errCode === 0) {
+            //todo: 已替换图书，刷UI
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funSucScreen(resp) {
+        if (resp.errCode === 0) {
+            //todo:处理数据，刷IU
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funSucGetMyBooks(resp) {
+        if (resp.errCode === 0) {
+            //处理数据，刷UI
+            $storage.setStorage('bookshelf-info', resp);
+            loadBookshelfUI(resp);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function loadBookshelfUI(resp) {
+        $api.html($api.byId('bookSwipeWrap'), '');
+        var domArr = document.createElement('div');
+        domArr.innerHTML = '';
+        var lastId = resp.lastbid;
+        booksInfo = resp.books;
+        var initialSlide = 0;
+        if (resp.books && resp.books.length >= 4) {
+            resp.books.forEach(function (item, index) {
+                if (!item.checkouted) {
+                    canUnlock = false;
+                    unlockBid = item.bid;
+                    recommendedBookTime = item.recommendDate;
+                    unlockBookTime = recommendedBookTime + 7 * 24 * 3600 * 1000;
+                    countDownLockBook();
+                    return;
+                }
+                var domBook = document.createElement('div');
+                var domBookWrap = document.createElement('div');
+                var changBookDom = document.createElement('button');
+                var imgDom = document.createElement('img');
+                $api.attr(imgDom, 'src', $comm.resUri + item.bcover);
+                $api.attr(imgDom, 'class', 'book-cover');
+                $api.attr(changBookDom, 'class', 'chang-book-btn');
+                $api.attr(domBookWrap, 'class', 'swiper-slide');
+                $api.attr(domBook, 'class', 'book');
+                $api.attr(domBook, 'id', item.bid);
+                $api.attr(imgDom, 'id', item.bid);
+                $api.attr(changBookDom, 'value', item.bid);
+                domBook.appendChild(imgDom);
+                changBookDom.innerText = '换这本';
+                if (item.powerlevel === 1) {
+                    $api.append(domBook, '<div class="label-level">' + '<svg class="icon" aria-hidden="true"><use xlink:href="#icon-dingjice_dengji_juyoutiaozhan"></use></svg></div>');
+                } else if (item.powerlevel === 0) {
+                    $api.append(domBook, '<div class="label-level">' + '<svg class="icon" aria-hidden="true"><use xlink:href="#icon-dingjice_dengji_shiheyuedu"></use></svg></div>');
+                } else {
+                    $api.append(domBook, '<div class="label-level">' + '<svg class="icon" aria-hidden="true"><use xlink:href="#icon-dingjice_dengji_feichangrongyi"></use></svg></div>');
+                }
+                if (item.required) {
+                    $api.append(domBook, '<div class="book-label">\n' + '<div class="label-set">必读</div>\n' + '</div>');
+                }
+                if (item.vipbook) {
+                    $api.append(domBook, '<div class="vip-icon"><svg class="icon icon-vip" aria-hidden="true"><use xlink:href="#icon-dianliangqiang_VIPicon"></use></svg></div><div class="vip-icon-wrap"></div>');
+                }
+                if (item.lighted) {
+                    $api.append(domBook, '<div class="light-icon"><svg class="icon icon-vip" aria-hidden="true"><use xlink:href="#icon-dianliangqiang_daohang_shu_dianliangicon_bukedian"></use></svg></div><div class="light-icon-wrap"></div>');
+                }
+                domBookWrap.appendChild(domBook);
+                domBookWrap.appendChild(changBookDom);
+                domArr.appendChild(domBookWrap);
+                if (lastId === item.bid) {
+                    initialSlide = index;
+                    //$api.append(domBook, '<div class="plan-bar">\n' + '<div id="planBar" style="width:' + item.readingPercentage + '%' + '" class="plan-bar-content"></div>\n' + '</div>');
+                }
+                else {
+                    //$api.append(domBook, '<div class="plan-bar">\n' + '<div id="planBarSmall' + index + '" style="width:' + item.readingPercentage + '%' + '"  class="plan-bar-content"></div>\n' + '</div>');
+                    $api.append(domBook, '<div class="book-label">\n' + '</div>\n' + '</div>')
+                }
+            });
+            $api.byId('bookSwipeWrap').innerHTML = domArr.innerHTML;
+            initSwiper(initialSlide, (resp.books.length - 1));
+        }
+    }
+
+    function goLeafShop() {
+        api.openWin({
+            name: 'leafShop',
+            url: '../task/leafShop.html',
+            bounces: false,
+            slidBackEnabled: false,
+            animation: {
+                type: "fade", //动画类型（详见动画类型常量）
+                subType: "from_right", //动画子类型（详见动画子类型常量）
+                duration: 600 //动画过渡时间，默认300毫秒
+            }
+        });
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        })
+    }
+</script>
+
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>注册新账号</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css">
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/loginNewStyle/verification_code.css">
+    <script src="../../../common/script/vue.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div class="top">
+          <div class="return" @touchend="exit">
+             <svg class="icon" aria-hidden="true">
+                 <use xlink:href="#icon-fh_"></use>
+             </svg>
+          </div>
+        </div>
+        <div class="content">
+          <h1>请输入验证码</h1>
+          <p class="codeTel">已发送6位验证码至 <span>+86  {{telNum}} <span>
+              <!-- <span class="time">{{ time }}秒后短信重新发送</span> -->
+              <!-- <span class="time" @click="sendAgain">{{ timeText }}</span> -->
+          </p>
+          <div class="number">
+            <div class="vcode" id='vertifycode'>
+                <input type="tel" maxlength='6' ref='code' class='code' id='code'
+                       @focus='focus=true'
+                       v-model='code'
+                       @blur='focus=false'
+                       autofocus="autofocus"
+                >
+                <div class="labels">
+                    <label class='label' for="code"
+                           :class='{active: focus===true && index===currentIndex}'
+                           v-for='item,index in length'
+                            v-text='arrCode[index]'>
+                    </label>
+                </div>
+            </div>
+          </div>
+          <button class="btn-login" :style="{backgroundColor:(code.length>=6?'#00b596':'#80dacb')}" id="goBtnPassword" @touchend="submit" >提交</button>
+          <div class="time">
+            <span @click="sendAgain" class="send">重新获取<span v-if='time==0?false:true'>({{ time }})</span></span>
+          </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type href="../../css/custom-toast.css" />
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-login-service.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+apiready = function () {
+    var toast = new customToast();
+    // 竖屏
+    api.setScreenOrientation({
+        orientation: 'portrait_up'
+    });
+    var app =new Vue({
+            el: '#app',
+            data: {
+                length: 6,
+                // currentIndex: 0,
+                code: '',
+                focus: false,
+                timeText:'',
+                time:60,
+                telNum:'',
+                // arrCode: [],
+                // arrCodee:[1,2,3,4,5,6],
+                disabled: false,
+                flag:false
+            },
+            mounted:function(){
+              this.telNum = api.pageParam.tel
+              // alert(3)
+              // console.log(api.pageParam.tel+'______')
+              this.getVerificationCode()
+              this.timeCount();
+            },
+            methods:{
+              //点击提交
+              submit:function(){
+                if(this.code.length==6){
+                  $Login.SMSLogin(this.telNum, this.code,3, this.loginFunSuc, this.funErr);
+                }
+              },
+              //点击返回按钮
+              exit:function(){
+                api.closeFrame({
+                    // name: 'root'
+                });
+
+              },
+              //点击重新发送
+              sendAgain:function(){
+                var that = this;
+                if(that.flag&&that.time==0){
+                  that.timeCount();
+                  $Login.sendVerCode(that.telNum, 1, that.funSuc, that.funErr);
+                }else{
+                  console.log(456)
+                }
+
+              },
+              funSuc:function(resp) {
+                  var ret = JSON.parse(resp)
+                  if (ret.error==0) {
+                      // sendVerCode ();
+                      api.toast({
+                        msg:"发送成功",
+                        duration: 2000,
+                        location: "middle"
+                      })
+                      var that = this;
+                      // setTimeout(function(){
+                      //   this.goToLogin();
+                      // },1000)
+
+                  } else {
+                      // isStart = false;
+                      api.toast({
+                        msg:"发送失败",
+                        duration: 2000,
+                        location: "middle"
+                      })
+                  }
+              },
+              funErr:function(err) {
+                  toast.fail({
+                      title: "网络异常，请检查网络链接"
+                  })
+              },
+              //验证码登陆成功回调
+              loginFunSuc:function(respon){
+                  respon = JSON.parse(respon);
+                // console.log(JSON.parse(respon).opCode)
+                  if(respon.error!=0){
+                    // this.arrCode = [];
+                    // console.log(typeof(this.arrCode))
+                    // toast.fail({
+                    //   title:respon.errorMsg
+                    // })
+                    api.toast({
+                     msg:"验证码不正确",
+                     duration: 2000,
+                     location: "middle"
+                   })
+                   this.code= "";
+                    // toast.alert({
+                    //   title: '',
+                    //   msg: "验证码错误",
+                    //   buttons: [{
+                    //     name: '确定',
+                    //     onclick: function() {
+                    //       toast.hide();
+                    //     }
+                    //   }]
+                    // });
+                  }
+
+                  // console.log(JSON.stringify(JSON.parse(respon.data)));
+                  var resp = respon.datas?JSON.parse(respon.datas):{}
+                if (respon.error == 0 && resp.user) {
+                    api.setScreenOrientation({
+                        orientation: 'portrait_up'
+                    });
+                    console.log("登陆后获取的个人信息-----"+JSON.stringify(resp.user))
+                    var userInfo = resp.user;
+                    var that = this;
+                    $storage.setStorage('user-info', userInfo);
+                    $storage.setStorage('token', userInfo.token);
+                    $storage.setStorage('level', userInfo.level);
+                    api.sendEvent({
+                        name: 'homeEvent'
+                    });
+
+                    // if (!userInfo.IsDefaultPwd) {
+                    //     // that.goToFinishPwd();
+                        that.goToHomePage();
+                    //     // alert(1)
+                    //     return;
+                    // }else{
+                    //     that.goToGradeTest();
+                    // }
+                    // if (userInfo.gender && userInfo.grade && userInfo.age) {
+                    //     // $storage.setStorage('user-info', resp.user);
+                    //     if (userInfo.gradeScaleId) {
+                    //         // clearInterval(setTimer);
+                    //         that.goToHomePage();
+                    //         // alert(2)
+                    //     } else {
+                    //         // clearInterval(setTimer);
+                    //         that.goToGradeTest();
+                    //         // that.personalInformation();
+                    //         // alert(3)
+                    //     }
+                    // } else {
+                    //     // clearInterval(setTimer);
+                    //     that.goToGradeTest();
+                    //     // that.personalInformation();
+                    //     // alert(4)
+                    // }
+                } else {
+                    // alert('验证码书')
+                    // toast.fail({
+                    //   title:respon.errorMsg
+                    // })
+                }
+                // this.goToGradeTest();
+                var eventProperty = {
+                    '消息': respon.Error === 0 ? '登录成功' : respon.ErrorMsg
+                };
+                // $analysis.bindZhuge('验证码登录_完成登录b', eventProperty);
+              },
+              //失败的回调
+              funErr:function(){
+                console.log('shibai');
+                // alert('123')
+              },
+
+              //去顶级测页
+              goToGradeTest:function() {
+                  api.setScreenOrientation({
+                    orientation: 'portrait_up'
+                  });
+                  api.openWin({
+                      // name: 'strat_testfrm',
+                      // url: '../gradingTest/strat_testfrm.html',
+                      name:'test',
+                      url:'./test.html',
+                      rect: {
+                          x: 0,
+                          y: 0,
+                          w: 'auto',
+                          h: 'auto'
+                      },
+                      pageParam: {
+                          name: 'strat_testfrm'
+                      },
+                      bounces: false,
+                      slidBackEnabled: false
+                  });
+              },
+              //设置密码
+              goToFinishPwd:function () {
+                  api.openFrame({
+                      name: 'set_password',
+                      url: './set_password.html',
+                      rect: {
+                          x: 0,
+                          y: 0,
+                          w: 'auto',
+                          h: 'auto'
+                      },
+                      pageParam: {
+                          name: 'set_password'
+                      },
+                      bounces: false
+                  })
+              },
+              //进入主页
+              goToHomePage:function() {
+                  api.openWin({
+                      name: 'indexHomePage',
+                      url: '../homePage/index_home_win.html',
+                      reload:true,
+                      pageParam: {
+                          name: 'homePage'
+                      },
+                      bounces: false,
+                      slidBackEnabled: false
+                  });
+                  api.closeWin({
+                      name: 'login_page'
+                  });
+
+              },
+              // 倒计时
+              timeCount:function(){
+                var that = this;
+                clearInterval(timer);
+                if(that.flag){
+                  that.time = 60;
+                }
+                var timer = setInterval(function(){
+                  that.time --;
+                  // console.log(that.time)
+                  if(that.time<=0){
+                    clearInterval(timer);
+                    that.flag = true;
+                  }
+                  that.timeText = that.time>0 ? that.time+'短信重新发送' :'重新发送'
+                },1000);
+                that.timeText = that.time>=0 ? that.time+'短信重新发送' :'重新发送'
+              },
+                //发送验证码
+                getVerificationCode:function() {
+                    var that = this;
+                    var message = '';
+                    //发送获取验证码请求
+                    $Login.sendVerCode(that.telNum, 1, that.sendSuc, that.sendSuc);
+                    var eventProperty = {
+                        '消息': message
+                    };
+
+                },
+                sendVerCode:function() {
+                    var timer = 60;
+                    // $api.html($api.byId('btnVerCodeLogin'), timer + 's');
+                    setTimer = setInterval(function() {
+                        timer--;
+                        $api.html($api.byId('btnVerCodeLogin'), timer + 's');
+                        if (timer === 0) {
+                            clearInterval(setTimer);
+                            isStart = false;
+                          //  $api.html($api.byId('btnVerCodeLogin'), '重新发送验证码');
+                        }
+                    }, 1000);
+                },
+                sendSuc:function(resp) {
+                  console.log("发送验证码成功")
+                    resp = JSON.parse(resp);
+                    if (resp.error === 0) {
+                        // sendVerCode ();
+                        message = "发送成功";
+                        // toast.fail({
+                        //     title: '发送成功'
+                        // })
+                        var that = this;
+                        setTimeout(function(){
+                          that.goToLogin();
+                        },1000)
+
+                    } else {
+                        // isStart = false;
+                        message = "发送失败";
+                        api.toast({
+                          msg:resp.errorMsg,
+                          duration: 2000,
+                          location: "middle"
+                        });
+                    }
+                },
+                sendErr:function(err) {
+                    // toast.fail({
+                    //     title: "网络异常，请检查网络链接"
+                    // })
+                    api.toast({
+                      msg: "网络异常，请检查网络链接",
+                      duration: 2000,
+                      location: 'middle'
+                    });
+                },
+            },
+            computed: {
+                arrCode: function () {
+                    // if(this.code.instanceof(Array))
+                    return this.code.split('');
+                },
+                currentIndex: function () {
+                    return this.code.length;
+                }
+            },
+            watch: {
+                code: function (newV,oldV) {
+                    var self = this;
+                    this.code = newV.replace(/[^\d]/g,''); // 限制非数字
+                    if(newV.length >= 6) {
+                        this.disabled = true;
+                        this.$refs.code.blur();
+                        // clearInterval(timer);
+
+                        var that = this;
+                        // that.goToHomePage();
+                        // $Login.SMSLogin(that.telNum, self.code,3, that.loginFunSuc, that.funErr);
+                        // setTimeout(function () {
+                        //     // alert('submit:'+self.code+'');
+                        //     api.openWin({
+                        //         name: 'test',
+                        //         url: './test.html',
+                        //         // pageParam: {
+                        //         //     name: 'test'
+                        //         // }
+                        //     });
+                        //
+                        // },500);
+                    }
+                }
+            }
+    })
+};
+</script>
+
+</html>

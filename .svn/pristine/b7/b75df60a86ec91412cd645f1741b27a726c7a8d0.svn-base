@@ -1,0 +1,581 @@
+@font-face {
+    font-family: 'iconfont';
+    src: url('../../../common/fontclass/iconfont.eot');
+    src: url('../../../common/fontclass/iconfont.eot?#iefix') format('embedded-opentype'),
+    url('../../../common/fontclass/iconfont.woff') format('woff'),
+    url('../../../common/fontclass/iconfont.ttf') format('truetype'),
+    url('../../../common/fontclass/iconfont.svg#iconfont') format('svg');
+}
+.font_family {
+    font-family:"font_family" !important;
+    font-size:16px;
+    font-style:normal;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+.iconfont {
+    font-family: "iconfont" !important;
+    font-size: 3rem;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+    font-size: 3rem;
+}
+
+.body {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+    background-color: #f6f6f6;
+}
+.top{
+    position: fixed;
+    width: 100%;
+    background-color: #fff;
+    top: 0;
+    padding-bottom: 1rem;
+    z-index: 10;
+}
+.top,.box{
+  padding-right: constant(safe-area-inset-right);
+  padding-left: constant(safe-area-inset-left);
+  /*IOS 11.2版本版本支持*/
+  padding-right: env(safe-area-inset-right);
+  padding-left: env(safe-area-inset-left);
+  background-color: #fff;
+}
+.book-top{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+}
+.book-top .icon{
+    margin: 0 3.7rem;
+    margin-top: 6rem;
+}
+.share span{
+    display: block;
+    font-size: 1.1rem;
+    color: #bcbcbd;
+    text-align: center;
+}
+.tab{
+    width: 21.4rem;
+    height: 4rem;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 6.4rem;
+    margin: auto;
+    display: flex;
+    display: -webkit-flex;
+    font-size: 1.8rem;
+    color: #666;
+    background-color: #f6f6f6;
+}
+.tab span{
+    width: 50%;
+    height: 100%;
+    line-height: 4rem;
+    text-align: center;
+}
+.tab span.click{
+    background-color: #1adb96;
+    color: #fff;
+}
+.tab .reading{
+    border-radius: 5px 0 0 5px;
+}
+.tab .course{
+    border-radius: 0 5px 5px 0;
+}
+.book-center{
+    display: flex;
+    flex-direction: row;
+    padding: 0 3.7rem;
+    margin-top: 10.4rem;
+    padding-bottom: 1.3rem;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+.book-left{
+    display: flex;
+    width: 50%;
+    padding-right: 1.7rem;
+    box-sizing: border-box;
+}
+.book-right{
+    width: 50%;
+    padding-left: 1.7rem;
+    box-sizing: border-box;
+}
+.book-img{
+    position: relative;
+    width: 13rem;
+    height: 17rem;
+    margin-right: 3.8rem;
+}
+.book-img img{
+    width: 100%;
+    height: 100%;
+}
+.book-img .light{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 4.8rem;
+    height: 4.8rem;
+    background: url(../../../common/image/light.png) no-repeat;
+    background-size: 100% 100%;
+}
+.book-title h1{
+    float: left;
+    display: block;
+    font-size: 2.6rem;
+    color: #333;
+    width: 100%;
+}
+.book-title .bright{
+    display: block;
+    font-size: 1.2rem;
+    width: 6rem;
+    height: 2.3rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    line-height: 2.3rem;
+    color: #999;
+    border: 1px solid #e8e8e8;
+}
+.book-title .bright.sel{
+    background-color: #ff9900;
+    color: #fff;
+}
+.book-basic{
+    width: 25rem;
+}
+.book-basic h2{
+    font-size: 1.7rem;
+    color: #07afb9;
+    margin: 1rem 0;
+}
+.book-basic p{
+    font-size: 1.5rem;
+    color: #999;
+    margin-bottom: 1rem;
+}
+.book-level .icon{
+    width: 9.8rem;
+    height: 2.8rem;
+}
+@media screen and (min-width: 750px) {
+  .book-level .icon{
+      width: 10rem;
+      height: 2.9rem;
+  }
+}
+.book-right span{
+    font-size: 1.5rem;
+    color: #999;
+}
+.book-like .like-box{
+  display: inline-block;
+  padding-right: 5rem;
+}
+.book-like .like{
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    background: url(../../../common/image/unlike.png) no-repeat;
+    background-size: 100% 100%;
+    margin-right: 1rem;
+}
+.book-like .click{
+    background: url(../../../common/image/like.png) no-repeat;
+    background-size: 100% 100%;
+    display: inline-block;
+    width: 2rem;
+    height: 2rem;
+    margin-right: 1rem;
+}
+.book-like span{
+    line-height: 2rem;
+    vertical-align: top;
+}
+.schedule{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 2rem 0;
+}
+.schedule .progress{
+    width: 19.3rem;
+    height: 0.5rem;
+    background-color: #e8e8e8;
+    border-radius: 0.25rem;
+    margin: 0 1.2rem;
+}
+.schedule .progress-bar{
+    height: 0.5rem;
+    background-color: #ea5514;
+    border-radius: 0.25rem;
+}
+.team{
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+.team i{
+    display: inline-block;
+    width: 1.8rem;
+    height: 1.8rem;
+    background: url(../../../common/image/icon01.png) no-repeat;
+    background-size: 100% 100%;
+}
+.team h3{
+    display: inline-block;
+    line-height: 1.8rem;
+    vertical-align: top;
+    color: #ff9900;
+    font-size: 1.5rem;
+    margin-left: 1rem;
+}
+.team-list{
+    align-self: flex-start;
+}
+.team-list img{
+    width: 3.5rem;
+    height: 3.5rem;
+}
+.team-list>div{
+    display: inline-block;
+    margin-left: 1.5rem;
+}
+.team .more{
+    width: 7.6rem;
+    height: 2.8rem;
+    background-color: #e8e8e8;
+    border-radius: 1.4rem;
+    line-height: 2.8rem;
+    text-align: center;
+    font-size: 1.3rem;
+    color: #999;
+    margin-left: 2.3rem;
+}
+
+.introduction{
+    padding: 0 3.7rem;
+    background: #fff;
+    margin-top: 1rem;
+    padding-bottom: 2.3rem;
+}
+.reading-ability{
+    padding-top: 3rem;
+    margin-bottom: 2.6rem;
+}
+.reading-ability h2{
+    font-size: 2.1rem;
+    color: #333;
+    display: inline-block;
+}
+.reading-ability span{
+    font-size: 2.1rem;
+    color: #8fc31f;
+    margin-left: 3.2rem;
+}
+.book-label h2{
+    font-size: 2.1rem;
+    color: #e75d2f;
+    display: inline-block;
+    padding-right: 1rem;
+}
+.book-label .down{
+  font-size: 1rem;
+  margin-right: 1rem;
+}
+.book-label .rotate{
+  transform:rotate(180deg);
+  vertical-align: 0.2rem;
+}
+.book-label .label{
+    float: left;
+    display:block;
+    font-size: 1.8rem;
+    height: 5.05rem;
+    line-height: 3.85rem;
+    width: 87%;
+    overflow: hidden;
+}
+.book-label .label-h{
+  height: auto;
+}
+.book-label .label01,.book-label .label02,.book-label .label03{
+    display: inline-block;
+    margin-right: 2rem;
+    margin-bottom: 1rem;
+}
+.book-label .label01{
+    padding: 0 2.5rem;
+    border: 1px solid #f3c01b;
+    border-radius: 1.9rem;
+    color: #f3c01b;
+    box-sizing: border-box;
+}
+.book-label .label02{
+    padding: 0 1.5rem;
+    border: 1px solid #22ac38;
+    border-radius: 1.9rem;
+    color: #22ac38;
+    box-sizing: border-box;
+}
+.book-label .label03{
+    color: #f3c01b;
+    border: 1px solid #fff;
+}
+.book-label .label03 .icon{
+    vertical-align: middle;
+}
+.book-text{
+    margin-top: 4rem;
+}
+.book-text h2{
+    display: inline-block;
+    font-size: 2.1rem;
+    color: #333;
+    margin-right: 2rem;
+}
+.book-text span{
+    display: inline;
+    font-size: 2rem;
+    color: #999;
+    line-height: 3.4rem;
+}
+.unit{
+    background-color: #fff;
+    margin-top: 1rem;
+    padding: 0 3.7rem;
+    padding-top: 3rem;
+}
+.unit h2{
+    margin-bottom: 3.5rem;
+    font-size: 2.1rem;
+    color: #333;
+}
+.unit-list{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.unit-box{
+    width: 30%;
+    border-radius: 2rem;
+    box-shadow:0 0 2rem rgba(0, 0, 0, .1);
+    padding-top: 1.9rem;
+    padding-bottom: 4.5rem;
+    position: relative;
+    margin-bottom: 3rem;
+    margin-right: 1.5rem;
+    margin-left: 1.5rem;
+}
+.unit-title{
+    font-size: 2rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 0.8rem;
+    line-height: 2rem;
+    font-weight: 900;
+}
+.unit-title span{
+    max-width: 20rem;
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.unit-img{
+    position: relative;
+}
+.unit-img img{
+    width: 100%;
+    height: 15.85rem;
+}
+.unit-img .lock{
+    width: 9rem;
+    height: 8rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 0.5rem;
+}
+.unit-img .lock .icon{
+    font-size: 5rem;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+.none-lock {
+    display: none;
+}
+.star{
+    text-align: center;
+    margin-bottom: 3.6rem;
+    margin-top: 1rem;
+}
+.star .icon:nth-child(2){
+    margin: 0 1rem;
+}
+.unit-test{
+    display: flex;
+    justify-content: space-around;
+}
+.unit-test>div{
+    position: relative;
+}
+.unit-test .icon{
+    width: 5rem;
+    height: 5rem;
+    font-size: 5rem;
+}
+.unit-test i{
+    position: absolute;
+    display: block;
+    width: 2.5rem;
+    height: 2.5rem;
+    background-color: #8fc31f;
+    font-size: 1.3rem;
+    color: #fff;
+    border-radius: 2.5rem;
+    line-height: 2.5rem;
+    text-align: center;
+    font-style: normal;
+    right: -1rem;
+    top: -1rem;
+}
+.unit-test .progress{
+    margin-top: 0.5rem;
+    width: 5rem;
+    height: 0.3rem;
+    background-color: #eee;
+    border-radius: 0.3rem;
+}
+.unit-test .progress-bar{
+    height: 0.3rem;
+    border-radius: 0.3rem;
+    background-color: #8fc31f;
+}
+.unit-record{
+    width: 100%;
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    bottom: -1.25rem;
+    height: 2.5rem;
+}
+.unit-record>div{
+    width: 7.4rem;
+    font-size: 1.3rem;
+    color: #fff;
+    background-color: #07afb9;
+    height: 2.5rem;
+    line-height: 2.5rem;
+    text-align: center;
+    border-radius: 2.5rem;
+}
+.new{
+    margin-top: 1rem;
+    background-color: #fff;
+    padding: 3rem 3.7rem;
+    margin-bottom: 12.1rem;
+}
+.new h2{
+    font-size: 2.1rem;
+    margin-bottom: 1.5rem;
+}
+.new .left{
+    float: left;
+    margin-right: 7.8rem;
+}
+.new p{
+    font-size: 1.5rem;
+    color: #999;
+    line-height: 2.2rem;
+}
+.footer{
+    display: flex;
+    justify-content: space-around;
+    position: fixed;
+    width: 100%;
+    height: 10rem;
+    bottom: 0;
+    background-color: #fff;
+    padding: 1.2rem 30rem;
+    box-sizing: border-box;
+}
+.vip{
+    width: 10rem;
+    height: 10rem;
+    background: url(../../../common/image/vip.png) no-repeat;
+    background-size: 100% 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+.footer button{
+    border: 1px solid #e8e8e8;
+    border-radius: 5.6rem;
+    height: 5.6rem;
+    width: 18.75rem;
+    font-size: 2.4rem;
+    line-height: 5.6rem;
+    box-sizing: border-box;
+}
+.btn{
+    background-color: #1adb96;
+    color: #fff;
+    border: none;
+    /*position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);*/
+}
+.vipBtn {
+    color: #999;
+    border: none;
+    /*position: absolute;
+    left: 80%;
+    top: 50%;
+    transform: translate(-50%, -50%);*/
+}
+progress {
+    -webkit-appearance: none;
+    width: 18rem;
+    height: 2rem;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+progress::-webkit-progress-bar{
+    background-color: #e7f1fb;
+    border-radius: 1rem;
+}
+progress::-webkit-progress-value{
+    background-color: #1adb96;;
+    border-radius: 1rem;
+}

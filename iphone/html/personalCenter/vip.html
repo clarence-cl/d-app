@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>vip购买</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+	<script src="../../../common/fontclass/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/vip.css">
+</head>
+
+<body>
+    <div id="app">
+			<div class="box-top box">
+        <div id="vip_t" class="top">
+            <div id="vip_return" @click="goBack">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+                </svg>
+            </div>
+            <span class="vip-time">{{vipDesc}}</span>
+        </div>
+			</div>
+      <img src="../../../common/image/bg8.png" class="img-top">
+			<div class="box">
+        <div class="pay">
+            <div class="pay-list">
+                <div @click="selectVIPProduct(vipProduct, index)" :class="['list', selectedIndex === index ? 'sel' : '']" v-for="(vipProduct, index) in showVIPProducts">
+                    <h3>{{vipProduct.vipDesc}}</h3>
+                    <h1>{{vipProduct.Price}}<span>元</span></h1>
+                    <h3 class="price">{{vipProduct.OldPrice}}<div v-show="selectedAuto" class="line"></div></h3>
+                </div>
+            </div>
+            <div class="center">
+                <button @click="buyVIP" class="payment">{{buyBtnDesc}}</button>
+                <p>点击“立即支付”即代表您同意<span @click="goTo('agreement.html')" class="color">《嘀嗒伴我读书服务条款》</span></p>
+            </div>
+        </div>
+        <img src="../../../common/image/poster.png" class="poster">
+      </div>
+	  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/public.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        var app = new Vue({
+            el: '#app',
+            data: {
+                vipDesc: '',
+                showVIPProducts: null,
+                isAutoVIP: false,
+                selectedIndex: 0,
+                selectedAuto: true,
+                dateDesc: '1个月',
+                buyBtnDesc: '立即支付'
+            },
+            mounted: function () {
+                FastClick.attach(document.body);
+                this.iap = api.require('iap');
+                this.toast = new customToast();
+                //userVIPInfo 用户VIP信息
+                this.buyVipInfo = {};
+                this.isBuying = false;
+                this.loadUserVIPInfo();
+                this.bindEvent();
+            },
+            methods: {
+                bindEvent: function () {
+                    var that = this;
+                    api.addEventListener({
+                        name: 'change_userVip'
+                    }, function () {
+                        that.isBuying = false;
+                        that.buyBtnDesc = '立即支付';
+                        that.toast.fail({
+                            title: '购买成功'
+                        });
+                        that.loadUserVIPInfo();
+                    });
+                    api.addEventListener({
+                        name: 'bug-vip-err'
+                    }, function (ret) {
+                        that.isBuying = false;
+                        that.toast.fail({
+                            title: ret.value
+                        });
+                        that.buyBtnDesc = '重新购买';
+
+                    });
+                },
+                buyVIP: function () {
+                    // $analysis.bindZhuge('VIP-立即支付按钮');
+                    var that = this;
+                    if (that.isBuying) {
+                        return;
+                    }
+                    that.isBuying = true;
+                    that.buyBtnDesc = '正在购买';
+                    that.productsArr.forEach(function (item, index) {
+                        if (that.selectProID === item.productId) {
+                            that.productID = item.productId;
+                        }
+                    });
+                    var params = {
+                        VIPType: that.VIPType,
+                        ReNew: that.isAutoVIP
+                    };
+                    $myCenter.buyVip(params, function (resp) {
+                        if (resp.errCode === 0) {
+                            that.buyVipInfo.BillNo = resp.BillNo;
+                            that.buyVipInfo.SID = resp.SID;
+                            $storage.setStorage('buy-vip-info', that.buyVipInfo);
+                            //$comm.showLoading('正在购买...');
+                            that.iap.purchase({
+                                productId: that.productID
+                            }, function(ret, err) {
+                                if (ret) {
+                                    console.log(JSON.stringify(ret))
+                                } else {
+                                    $comm.hideLoading('购买失败...');
+                                    //console.log(err)
+                                }
+                            });
+                        } else {
+                            that.isBuying = false;
+                            that.buyBtnDesc = '重新购买';
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    },that.funErr);
+                },
+
+                selectVIPProduct: function (product,index) {
+                    this.selectProID = product.ProductID;
+                    this.VIPType = product.VipType;
+                    this.selectedIndex = index;
+                    // $analysis.bindZhuge('VIP-' + product.vipDesc);
+                    switch (index) {
+                        case 0:
+                            this.dateDesc = '1个月';
+                            break;
+                        case 1:
+                            this.dateDesc = '3个月';
+                            break;
+                        default:
+                            this.dateDesc = '12个月';
+
+                    }
+                },
+                loadUserVIPInfo: function () {
+                    var that = this;
+                    $myCenter.VIPInfo(function (resp) {
+                        if (resp.errCode === 0) {
+                            that.isAutoVIP = resp.VIPInfo.IsAutoVIP;
+                            if (resp.VIPInfo.IsVIP && (resp.VIPInfo.EndTime !== resp.VIPInfo.BeginTime)) {
+                                that.vipDesc = '续费VIP' + '(当前VIP有效期至:' + resp.VIPInfo.EndTime + ')' ;
+                            } else {
+                                that.vipDesc = '开通VIP';
+                            }
+                            that.loadVipProducts();
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            });
+                        }
+                    }, that.funErr);
+                },
+                loadVipProducts: function () {
+                    var that = this;
+                    $myCenter.VipProducts(function (resp) {
+                        if (resp.errCode === 0) {
+                            $comm.showLoading();
+                            that.loadingVIPProducts = false;
+                            that.autoVIP = [];
+                            that.manualVIP = [];
+                            that.productsID = [];
+                            resp.VIPList.length > 0 && resp.VIPList.forEach(function (item, index) {
+                                if (7 > item.VipType && item.VipType > 3) {
+                                    that.productsID.push(item.ProductID);
+                                    that.autoVIP.push(item);
+                                } else if (item.VipType <= 3) {
+                                    that.productsID.push(item.ProductID);
+                                    that.manualVIP.push(item);
+                                }
+                            });
+
+                            that.manualVIP = that.manualVIP.map(function (item) {
+                                switch (item.VipType) {
+                                    case 1:
+                                        item.OldPrice = '折合' + (item.Price / 100).toFixed(2) + '元/月';
+                                        item.vipDesc = '30天';
+                                        break;
+                                    case 2:
+                                        item.OldPrice = '折合' + (item.Price / 100 / 3).toFixed(2) + '元/月';
+                                        item.vipDesc = '90天';
+                                        break;
+                                    default:
+                                        item.OldPrice = '折合' + (item.Price / 100 / 12).toFixed(2) + '元/月';
+
+                                        item.vipDesc = '365天';
+                                }
+                                item.Price = (item.Price / 100).toFixed(2);
+                                return item;
+                            });
+                            if (that.isAutoVIP) {
+                                that.VIPType = that.manualVIP[0].VipType;
+                                that.selectProID = that.manualVIP[0].ProductID;
+                                that.showVIPProducts = that.manualVIP;
+                                that.selectedAuto = false;
+                            } else {
+
+                            }
+                            that.iap.getProducts({
+                                productIds: that.productsID
+                            }, function(ret, err) {
+                                if (ret) {
+                                    that.productsArr = ret.products;
+                                    that.loadingVIPProducts = true;
+                                    $comm.hideLoading();
+                                } else {
+                                    that.loadingVIPProducts = true;
+                                    that.toast.fail({
+                                        title: '获取商品失败'
+                                    });
+                                }});
+                        } else {
+                            that.loadingVIPProducts = true;
+                            that.toast.fail({
+                                title: resp.errMsg
+                            });
+                        }
+                    }, that.funErr);
+                },
+                goBack: function () {
+									console.log("---------")
+                  
+                },
+                goTo: function (url) {
+                    api.openFrame({
+                        name: url,
+                        url: '../task/' + url,
+                        bgColor: 'rgba(0,0,0,0)',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        bounces: false
+                    });
+                },
+                funErr: function () {
+                    this.loadingVIPProducts = true;
+                    this.isBuying = false;
+                    this.toast.fail({
+                        title: "网络异常，请检查网络链接"
+                    });
+                }
+            }
+        })
+    }
+</script>
+</html>

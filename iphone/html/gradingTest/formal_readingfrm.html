@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>正式朗读</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/formal_readingfrm.css">
+</head>
+
+<body id="body" class="body">
+    <div id="exitFormalReading" class="icon-wrap">
+        <i class="iconfont font_family icon-btn">&#xe6fe;</i>
+    </div>
+    <div class="title-wrap">
+        <h1 class="text-title">请大声朗读下面的文字</h1>
+        <div class="header-bar-wrap">
+            <div class="header-bar" id="headerBar"></div>
+        </div>
+    </div>
+    <div class="reading-content">
+        <div class="read-text-wrap">
+            <p class="read-text" id="refText">
+            </p>
+            <span class="word-count" id="wordCount"></span>
+        </div>
+    </div>
+    <div id="btnRecord" class="btn-record">
+        <div class="btn-wrap-record" onclick="playRecording()">
+            <div class="icon-wrap-record" id="playIcon">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-dingjice_huifanganniu"></use>
+                </svg>
+            </div>
+            <h6 class="text-record" id="iconText">回放</h6>
+        </div>
+        <div class="btn-wrap-recordB" id="btnRecording">
+            <div class="icon-wrap-record" id="iconWrap">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-dingjiceluyin_moren"></use>
+                </svg>
+            </div>
+            <h6 id="recordText" class="text-record">点击话筒，开始录音</h6>
+        </div>
+        <div class="btn-wrap-recordC">
+            <div class="score-wrap">
+                <div id="scoreIcon" class="icon-wrap-record">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-dingjice_weidefenanniu"></use>
+                    </svg>
+                </div>
+                <h6 id="scoreResult" class="score-text"></h6>
+            </div>
+            <h6 class="text-record">得分</h6>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="footer-icon-wrap" id="footerIcon">
+            <div class="icon-button">
+                <svg class="icon icon-footer" aria-hidden="true">
+                    <use xlink:href="#icon-luyin_jinhangzhong"></use>
+                </svg>
+            </div>
+        </div>
+        <div class="warn-text-wrap">
+            <i class="iconfont icon-warn">&#xe6db;</i>
+            <span class="warn-text">你还有 <span id="warnText" class="warn-count">3</span>次机会，请认真朗读</span>
+        </div>
+        <div class="submit-btn-wrap">
+            <div id="subBtn" class="sub-btn">
+                提交
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var testId = '';
+    var paperId = '';
+    var qid = '';
+    var isRecord = false;
+    var isPlay = false;
+    var demo = null;
+    var chivoxEngineOn = false;
+    var readingCount = 3;
+    var readResult = null;
+    var hasReadResult = false;
+    var score;
+    var readBook;
+    var timer = null;
+    var countTimer = null;
+    var countdown = 180;
+    apiready = function() {
+        adaptationModel();
+        loadPaper();
+        create();
+        registChivoxCallback();
+        bindEvent();
+    };
+    function bindEvent() {
+        $analysis.bindEvent($api.byId('exitFormalReading'), 'touchend', function () {
+            goback();
+        }, '正式-朗读测_关闭b');
+
+        $analysis.bindEvent($api.byId('btnRecording'), 'touchend', function () {
+            btnRecord();
+        }, '正式-朗读测_朗读b');
+
+        $analysis.bindEvent($api.byId('subBtn'), 'touchend', function () {
+            submit();
+        }, '正式-朗读测_提交b');
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function loadPaper() {
+        if (api.systemType === 'android') {
+            readResult = {};
+            hasReadResult = true;
+        } else {
+            demo = api.require('moduleChivox');
+        }
+        var data = JSON.parse($storage.getStorage('user-info'));
+        var grade = data.grade;
+        var month = new Date().getMonth() + 1;
+        if (api.pageParam.name === 'formalAnswer') {
+            grade = api.pageParam.grade;
+            month = api.pageParam.month;
+        }
+        $GradingTest.getTestPaper(grade, month, funSucGetPaper, funErr)
+    }
+
+    function playRecording() {
+        if (isRecord) {
+            return;
+        }
+        if (!readResult) {
+            return toast.fail({
+                title: '请先录音'
+            });
+        }
+        if (!isPlay) {
+            isPlay = true;
+            replay();
+            $api.html($api.byId('playIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_tingzhianniu"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('iconText'), '停止');
+        } else {
+            isPlay = false;
+            stopReplay();
+        }
+    }
+
+    function btnRecord() {
+        var privacy = api.require('privacy');
+        privacy.microphone(function(ret, err) {
+            if (ret.status) {
+                if (readResult) {
+                    stopReplay();
+                }
+                if (!isRecord && readingCount > 0) {
+                    countdown = 180;
+                    if (api.systemType === 'ios') {
+                        hasReadResult = false;
+                    } else {
+                        hasReadResult = true;
+                    }
+                    isRecord = true;
+                    changBtnUI();
+                    start();
+                    countdownTime();
+                } else {
+                    $api.removeCls($api.byId('headerBar'), 'count-down');
+                    $api.addCls($api.byId('headerBar'), 'reload-count-down');
+                    stopRecord();
+                    stop();
+                }
+            } else {
+                toast.fail({
+                    title: '请开启麦克风权限'
+                });
+            }
+        });
+    }
+
+    function stopRecord() {
+        isRecord = false;
+        clearInterval(timer);
+        clearInterval(countTimer);
+        $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+            '                <use xlink:href="#icon-dingjice_kaishiluyinanniu"></use>\n' +
+            '            </svg>');
+        if (readingCount === 0) {
+            $api.html($api.byId('recordText'), '3次机会 已经用完');
+        } else {
+            $api.html($api.byId('recordText'), '再读一次');
+        }
+    }
+
+    function countdownTime() {
+        countTimer = setInterval(function() {
+            countdown--;
+            if (countdown === 0) {
+                stopRecord();
+            }
+        }, 1000)
+    }
+
+    function funSucGetPaper(resp) {
+        if (resp.errCode === 0) {
+            testId = resp.testid;
+            paperId = resp.paperid;
+            qid = resp.readblock[0].qid;
+            $api.html($api.byId('refText'), resp.readblock[0].qtext);
+            $api.html($api.byId('wordCount'), '字数：' + resp.readblock[0].wordcount + '个');
+            readBook = resp.readblock[0].qtext;
+            var readChoiceList = resp.choice;
+            var readTestId = {
+                testId: resp.testid,
+                paperId: resp.paperid
+            };
+            $storage.setStorage('reading-test-id', readTestId);
+            $storage.setStorage('choice-list', readChoiceList);
+            loadPaperFooterUI(readChoiceList);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+    }
+
+    function changBtnUI() {
+        readingCount--;
+        $api.html($api.byId('recordText'), '再次点击 结束录音');
+        $api.html($api.byId('warnText'), readingCount);
+        $api.addCls($api.byId('headerBar'), 'count-down');
+        $api.removeCls($api.byId('headerBar'), 'reload-count-down');
+        $api.html($api.byId('refText'), readBook);
+        var btn = false;
+        $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+            '                <use xlink:href="#icon-dingjiceluyin_kaishi"></use>\n' +
+            '            </svg>');
+        timer = setInterval(function() {
+            if (btn) {
+                $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+                    '                <use xlink:href="#icon-dingjiceluyin_kaishi"></use>\n' +
+                    '            </svg>');
+            } else {
+                $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+                    '                <use xlink:href="#icon-dingjiceluyin_moren"></use>\n' +
+                    '            </svg>');
+            }
+            btn = !btn;
+        }, 500)
+    }
+
+    function loadPaperFooterUI(arr) {
+        for (var i = 0; i < arr.length; i++) {
+            var iconDom = document.createElement('div');
+            $api.attr(iconDom, 'class', 'icon-wrap-footer');
+            if (i === 0) {
+                $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                    '                    <use xlink:href="#icon-ceshidiyiti_weikaishi"></use>\n' +
+                    '                </svg>');
+            } else if (i === 1) {
+                $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                    '                    <use xlink:href="#icon-ceshidierti_weikaishi"></use>\n' +
+                    '                </svg>');
+            } else if (i === 2) {
+                $api.html(iconDom, '                <svg class="icon icon-footer" aria-hidden="true">\n' +
+                    '                    <use xlink:href="#icon-ceshidisanti_weikaishi"></use>\n' +
+                    '                </svg>');
+            }
+            $api.byId('footerIcon').appendChild(iconDom);
+        }
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: "网络异常，请检查网络链接"
+        });
+    }
+
+    function submit() {
+        stopReplay();
+        if (!readResult) {
+            return toast.fail({
+                title: '请朗读文章...'
+            })
+        }
+        if (!hasReadResult) {
+            return toast.fail({
+                title: '正在测评语音成绩...'
+            })
+        }
+        $GradingTest.submitReadResults(testId, paperId, qid, score, JSON.stringify(readResult), 0, 0, 0, funSucSubmit, funErr)
+    }
+
+    function funSucSubmit(resp) {
+        if (resp.errCode === 0) {
+            goToAnswer();
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+    }
+
+    function goToAnswer() {
+        $api.html($api.byId('refText'), '');
+        destroy();
+        api.openFrame({
+            name: 'formal_answerfrm',
+            url: './formal_answerfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'formal_answerfrm',
+                bookText: readBook
+            },
+            bounces: false,
+            reload: true
+        });
+    }
+
+    function registChivoxCallback() {
+        //chivox全结果回调
+        api.addEventListener({
+            name: 'chivoxAllResult'
+        }, function(ret, err) {
+            if (ret) {
+                stopRecord();
+                if (ret.value.errId === 60010) {
+                    return toast.fail({
+                        title: '网络异常，请检查网络链接'
+                    });
+                }
+                reloadUI(ret);
+                hasReadResult = true;
+                var currScore = $chivox.calcTotalScore(ret, JSON.parse($storage.getStorage('user-info')).grade).totalscore;
+                if (!score || currScore > score) {
+                    score = currScore;
+                    readResult = ret;
+                }
+            }
+        });
+        //chivox开始回放回调
+        api.addEventListener({
+            name: 'chivoxReplayStart'
+        }, function(ret, err) {
+            if (ret) {
+                //$comm.debug('Chivox Replay Started:', JSON.stringify(ret), 'debug');
+            }
+        });
+        //chivox结束回放回调
+        api.addEventListener({
+            name: 'chivoxReplayFinished'
+        }, function(ret, err) {
+            if (ret) {
+                isPlay = false;
+                $api.html($api.byId('playIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                    '                    <use xlink:href="#icon-dingjice_huifanganniu"></use>\n' +
+                    '                </svg>');
+                $api.html($api.byId('iconText'), '回放');
+                $api.removeCls($api.byId('headerBar'), 'count-down');
+                $api.addCls($api.byId('headerBar'), 'reload-count-down');
+            }
+        });
+    }
+
+    function reloadUI(ret) {
+        var value = $chivox.parse(ret);
+        if (!value || !value.details) {
+            return;
+        }
+        var arrIndex = [];
+        var item;
+        for (var i = 0; i < value.details.length; i++) {
+            if (value.details[i].overall >= 80) {
+                item = {
+                    idx: i,
+                    type: 1
+                };
+                arrIndex.push(item)
+            } else if (value.details[i].overall >= 50 && value.details[i].overall < 80) {
+                item = {
+                    idx: i,
+                    type: 2
+                };
+                arrIndex.push(item)
+            } else if (value.details[i].overall < 50) {
+                item = {
+                    idx: i,
+                    type: 3
+                };
+                arrIndex.push(item)
+            }
+        }
+        $api.html($api.byId('refText'), $matchText(readBook, arrIndex));
+        // 重新计算朗读得分规则
+        var readingScore = $chivox.calcTotalScore(ret, JSON.parse($storage.getStorage('user-info')).grade).totalscore;
+        if (readingScore >= 80) {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-1"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), Math.floor(readingScore));
+        } else if (80 > readingScore && readingScore >= 60) {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-2"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), Math.floor(readingScore));
+        } else {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), '');
+        }
+        $api.css($api.byId('subBtn'), 'background-color: #1adb96');
+    }
+
+    function create() {
+        if (demo) {
+            demo.creatCloudEngine({}, function(ret, err) {
+                if (ret) {
+                    chivoxEngineOn = true;
+                    $comm.debug('Chivox Engine Created:', JSON.stringify(ret), 'debug');
+                } else {
+                    chivoxEngineOn = false;
+                }
+            });
+        }
+    }
+
+    function destroy() {
+        if (demo) {
+            demo.deleteCloudEngine({}, function(ret, err) {
+                if (ret) {
+                    chivoxEngineOn = false;
+                    $comm.debug('Chivox Engine Destroyed:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+
+    function start() {
+        if (demo && chivoxEngineOn) {
+            var reg = /^[\u4e00-\u9fa5]+$/;
+            var wordArr = [];
+            var dataStr = $api.byId('refText').innerText;
+            var strArr = dataStr.split('');
+            strArr.forEach(function (item, index) {
+                if (reg.test(item)) {
+                    wordArr.push(item)
+                }
+            });
+            dataStr = wordArr.join('');
+            var data = {
+                refText: dataStr
+            };
+            demo.start(data, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret, data)), 'debug');
+                }
+            });
+        }
+    }
+
+    function stop() {
+        if (demo) {
+            demo.stop({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret)), 'debug');
+                }
+            });
+        }
+    }
+
+    function stopReplay() {
+        if (demo) {
+            demo.stopReplay({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Stoping:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+
+    function replay() {
+        if (demo) {
+            demo.replay({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Replaying:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+
+    function goback() {
+        toast.alert({
+            title: '确定要退出定级测试吗？',
+            msg: '退出以后下次需要从头开始，你确认要退出吗？',
+            buttons: [{
+                name: '继续测试',
+                onclick: function() {
+                    toast.hide();
+                }
+            }, {
+                name: '退出',
+                onclick: function() {
+                    destroy();
+                    clearInterval(timer);
+                    clearInterval(countTimer);
+                    $storage.delStorage('test-count');
+                    toast.hide();
+                    $api.html($api.byId('refText'), '');
+                    api.openFrame({
+                        name: 'index_start_test',
+                        url: './index_start_test.html',
+                        pageParam: {
+                            name: 'index_start_test'
+                        },
+                        bounces: false,
+                        reload: true
+                    });
+                }
+            }]
+        });
+    }
+</script>
+
+</html>

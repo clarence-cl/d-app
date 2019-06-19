@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>阅读能力测评-朗读题</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/gradReadTest.css">
+</head>
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+        <div class="head">
+          <!-- 返回 -->
+          <div class="top">
+              <div class="return" @touchend="exit">
+                 <svg class="icon" aria-hidden="true">
+                     <use xlink:href="#icon-fh_"></use>
+                 </svg>
+              </div>
+              <h1>{{nowcount}}/{{total}}题</h1>
+              <div class="skip" @touchend="skip" :style="{color:(Color?'#223330':'#c9c9c9')}">跳过</div>
+          </div>
+          <div class="clock">
+            <div class="progress">
+              <div class="plan" :style="{width:W+'%'}"></div>
+            </div>
+            <svg class="icon" aria-hidden="true">
+                <use xlink:href="#icon-nz"></use>
+            </svg>{{minute|double}}:{{second|double}}
+          </div>
+        </div>
+
+        <!-- 题目 -->
+        <div class="content">
+          <h2>朗读题<span>选自：{{resData.source}}</span></h2>
+          <!-- <div class="text" id="text">{{ resData.passages }}</div> -->
+          <div class="text" id="text">{{ resData.passages }}</div>
+        </div>
+        <!-- 音波   -->
+        <div class="footer" v-if="foot">
+          <div>
+            <!-- <div class="soundWave"></div> -->
+            <canvas id="canvas" class="soundWave" style="width:100%;" v-show="canvasShow">
+    					你这不行啊..不支持canvas
+    				</canvas>
+            <span class="time">{{ timerSecond }}</span>
+          </div>
+          <div class="record">
+            <div @touchend="isOpenBtnRecord">
+              <svg class="icon" aria-hidden="true" v-show="!threeSconds">
+                  <use xlink:href="#icon-dianliangqiang_tushuxiangqing_langdu_kaishi" v-show="!ztFlag"></use>
+                  <use xlink:href="#icon-zt" v-show="ztFlag"></use>
+              </svg>
+              <div class="countdown" v-show="threeSconds">{{ time }}</div>
+              <span id="span">{{ recordText }}</span>
+            </div>
+            <div>
+              <svg class="icon" aria-hidden="true" v-show="!scoreFlag">
+                  <use xlink:href="#icon-dingjice_weidefenanniu"></use>
+              </svg>
+              <div class="countdown" v-show="scoreFlag">{{ readingScore }}</div>
+              <span>得分</span>
+            </div>
+          </div>
+          <div :class="canfit?'complete':'btn'" @touchend="keepOn">提交</div>
+          <span class="tip">提示：请认真作答，提交后不可修改</span>
+        </div>
+        <!-- 阅读按钮 -->
+        <div class="footer" v-if="!foot" style="position: absolute;bottom:0;">
+          <div :class="btnComplete?'complete':'btn'" @touchend="submit">提交</div>
+          <span class="tip">提示：请认真作答，提交后不可修改</span>
+        </div>
+  <div class="mask" v-if="mask"></div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox1.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript" src="../../../common/script/pinyin_dict_withtone.js"></script>
+<script type="text/javascript" src="../../../common/script/pinyinUtil.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script>
+    apiready = function() {
+            var readingAloudTime = null;
+            var readingTime = null;
+            var app = new Vue({
+                        el: '#app',
+                        data: {
+                          backstageTime:0,//进入后台的时间
+                          timeDiff:0,//切换前后台的时间差
+                          timeData:0,
+                          W:100,//进度条宽度
+                          nowcount:0,
+                          total:0,
+                          foot:true,
+                          Color:true,
+                          btnComplete:false,
+                          mask:false,
+                          testID:api.pageParam.testId,
+                          testType:api.pageParam.testType,
+                          questionType:null,
+                          questionId:null,
+                          resData:'',
+                          sound:null,
+                          demo:null,
+                          readTxt:'',
+                          isOpen:false,
+                          chivoxEngineOn:false,
+                          canvasShow:false,
+                          recordFlag:false,
+                          threeScondsFlag:false,
+                          codeSw:'',
+                          threeScondsInterval:null,
+                          ztFlag:false,
+                          threeSconds:false,
+                          time:3,
+                          recordText:'开始录音',
+                          readingScore:0,
+                          scoreFlag:false,
+                          readTimer:null,
+                          canfit:false,
+                          minute:'30',
+                          second:'0',
+                          ret:null,
+                          timerSecond:'00:00/03:00',
+                          interval:null,
+                          str1:'',
+                          doublePI:Math.PI * 2,
+                          canvas:null,
+                          ctx:null,
+                          soundTimer:null,
+                          requestAnimation:null,
+
+                        //画布的高度的一半
+                          halfCanvasHeight:100,
+                        //水平边距
+                          horizontalMargin:150,
+
+                        //衰减系数(越大, 边缘衰减的就越多, 震动宽度相应也越窄)
+                        attenuationCoefficient:2,
+                        //半波长个数-1
+                         halfWaveCount:3,
+                        //振幅是画布高度的一般的百分比[0,1]
+                        amplitudePercentage:0,
+                        //每帧增加的弧度[0,2PI](作用于sin曲线, 正值相当于原点右移, 曲线左移)
+                        radianStep:-0.05,
+
+                        //当前弧度的偏移
+                        radianOffset:0,
+                        //画布宽度
+                        canvasWidth:null,
+                        timer:null
+                        },
+                        filters:{
+                          double(value){
+                            if(parseInt(value)<10){
+                              return "0"+value
+                              if(value<=0){
+                                return value=0
+                              }
+                            }else{
+                              return value
+                            }
+                          }
+                        },
+                        mounted() {
+                          this.countDown(1800)
+                          // this.recordText = '开始录音';
+                          this.Backstage()
+                          this.toast = new customToast();
+                          this.slec()
+                          this.testID=api.pageParam.testId
+                          this.getExercise();
+                          this.createChivox();
+                          this.registChivoxCallback();
+                        },
+                        // filters:{
+                        //   removeN:(value){
+                        //     return value.repl
+                        //   }
+                        // },
+                        methods: {
+                            exit: function() {
+                              if(this.testType==1){
+                               //api.closeWin({})
+                               if(this.questionType==1){
+                                 this.end()
+                               }else{
+                                 api.sendEvent({
+                                     name: 'skipMask',
+                                     extra: {
+                                         key: true,
+                                     }
+                                 });
+                               }
+                              }else{
+                                if(this.questionType==1){
+                                  this.outTip()
+                                }else{
+                                  console.log("阅读退出---------")
+                                  api.sendEvent({
+                                      name: 'exit',
+                                  });
+                                }
+                              }
+
+
+                            },
+                            //退出正式测试提示
+                            outTip(){
+                              this.toast.alert({
+                                  title: '退出测评',
+                                  msg: '选择离开，将计算当前成绩，并且消耗1次剩余次数',
+                                  buttons: [{
+                                      name: '继续测试',
+                                      onclick: ()=>{
+                                          this.toast.hide();
+                                      }
+                                  },
+                                  {
+                                      name: '我要离开',
+                                      onclick: ()=>{
+                                          this.finish()
+                                          this.toast.hide();
+                                          // api.sendEvent({
+                                          //     name: 'GMask',
+                                          //     extra: {
+                                          //         key: 'interrupt'
+                                          //     }
+                                          // });
+                                          // this.interrupt()
+                                          var slelectGrade = req.abilityCard.grade //缓存定级测年级书房使用,中途离开
+                                          $storage.setStorage('slelectGrade',slelectGrade)
+                                          // api.closeToWin({
+                                          //     name: 'startTest'
+                                          // });
+
+                                      }
+                                  }]
+                              });
+                            },
+                            interrupt(){ //定级测中途退出提交默认兴趣选择
+                              var data = {
+                                  DimensionIds: []
+                              }
+                              $comm.socket(8007, data, (res) => {
+                                  console.log(res)
+                                  if (res) {
+                                      ret = JSON.parse(res)
+                                      if (ret.error == 0) {
+                                          Data = JSON.parse(ret.datas)
+                                          console.log("中途退出___________"+res)
+                                      }
+                                  }
+                              })
+                            },
+                            //退出热身测试
+                            end(){
+                              this.toast.alert({
+                                  title: '热身结束',
+                                  msg: '小提示：可以去正式测评啦！',
+                                  buttons: [{
+                                      name: '确定',
+                                      onclick: ()=>{
+                                          this.toast.hide();
+                                          api.closeToWin({
+                                              name: 'startTest'
+                                          });
+                                      }
+                                  }]
+                              });
+                            },
+                            //结束测评
+                            finish(){
+                              var data = {
+                                testID:this.testID
+                              }
+                              $comm.socket(8005,data,(res)=>{
+                                console.log("结束测试--------"+res)
+                                if(res){
+                                  ret = JSON.parse(res)
+                                  if(ret.error==0){
+                                    req = JSON.parse(ret.datas)
+                                    Data = req.abilityCard
+                                      api.openWin({
+                                          name: 'testResult',
+                                          url: './testResult.html',
+                                          slidBackEnabled:false,
+                                          reload:true,
+                                          pageParam: {
+                                              result: Data
+                                          }
+                                      });
+                                      api.closeWin();
+                                  }
+                                }
+
+                              })
+                            },
+                            //倒计时
+                            countDown(time){
+                              clearInterval(this.timer)
+                              //var time=1800;//30分钟换算成1800秒
+                              this.timer = setInterval(()=>{
+                                  this.timeData = time =time-1;
+                                  if(this.W<=0){
+                                    this.W = 0
+                                  }else{
+                                    this.W = this.W-0.055
+                                  }
+                                 this.minute=parseInt(time/60)
+                                 this.second=parseInt(time%60)
+                                 if(this.minute<=0&&this.second<=0){
+                                   this.btnComplete = false
+                                   clearInterval(this.timer)
+                                   this.minute=0
+                                   this.second=0
+                                   if(this.testType==1){
+                                     api.closeToWin({
+                                         name: 'startTest'
+                                     });
+                                   }else{
+                                     api.sendEvent({
+                                         name: 'endTime',
+                                     }); //时间结束toast提醒
+                                     this.finish()
+                                   }
+
+                                 }
+                              },1000);
+                            },
+                            //计时
+                            timeCountFun() {
+                              var that = this;
+                            	clearInterval(that.interval);
+                            	timeCount = 0;
+                            	that.interval = setInterval(function() {
+                            		timeCount++;
+                            		if(timeCount>180){
+                            			clearInterval(that.interval);
+                                  that.timerSecond = '00:00/03:00'
+                            			// stopRecord();
+                            			that.stop();
+                            		} else {
+                            			that.timerSecond = $comm.getReadTime(timeCount)+'/03:00';
+                                  // console.log(that.timerSecond)
+                            		}
+                            	}, 1000);
+                            },
+                            next(Data){
+                              this.foot = false
+                              console.log("传递过的data-----"+JSON.stringify(Data))
+                              api.sendEvent({
+                                  name: 'data',
+                                  extra: {
+                                      data: Data,
+                                      testID: this.testID,
+                                      testType:this.testType,
+                                  }
+                              });
+                              api.openFrame({
+                                  name: 'gradAnswerTestCon',
+                                  url: './gradAnswerTestCon.html',
+                                  slidBackEnabled:false,
+                                  bounces:true,
+                                  bgColor:'#fff',
+                                  rect: {
+                                      x: 0,
+                                      y: 100,
+                                      w: 'auto',
+                                      h: '755'
+                                  },
+                                  pageParam: {
+                                      testID: this.testID,
+                                      testType:this.testType,
+                                      data:Data
+                                  },
+                              });
+                            },
+                            //跳过
+                            skip(){
+                              // var that = this;
+                              // api.sendEvent({ //跳过时无法选进行选项操作
+                              //     name: 'selSwitch',
+                              //     extra: {
+                              //       key:false
+                              //     }
+                              //   })
+                              this.stop();
+                              window.cancelAnimationFrame(this.requestAnimation)
+                              if(this.soundTimer){
+                                clearInterval(this.soundTimer)
+                              }
+                              if(this.interval){
+                                clearInterval(this.interval)
+                              }
+                              console.log("跳过当前页数"+this.nowcount,"当前总数+"+this.total)
+                              if(this.total == this.nowcount){
+                                // this.finish()
+                                if(this.testType==1){
+                                  // this.end()
+                                  if(this.questionType ==1){//判断跳过结束时所在页面弹窗
+                                    this.end()
+                                  } else{
+                                    api.sendEvent({
+                                        name: 'skipMask',
+                                        extra: {
+                                            key: true,
+                                        }
+                                    });
+
+                                  }
+                                }else{
+                                  this.finish()
+                                }
+                                return
+                              }else{
+                                if(this.Color){
+                                  // alert(this.questionId)
+                                   this.Color = false
+                                    var json = {
+                                      testID:this.testID,
+                                      questionResult:{
+                                      qID:this.questionId,
+                                      status:false,
+                                      score:0,
+                                      questionType:this.questionType,
+                                      questionResult:''
+                                      }
+                                    }
+                                  $comm.socket(8004,json,(res)=>{
+                                    api.sendEvent({ //跳过时无法选进行选项操作
+                                        name: 'selSwitch',
+                                        extra: {
+                                          key:false
+                                        }
+                                      })
+                                    if(res){
+                                      // this.send(true)
+                                      ret = JSON.parse(res)
+                                      if(ret.error == 0){
+                                        Data = JSON.parse(ret.datas)
+                                          if(this.testType!=1){
+                                            api.toast({
+                                                msg: '下一题降低难度',
+                                                duration: 2000,
+                                                location: 'middle'
+                                            });
+                                          }
+                                          setTimeout(()=>{
+                                            this.getExercise()
+                                            this.Color = false
+                                          },3000)
+                                      }else{
+                                        api.toast({
+                                            msg: res.errorMsg,
+                                            duration: 2000,
+                                            location: 'middle'
+                                        });
+                                        if(ret.error == 1010){
+                                          this.finish()
+                                        }
+                                      }
+                                    }
+                                  })
+                                }
+                              }
+
+                            },
+                            watchOutLine(){
+                              api.addEventListener({
+                                  name: 'outLine'
+                              }, function(ret, err){
+                                alert(444)
+                                  // if( ret ){
+                                  //      alert( JSON.stringify( ret ) );
+                                  // }else{
+                                  //      alert( JSON.stringify( err ) );
+                                  // }
+                              });
+
+                            },
+                            //选择后按钮改变
+                            slec(){
+                              var that = this;
+                              // api.addEventListener({
+                              //     name: 'finish'
+                              // }, function(ret, err){
+                              //   that.finish()
+                              // });
+
+                              api.addEventListener({
+                                  name: 'sel'
+                              }, (ret, err)=> {
+                                that.btnComplete = ret.value.key1
+                              });
+                              api.addEventListener({
+                                  name: 'skipColor'
+                              }, (ret, err)=> {
+                                console.log("跳过颜色开关======="+ret.value.key)
+                                that.Color = ret.value.key
+                              });
+                              api.addEventListener({
+                                  name: 'mask'
+                              }, (ret, err)=>{
+                                that.mask = ret.value.key
+                              })
+                              //底部
+                              api.addEventListener({
+                                  name: 'foot'
+                              }, function(ret, err){
+                                  if( ret ){
+                                      if(ret.value.data){
+                                        console.log("从选择页面传递过来的值-------"+ret.value.data)
+                                        that.Color = true
+                                        that.foot = true;
+                                        that.resData = JSON.parse(ret.value.data.question);
+                                        that.questionId = that.resData.qid;
+                                        // console.lo
+                                        that.readTxt = that.resData.passages.replace(/\\n/g,'<br>').replace(/\n/g,'<br>');
+
+                                        that.readTxt = that.readTxt.split('<br/>');
+                                        console.log(that.readTxt)
+                                        // var str1 = ''
+                                        that.readTxt.map((v,i)=>{
+                                          that.str1+=`<p>${v}</p>`
+                                        })
+                                        that.readTxt = that.str1;
+                                        console.log(that.str1+'1111111111111111111111111111111')
+                                        // $api.html($api.byId('text'), that.str1);
+                                        $api.byId('text').innerHTML = that.str1;
+                                        that.str1 = '';
+                                        // console.log(that.readTxt)
+                                        // that.$forceUpdate();
+                                        // alert(that.foot)
+                                      }
+                                      //  this.foot = ret.value.key1,
+                                       console.log(JSON.stringify(ret.value.data)+'JJJJJJ')
+                                      //  this.resD = ret.value.data
+                                  }
+                              });
+
+                              //传递页面头部信息
+                              api.addEventListener({
+                                  name: 'headInfo'
+                              }, (ret, err)=>{
+                                this.nowcount= ret.value.nowcount
+                                this.total = ret.value.total
+                                this.questionType = ret.value.questionType
+                                this.questionId = ret.value.questionId
+                              });
+                            },
+                            submit(){
+                              if(this.btnComplete){
+                                api.sendEvent({
+                                    name: 'refer',
+                                    extra: {
+                                        // key1: 'value1',
+                                        // key2: 'value2'
+                                    }
+                                });
+                              }
+                            },
+                            //朗读时间
+                            //调取驰声模块
+                            //1、
+                            createChivox(){
+                              var that = this;
+                              that.demo = api.require('moduleChivox');
+                              if (that.demo) {
+                            			that.demo.creatCloudEngine({}, function(ret, err) {
+                            					if (ret) {
+                            							that.chivoxEngineOn = true;
+                            							$comm.debug('Chivox Engine Created:', JSON.stringify(ret), 'debug');
+                            					} else {
+                            							$comm.debug('创建引擎失败')
+                            							that.chivoxEngineOn = false;
+                            					}
+                            			});
+                            	}
+                            },
+                            //2、
+                            //删除引擎
+                            destoryChivox(){
+                              var that = this;
+                            	// var data = {};
+                            	if(that.demo){
+                            		that.demo.deleteCloudEngine({},function(ret,err){
+                            			if(ret){
+                            				console.log('删除引擎成功')
+                            			}else{
+                            				console.log('删除引擎失败')
+                            			}
+                            		})
+                            	}
+                            },
+                            //结束
+                            stop() {
+                                var that =this;
+                            		if (that.demo) {
+                            				that.demo.stop({}, function(ret, err) {
+                            						if (ret) {
+                            								console.log('停止录音');
+                            								// isRecord = false;
+                            								// finishRead = true;
+                            								$comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret)), 'debug');
+                            						}
+                            				});
+                            		}
+                            },
+                            //
+                            registChivoxCallback() {
+                            		//chivox简单结果回调
+                                var that = this;
+                            		api.addEventListener({
+                            				name: 'chivoxResult'
+                            		}, function(ret, err) {
+                            				if (ret) {
+                                      alert('shenme')
+                            				}
+                            		});
+                            		//录音音量回调
+                            		api.addEventListener({
+                            		    name: 'chivoxSoundResult'
+                            		}, function(ret, err){
+                                    // console.log('hhhh')
+                            		    if( ret ){
+                                        // console.log(ret.value.sound_intensity)
+                            						 that.sound = ret.value.sound_intensity ? ret.value.sound_intensity : null;
+                                        //  console.log('that.sound'+that.sound)
+                            		    }else{
+                            		         alert( JSON.stringify( err ) );
+                            		    }
+                            		});
+
+                            		//chivox全结果回调
+                            		api.addEventListener({
+                            				name: 'chivoxAllResult'
+                            		}, function(ret, err) {
+                            				console.log('开始调用驰生结果')
+                            				if (ret) {
+                                          // alert('gansha')
+                                          that.ret = ret;
+                                          that.ret = JSON.stringify(that.ret)
+                                          console.log(JSON.stringify(ret))
+                                          // console.log(JSON.stringify(ret));
+                                          that.reloadUI(ret);
+                            						// that.stopRecord();
+                            						// that.stop();
+                            						// clearInterval(interval)
+                            						if (ret.value.errId === 60010) {
+                            								// return toast.fail({
+                            								// 		title: '网络异常，请检查网络链接'
+                            								// });
+                                            return api.toast({
+                                              msg: '网络异常，请检查网络链接',
+                                              duration: 2000,
+                                              location: 'middle'
+                                            });
+                            						}
+                            						// that.readAllData = ret;
+                            						// that.reloadUI(ret);
+                            						// hasReadResult = true;
+                            				}
+                            		});
+                            		//chivox开始回放回调
+                            		//chivox结束回放回调
+                            },
+                            //开始录音
+                            start(){
+                              var that = this;
+                              console.log(that.threeScondsFlag)
+                              if(that.threeScondsFlag){
+                                return;
+                              }
+                              // that.isOpenBtnRecord();
+
+                              if(that.threeScondsInterval){
+                                clearInterval(that.threeScondsInterval)
+                              }
+                              if(that.recordFlag){
+                                if (that.demo) {
+                          				that.demo.stop({}, function(ret, err) {
+                          						if (ret) {
+                        								console.log('停止录音');
+                                        if(that.requestAnimation){
+                                          window.cancelAnimationFrame(that.requestAnimation)
+                                        }
+                                        that.canvasShow = false;
+                                        if(that.soundTimer){
+                                          clearInterval(that.soundTimer)
+                                        }
+                                        clearInterval(that.interval)
+                                        that.recordText = '重新录音';
+                                        // that.canfit = false;
+                                        that.threeSconds = false;
+                                        that.ztFlag = false;
+                                        that.recordFlag = false;
+                        								// isRecord = false;
+                        								// finishRead = true;
+                        								$comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret)), 'debug');
+                          						}
+                          				});
+                            		}
+                              }else{
+                                that.threeScondsFlag = true;
+                                // that.scoreFlag = false;
+                                // let codeSw = '';
+                                // that.time = 3;
+                                that.threeSconds = true;
+                                if(that.resData.passages.length<=4){
+                    							that.codeSw = 'cn.word.score';
+                    						}else if(that.resData.passages.length<=15 && that.resData.passages.length>=5){
+                    							that.codeSw = 'cn.sent.score';
+                    						}else{
+                    							// that.codeSw = 'cn.sent.score';
+                    							that.codeSw = 'cn.pred.raw';
+                    						}
+                                console.log(that.resData.passages+'++++++++++')
+                                var reftext = that.resData.passages.replace(/<br\/>/g,'').replace(/\\n/g,'')
+                                console.log(reftext+'++++++++++++++')
+                                let data = {
+                                    refText:reftext,
+                                    codeSw:that.codeSw,
+                                    isCnWord:that.codeSw=='cn.pred.raw' ? false : true,
+                                    isSoundCallBack:1
+                                };
+                                console.log(JSON.stringify(data));
+                                that.demo.start(data, function(ret, err) {
+                    								if (ret) {
+                    									$comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret, data)), 'debug');
+                                      //3秒倒计时
+                                      let time = 3;
+                                      that.threeScondsInterval = setInterval(()=>{
+                                        time--;
+                                        that.time = time;
+                                        console.log(that.time)
+                                        if(time<=0){
+                                          that.threeSconds = false;
+                                          clearInterval(that.soundTimer);
+                                          console.log(that.readTxt+'+++++!!!!!!!!!!!!')
+                                          $api.html($api.byId('text'), that.readTxt);
+                                          // $api.html($api.byId('text'), that.str1);
+                                          that.init();
+                                          that.timeCountFun();
+                                          that.recordText = '正在录音';
+                                          that.scoreFlag = false;
+                                          that.canfit = false;
+                                          that.threeSconds = false;
+                                          that.ztFlag = true;
+                                          clearInterval(that.threeScondsInterval)
+                                          that.recordFlag = true;
+                                          that.threeScondsFlag = false;
+                                          that.time = 3;
+                                        }
+                                      },1000);
+                    								}
+                    						});
+                              }
+                            },
+                            reloadUI(ret) {
+                                var that = this;
+                            	  // console.log(dataLength+'总字数');
+                            		// console.log(JSON.stringify(ret));
+                            		// wavetime = Math.floor(ret.value.result.wavetime/1000);
+                            		// console.log(wavetime)
+                            		// console.log(readBook)
+                            		console.log(123+that.codeSw)
+                            		var value = $chivox.parse(ret,that.codeSw);
+                            		// console.log(321)
+                            		console.log(JSON.stringify(value));
+                            		if (!value || !value.details) {
+                            				return;
+                            		}
+                            		if(value.tipMsg!='' || value.tipMsg!=''){
+                                  console.log(value.tipMsg)
+                            			api.toast({
+                            			    msg: value.tipmsg ? value.tipmsg : value.tipMsg,
+                            			    duration: 2000,
+                            			    location: 'middle'
+                            			});
+                            			return;
+                            		}
+                                console.log('-----=======------------------=======')
+                            		var arrIndex = [];
+                            		var item;
+                            		for (var i = 0; i < value.details.length; i++) {
+                            				if (value.details[i].overall >= 85) {
+                            						item = {
+                            								idx: i,
+                            								type: 1,
+                            								cnword:value.details[i].cnword
+                            						};
+                            						arrIndex.push(item)
+                            				} else if (value.details[i].overall >= 55 && value.details[i].overall <= 84) {
+                            						item = {
+                            								idx: i,
+                            								type: 2,
+                            								cnword:value.details[i].cnword
+                            						};
+                            						arrIndex.push(item)
+                            				} else if (value.details[i].overall <= 54) {
+                            						item = {
+                            								idx: i,
+                            								type: 3,
+                            								// char:value.details[i].char,
+                            								// char:pinyinUtil.getPinyin(value.details[i].cnword,' ', false)==value.details[i].char ? pinyinUtil.getPinyin(value.details[i].cnword,' ', true) :pinyinUtil.getTone(value.details[i].char+value.details[i].tone),
+                            								// char:pinyinUtil.getPinyin(value.details[i].cnword,' ', false)==value.details[i].char ? pinyinUtil.getPinyin(value.details[i].cnword,' ', true) : pinyinUtil.getTone($comm.getNewTone(value.details[i].char,value.details[i].tone)),
+                            								char:pinyinUtil.getTone($comm.getNewTone(value.details[i].char,value.details[i].tone)),
+                            								tone:value.details[i].tone,
+                            								cnword:value.details[i].cnword
+                            						};
+                                        console.log(pinyinUtil.getTone($comm.getNewTone(value.details[i].char,value.details[i].tone)))
+                                        // JSON.stringify(item)
+                            						arrIndex.push(item)
+                            				}
+                            		}
+
+                                console.log(that.readTxt)
+                                var m = $api.byId('text').innerText.replace(/\n\n/g,'<br>').split('<br>')
+                                // console.
+                                // console.log(JSON.stringify(m))
+
+                                var textarr = [];
+                                textarr.push(m);
+                                // json.stringify()
+                            		$api.html($api.byId('text'), $matchText.textWordPinYinStyle(m, arrIndex));
+                                textarr = [];
+                            		// $api.byId('readText').css('text-indent','0');
+
+                                var dataLength = that.resData.passages.length;
+                            		//获取用户等级
+                            		// var userGrade = JSON.parse($storage.getStorage('user-info')).grade;
+                            		that.readingScore = !isNaN($chivox.calcTotalScore(ret, 1,dataLength,that.codeSw).totalscore) ? $chivox.calcTotalScore(ret, 1,dataLength,that.codeSw).totalscore :0;
+                                if(that.readingScore){
+                                  that.scoreFlag = true;
+                                  that.canfit = true;
+                                }
+                            },
+                            //判断是否开启麦克风
+                            isOpenBtnRecord(){
+                              var that = this;
+                              var privacy = api.require('privacy');
+                              privacy.microphone(function(ret, err){
+                                if(ret.status){
+                                  that.isOpen = true;
+                                  that.start();
+                                }else{
+                                  that.isOpen = false;
+                                  api.toast({
+                                      msg: '请开启麦克风权限',
+                                      duration: 2000,
+                                      location: 'middle'
+                                  });
+                                }
+                              })
+                              // if(!that.isOpen){
+                              //   return;
+                              // }
+                            },
+                            init(){
+
+                                var that = this;
+                                // console.log(that.sound)
+                                that.canvasShow = true;
+                            		if(that.soundTimer){
+                            			clearInterval(that.soundTimer);
+                                  // return;
+                            		}
+                                that.canvas = document.getElementById("canvas");
+                                // console.log(that.canvas)
+                                that.ctx = that.canvas.getContext("2d");
+                                that.canvas.height = that.halfCanvasHeight * 2;
+                                // console.log(that.canvas.height)
+                                that.onResize();
+                                that.loop();
+                            },
+                            clearMap(){
+                              // console.log(2)
+                              var that = this;
+                            	// canvas = document.getElementById("canvas");
+                            	var width = that.canvas.width;
+                            	var height = that.canvas.height;
+                            	// console.log(width,height)
+                            	// that.ctx = canvas.getContext("2d");
+                            	// canvas.height = halfCanvasHeight * 2;
+                            	that.ctx.clearRect(0,0,width,height);
+                            },
+                            onResize() {
+                                var that = this;
+                                //元素的大小不能加单位, 单位默认就是像素, 而style中的长度要加单位
+                                that.canvasWidth = that.canvas.width = window.innerWidth - that.horizontalMargin;
+                                // console.log(that.canvasWidth)
+                            },
+
+                            //设K=attenuationCoefficient, 计算信号衰减 (4K/(4K+x^4))^2K<=1 (x belong [-K,K])
+                            // calcAttenuation(x) {
+                            //   console.log(4)
+                            //   var that = this;
+                            //     return Math.pow(4 * that.attenuationCoefficient / (4 * that.attenuationCoefficient + Math.pow(x, 4)),
+                            //         2 * that.attenuationCoefficient);
+                            // },
+
+                            //heightPercentage为振幅的显示比例
+                          drawAcousticWave(heightPercentage, alpha, lineWidth) {
+                            // console.log(5)
+
+                            var that = this;
+                            // if(that.sound)
+                            // console.log(that.recordFlag)
+                            // if(!that.recordFlag){
+                            //   return;
+                            // }
+                            		// if(soundTimer){
+                            		// 	clearInterval(soundTimer)
+                            		// }
+                                // console.log(that.sound)
+                            		that.soundTimer = setInterval(function(){
+                            			// console.log(sound+'声音');
+                            			that.amplitudePercentage  = that.sound/100;
+                                  // console.log(that.amplitudePercentage)
+                            		},500)
+                                that.ctx.strokeStyle = "#00B596";
+                                that.ctx.globalAlpha = alpha;
+                                that.ctx.lineWidth = lineWidth || 10;
+                                that.ctx.beginPath();
+                                that.ctx.moveTo(0, that.halfCanvasHeight);
+                                var x, y;
+                                for (var i = -that.attenuationCoefficient; i <= that.attenuationCoefficient; i += 0.01) {
+                                    //i是当前位置相对于整个长度的比率( x=width*(i+K)/(2*K))
+                                    x = that.canvasWidth * (i + that.attenuationCoefficient) / (2 * that.attenuationCoefficient);
+                                    //加offset相当于把sin曲线向右平移
+                                    y = that.halfCanvasHeight + that.halfCanvasHeight * that.amplitudePercentage * heightPercentage *
+                                        Math.sin(that.halfWaveCount * i + that.radianOffset);
+                                    that.ctx.lineTo(x, y);
+                                }
+                                that.ctx.stroke();
+                            },
+
+                            loop() {
+                                var that = this;
+                                that.radianOffset = (that.radianOffset + that.radianStep) % that.doublePI;
+                                that.ctx.clearRect(0, 0, that.canvas.width, that.canvas.height);
+                                that.drawAcousticWave(1, 1, 4);
+                                that.requestAnimation = window.requestAnimationFrame(that.loop);
+                            },
+                            getExercise(){
+                              this.canfit = false;
+                              var data = {
+                                testID:this.testID
+                              }
+                              $comm.socket(8003,data,(res)=>{
+                                // this.skip(true)
+                                if(res){
+                                  res = JSON.parse(res);
+                                  if(res.error==0){
+                                    $api.html($api.byId('text'), '')
+                                    this.Color = true
+                                    if(JSON.parse(res.datas).questionType==2){
+                                      this.threeSconds = false;
+                                      this.ztFlag = false;
+                                      this.recordFlag = false;
+                                      this.scoreFlag = false;
+                                      this.recordText = '开始录音';
+                                      this.timerSecond = '00:00/03:00';
+                                      this.readingScore = 0;
+                                      $api.html($api.byId('text'), this.readTxt);
+                                      this.next(JSON.parse(res.datas))
+                                    }else{
+                                      this.foot = true;
+                                      api.closeFrame({
+                                          name: 'gradAnswerTestCon'
+                                      });
+                                      this.resData = JSON.parse(JSON.parse(res.datas).question);
+                                      this.nowcount=JSON.parse(res.datas).nowCount
+                                      this.total=JSON.parse(res.datas).totalTestCount
+                                      this.qesNum = JSON.parse(res.datas).totalCount
+                                      this.questionType = JSON.parse(res.datas).questionType;
+                                      console.log(res.datas)
+                                      this.questionId = this.resData.qid;
+                                      console.log(this.questionId+'+++++++++++++++++++++++++++++++++++++++++++')
+                                      this.resData.passages = this.resData.passages
+                                      var subReg22 = /\\n/g;
+                                      this.readTxt = this.resData.passages.replace(subReg22,'<br>')
+                                      // this.$forceUpdate();
+                                      // console.log(JSON.stringify(this.resData)+'++++');
+                                      var subReg22 = /\\n/g;
+                                      var a = this.resData.passages.replace(subReg22,'<br>')
+                                      console.log('--------->>>>'+this.readTxt+'3333333333-------->>>');
+                                      this.readTxt = this.readTxt.split('<br/>');
+                                      // var str1 = ''
+                                      this.readTxt.map((v,i)=>{
+                                        this.str1+=`<p>${v}</p>`
+                                      })
+                                      this.readTxt = this.str1;
+                                      console.log('<<<--------->>>>'+this.str1+'22222222222222222-------->>>');
+                                      // $api.html($api.byId('text'), this.readTxt.replace(/\\n/g,'<br>').replace(/\n/g,'<br>'));
+                                      // $api.html($api.byId('text'), str1);
+                                      $api.byId('text').innerHTML = this.str1;
+                                      this.str1 = '';
+                                      if(this.total == this.nowcount){
+                                      //   this.Color = false
+                                      // }else{
+                                        this.Color = true
+                                      }
+                                      this.threeSconds = false;
+                                      this.ztFlag = false;
+                                      this.recordFlag = false;
+                                      this.recordText = '开始录音';
+                                      this.timerSecond = '00:00/03:00';
+                                      // $api.html($api.byId('text'),this.readTxt);
+                                      this.readingScore = 0;
+                                    }
+                                  }else{
+                                    api.toast({
+                                        msg: res.errorMsg,
+                                        duration: 3000,
+                                        location: 'middle'
+                                    });
+                                  }
+                                }
+                              })
+
+                            },
+                            tip(con,time){
+                              api.toast({
+                                  msg: con,
+                                  duration: time,
+                                  location: 'middle'
+                              });
+                            },
+                            keepOn(){
+                              var that = this;
+                              if(!that.canfit){
+                                return;
+                              }
+                              that.canfit = false;
+                              let data = {
+                                testID:api.pageParam.testId,
+                                questionResult:{
+                                  qID:that.resData.qid,
+                                  status:false,
+                                  score:that.readingScore,
+                                  questionType:1,
+                                  questionResult:that.ret
+                                }
+                              }
+                              // console.log(JSON.stringify(data)+'_____+++++______++++++')
+                                $comm.socket(8004,data,res=>{
+                                  // console.log(res);
+                                  if(res){
+                                    console.log("8004-----------"+res)
+                                    res = JSON.parse(res);
+
+                                    if(res.error==0){
+                                      Data = JSON.parse(res.datas)
+                                      if(Data.step>0){
+                                        that.tip("下一题提高难度",3000)
+                                      }else if(Data.step<0){
+                                        that.tip("下一题降低难度",3000)
+                                      }else{
+                                        console.log("不变")
+                                      }
+                                    setTimeout(function(){
+                                      if(that.nowcount!=that.total){
+                                        // alert(8888)
+                                        $api.html($api.byId('text'),'');
+                                        that.readingScore = 0;
+                                        that.scoreFlag = false;
+                                        that.Color = true
+                                        that.getExercise();
+                                        that.canfit = false;
+                                      }else{
+                                        if(that.testType===1){
+                                          that.end()
+                                        }else{
+                                          that.finish()
+                                        }
+                                      }
+                                    },2000)
+                                    }else{
+                                      api.toast({
+                                          msg: res.errorMsg,
+                                          duration: 2000,
+                                          location: 'bottom'
+                                      });
+                                    }
+                                  }
+                                })
+                              // this.next()
+                              // api.openWin({
+                              //     name: 'gradAnswerTest',
+                              //     url: './gradAnswerTest.html',
+                              //     pageParam: {
+                              //         name: 'test'
+                              //     }
+                              // });
+                            },
+                            //监听应用进入后台
+                            Backstage(){
+                              var that = this
+                              api.addEventListener({
+                                  name:'pause'
+                              }, function(ret, err){ //new Date().getTime()
+                                that.backstageTime =  new Date().getTime()
+                              });
+                              api.addEventListener({
+                                  name:'resume'
+                              }, function(ret, err){ //得到切入前台的时间差
+                                that.timeDiff = ((new Date().getTime())-that.backstageTime)/1000
+                                that.W = that.W-that.timeDiff* 0.055//计算时间差所走的宽度
+                                clearInterval(that.timer)
+                                var time = that.timeData-that.timeDiff<0?0:that.timeData-that.timeDiff
+                                  that.countDown(time)
+                              });
+                            }
+                        }
+                    })
+                }
+</script>
+
+</html>

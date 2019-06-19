@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>读书信息</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" href="../../css/myBookshelfStyle/VIPUser_bookInfo_win.css">
+</head>
+<body class="body">
+    <div id="app">
+        <div class="top">
+            <div class="book-top">
+                <div @click="exit" class="return">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-zuoyoujiantou"></use>
+                    </svg>
+                </div>
+                <!--<div class="share" id="">-->
+                    <!--<svg class="icon" aria-hidden="true">-->
+                        <!--<use xlink:href="#icon-dingjice_fenxianganniu_moren"></use>-->
+                    <!--</svg>-->
+                    <!--<span>分享</span>-->
+                <!--</div>-->
+                <!--<div class="tab">-->
+                    <!--<span class="reading click">读书</span>-->
+                    <!--<span class="course">课程</span>-->
+                <!--</div>-->
+            </div>
+        </div>
+        <div class="book">
+            <div class="box">
+                <div class="book-center">
+                    <div class="book-left">
+                        <div class="book-img">
+                            <img :src="bookInfo.bookCover">
+                            <div v-show="bookInfo.BookLight" class="light"></div>
+                        </div>
+                        <div class="book-basic">
+                            <div class="book-title clearfix">
+                                <h1>{{bookInfo.bookName}}<span v-show="bookInfo.BookLight" class="bright sel">已点亮</span></h1>
+                            </div>
+                            <h2>{{bookInfo.author}}</h2>
+                            <p>字数 {{bookInfo.wordsNumber}}</p>
+                            <div class="book-level">
+                                <svg class="icon" aria-hidden="true">
+                                    <use :xlink:href='bookInfo.bookLevelDes'></use>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="book-right">
+                        <div class="book-like">
+                              <div @click="giveBookHearts()" class="like-box"><i :class="[isLike ? 'click' : 'like']"></i><span>{{bookHearts}}</span></div>
+                              <span>{{bookInfo.readingNumber}}人在读</span>
+                        </div>
+                        <div class="schedule">
+                            <span>阅读进度</span>
+                            <div class="progress">
+                                <div :style="{width: bookInfo.bookReadingPercentage + '%'}" class="progress-bar"></div>
+                            </div>
+                            <span>{{bookInfo.bookPlanBar}}</span>
+                        </div>
+                        <span>本书你已经停留{{bookInfo.missingDateNumber}}天</span>
+                        <!--<div class="team">-->
+                            <!--<i></i><h3>共读小队</h3>-->
+                            <!--<div class="team-list">-->
+                                <!--<div>-->
+                                    <!--<img src="../../../common/image/team.png">-->
+                                    <!--<h4>嘀嗒1队</h4>-->
+                                <!--</div>-->
+                                <!--<div>-->
+                                    <!--<img src="../../../common/image/team.png">-->
+                                    <!--<h4>嘀嗒1队</h4>-->
+                                <!--</div>-->
+                                <!--<div>-->
+                                    <!--<img src="../../../common/image/team.png">-->
+                                    <!--<h4>嘀嗒1队</h4>-->
+                                <!--</div>-->
+                                <!--<div>-->
+                                    <!--<img src="../../../common/image/team.png">-->
+                                    <!--<h4>嘀嗒1队</h4>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <!--<div class="more">查看更多</div>-->
+                        <!--</div>-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="introduction">
+                    <div class="reading-ability">
+                    <h2>图书难度等级</h2><span>{{bookInfo.bookGradeScaleName}}</span>
+                        <!-- <span>相当于{{bookInfo.gradeScaleName}}水平</span> -->
+                    </div>
+                    <div class="book-label clearfix">
+                      <div @click="leverHeight" style="float:left;">
+                          <h2>图书标签</h2>
+                          <svg class="icon down" aria-hidden="true" id="down">
+                              <use xlink:href="#icon-xialajiantou-copy"></use>
+                          </svg>
+                        </div>
+                        <div class="label" id="bookLabel">
+                            <!--<div class="label01">{{tag.tag}}</div>-->
+                            <!--<div class="label02">外国儿童文学</div>-->
+                            <!--<div class="label03">-->
+                                <!--<svg class="icon" aria-hidden="true">-->
+                                    <!--<use xlink:href="#icon-maisui"></use>-->
+                                <!--</svg>-->
+                                <!--教育部推荐书目-->
+                                <!--<svg class="icon" aria-hidden="true">-->
+                                    <!--<use xlink:href="#icon-maisuicopy"></use>-->
+                                <!--</svg>-->
+                            <!--</div>-->
+                            <!--<div class="label01">共读训练营 1 期  精选</div>-->
+                            <!--<div class="label02">外国儿童文学</div>-->
+                            <div v-for="tag in bookInfo.label" style="display: inline-block;">
+                            <div v-if="tag.flag === 2" class="label01">{{tag.tag}}</div>
+                            <div v-else-if="tag.flag === 1" class="label02">{{tag.tag}}</div>
+                            <div class="label03" v-else-if="tag.flag === 3">
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-maisui"></use>
+                                </svg>
+                                {{tag.tag}}
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-maisuicopy"></use>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <div class="book-text">
+                        <h2>图书简介</h2>
+                        <span>{{bookInfo.bookDesc}}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="unit">
+                    <h2>阅读单元<span>{{bookInfo.unitCount}}</span>个</h2>
+                    <div class="unit-list">
+                        <div class="unit-box" v-for="(unitItem, index) in bookInfo.bookChapters">
+                            <div class="unit-title"><span>{{unitItem.bcname}}</span></div>
+                            <div class="unit-img" v-if="unitItem.bccover === ''">
+                                <img src="../../../common/image/fengmian3@3x.png">
+                                <div v-show="unitItem.flag" class="lock">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_daohang_shu_suoicon_bukedian"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="unit-img" v-else="unitItem.bccover">
+                                <img :src="unitItem.bccover">
+                                <div class="lock">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_daohang_shu_suoicon_bukedian"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="star" v-if="unitItem.lightedstarts === 0">
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                </svg>
+                            </div>
+                            <div class="star" v-else-if="unitItem.lightedstarts === 1">
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                </svg>
+                            </div>
+                            <div class="star" v-else-if="unitItem.lightedstarts === 2">
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_weidianliang"></use>
+                                </svg>
+                            </div>
+                            <div class="star" v-else-if="unitItem.lightedstarts === 3">
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                </svg>
+                                <svg class="icon" aria-hidden="true">
+                                    <use xlink:href="#icon-dianliangqiang_tushuxiangqing_xingji_dianliang"></use>
+                                </svg>
+                            </div>
+                            <div class="unit-test">
+                                <div v-if="!unitItem.flag" @click="startReadingAloudChapter(unitItem.bcid)">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_tushuxiangqing_langdu_kaishi"></use>
+                                    </svg>
+                                    <i>{{unitItem.readblockScore}}</i>
+                                </div>
+                                <div v-else="!unitItem.flag">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_tushuxiangqing_langdu_weikaishi"></use>
+                                    </svg>
+                                </div>
+                                <div v-if="unitItem.readblockComplete || unitItem.readingComplete" @click="startReadingChapter(unitItem.bcid, unitItem.cfiFrom, unitItem.readblockComplete)">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_tushuxiangqing_modu_kaishi"></use>
+                                    </svg>
+                                    <div class="progress">
+                                        <div :style="{width: unitItem.readingPercentage + '%'}" class="progress-bar"></div>
+                                    </div>
+                                </div>
+                                <div v-else="unitItem.readingComplete">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_tushuxiangqing_modu_weikaishi"></use>
+                                    </svg>
+                                    <div class="progress">
+                                        <div :style="{width: unitItem.readingPercentage + '%'}" class="progress-bar"></div>
+                                    </div>
+                                </div>
+                                <div v-if="(unitItem.readblockComplete && unitItem.readingComplete) || unitItem.choiceComplete" @click="startChoiceChapter(unitItem.bcid, unitItem.readingComplete)">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_tushuxiangqing_lianxi_kaishi"></use>
+                                    </svg>
+                                    <i>{{unitItem.choiceScore}}</i>
+                                </div>
+                                <div v-else="unitItem.choiceComplete">
+                                    <svg class="icon" aria-hidden="true">
+                                        <use xlink:href="#icon-dianliangqiang_tushuxiangqing_lianxi_weikaishi"></use>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="unit-record" v-show="(bookInfo.bookIsVip && !userIsVip) ? false : index === bookInfo.lastReadingUnitIndex">
+                                <div v-show="bookInfo.readingstep === 0" style="position: absolute; left: 2rem">读到这</div>
+                                <div v-show="bookInfo.readingstep === 1" style="position: absolute; left: 50%; transform: translateX(-50%)">看到这</div>
+                                <div v-show="bookInfo.readingstep === 2" style="position: absolute; right: 2rem">做到这</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box">
+                <div class="new clearfix">
+                    <h2>图书信息</h2>
+                    <div class="left">
+                        <p>版权信息方：<span>{{bookInfo.rights}}</span></p>
+                        <p>ISBN：<span>{{bookInfo.info}}</span></p>
+                    </div>
+                    <div class="left">
+                        <p>出版社：<span>{{bookInfo.publisher}}</span></p>
+                        <p>出版日期：<span>{{bookInfo.date}}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <!--<button >加入共读</button>-->
+            <button v-show="!isDownloading" class="btn" v-if="!bookIsDownLoad" @click="downLoadBook" style="background-color: #00a29a">立即下载</button>
+            <button class="btn" v-else="bookIsDownLoad" @click="startRead" >开始阅读</button>
+            <progress v-show="isDownloading" :value="downloadPercent" max="100"></progress>
+            <button class="vipBtn" v-show="bookInfo.bookIsVip && !this.userIsVip" @click="goBuyVip">开通VIP</button>
+            <div v-show="bookInfo.bookIsVip" class="vip"></div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        var readingBcid;
+        var readingBookUnitID;
+        var bookStatus = false;
+        var bookInfo;
+        var bookchaptersData = '';
+        var bookchapters = '';
+        var app = new Vue({
+            el: '#app',
+            data: {
+                bookInfo: {
+                    bookName: '',
+                    author: '',
+                    wordsNumber: '',
+                    bookLevelDes: '',
+                    bookCover: '',
+                    bookReadingPercentage: 0,
+                    bookPlanBar: '',
+                    bookGradeScaleName: '',
+                    gradeScaleName: '',
+                    label: [],
+                    bookDesc: '',
+                    unitCount: 0,
+                    bookChapters: null,
+                    lastReadingUnitIndex: null,
+                    bookIsVip: false,
+                    date: '',
+                    info: '',
+                    publisher: '',
+                    rights: '',
+                    readingstep: 0,
+                    missingDateNumber: 0,
+                    readingNumber: 0,
+                    BookLight: false
+                },
+                userIsVip: false,
+                bookIsDownLoad: false,
+                downloadPercent: 0,
+                isDownloading: false,
+                bookHearts: 0,
+                isLike: false,
+            },
+            create: function () {
+
+            },
+            mounted: function () {
+                FastClick.attach(document.body);
+                this.toast = new customToast();
+                this.loadBookInfo();
+                this.loadBookHearts();
+                this.bindEvent();
+            },
+            methods: {
+                exit: function () {
+                    api.sendEvent({
+                        name: 'turn-the-page-bookInfo'
+                    });
+                    api.closeWin({})
+                },
+                leverHeight: function () {
+                    if (this.bookInfo.label.length > 3) {
+                        $api.toggleCls($api.byId('bookLabel'), 'label-h');
+                    }
+                    $api.toggleCls($api.byId('down'), 'rotate');
+                },
+                giveBookHearts: function () {
+                    var that = this;
+                    $homeService.giveBookHeart(api.pageParam.bid, that.isLike ? 2 : 1, function (resp) {
+                        if (resp.errCode === 0) {
+                            that.bookHearts = resp.HeartCount;
+                            that.isLike = resp.StudentIsClickHeart;
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr)
+                },
+                loadBookHearts: function () {
+                    var that = this;
+                    $homeService.getBookHeartCount(api.pageParam.bid, function (resp) {
+                        if (resp.errCode === 0) {
+                            that.bookHearts = resp.HeartCount;
+                            that.isLike = resp.StudentIsClickHeart;
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, that.funErr)
+                },
+                loadBookInfo: function () {
+                    $homeService.bookInformation(api.pageParam.bid, this.loadBookInfoUI, this.funErr);
+                },
+                funErr: function () {
+                    this.toast.fail({
+                        title: '网络异常，请检查网络链接'
+                    })
+                },
+                getBookChapters: function () {
+                    $homeService.getBookMenu(api.pageParam.bid, this.funSucGetBookChapters, this.funErr)
+                },
+                funSucGetBookChapters: function (resp) {
+                    var that = this;
+                    if (resp.errCode === 0) {
+                        bookchapters = resp.chapters;
+                        bookchaptersData = resp;
+                        var finishIndex = 0;
+                        var isReading = false;
+                        // when i wrote this, only God and i understood what i was doing
+                        // now, only God knows
+                        that.bookInfo.bookChapters = resp.chapters.map(function (item, index) {
+                            item.flag = true;
+                            if (index === 0 && item.readblockComplete) {
+                                isReading = true;
+                            }
+                            if (item.bcid === readingBookUnitID) {
+                                that.bookInfo.lastReadingUnitIndex = index;
+                            }
+                            if (item.choiceComplete) {
+                                finishIndex = index + 1
+                            }
+                            if (index === 0 || item.readblockComplete) {
+                                item.flag = false
+                            }
+                            if (that.bookInfo.bookIsVip && !that.userIsVip) {
+                                if (!isReading) {
+                                    item.flag = true;
+                                }
+                            }
+                            item.bccover = item.bccover === '' ? '' : $comm.resUri + item.bccover;
+                            return item
+                        });
+                        if (!(that.bookInfo.bookIsVip && !that.userIsVip)) {
+                            if (finishIndex > (that.bookInfo.bookChapters.length - 1)) {
+                                return;
+                            }
+                            that.bookInfo.bookChapters[finishIndex].flag = false;
+                        }
+                    } else {
+                        this.toast.fail({
+                            title: resp.errMsg
+                        })
+                    }
+                },
+                loadBookInfoUI: function (resp) {
+                    if (resp.errCode === 0) {
+                        bookInfo = resp;
+                        this.bookInfo.bookName = resp.bname;
+                        this.bookInfo.author = resp.author;
+                        this.bookInfo.wordsNumber = resp.wordsNumber;
+                        this.bookInfo.bookCover = $comm.resUri + resp.bcover;
+                        this.bookInfo.bookReadingPercentage =  resp.readingPercentage;
+                        this.bookInfo.bookPlanBar = resp.lastreadingChapterIndex + '/'+resp.chapterNumber;
+                        this.bookInfo.bookGradeScaleName = resp.gradeScaleName;
+                        // this.levelGrade(resp.gradeScaleName);
+                        resp.categories = resp.categories.map(function (item) {
+                            item.flag = 1;
+                            return item;
+                        });
+                        resp.tags = resp.tags.map(function (item) {
+                            if (item.tag.indexOf('共读') !== -1) {
+                                item.flag = 2
+                            } else {
+                                item.flag = 3
+                            }
+                            return item;
+                        });
+                        this.bookInfo.label = resp.tags.concat(resp.categories);
+                        this.bookInfo.bookDesc = resp.introduce;
+                        this.bookInfo.unitCount = resp.chapterNumber;
+                        this.bookInfo.missingDateNumber = resp.missingDateNumber;
+                        this.bookInfo.bookIsVip = resp.vipbook;
+                        this.bookInfo.readingNumber = resp.readingNumber;
+                        this.bookInfo.BookLight = resp.BookLight;
+                        switch (resp.readingstep) {
+                            case 0:
+                                this.bookInfo.readingstep = 0;
+                                break;
+                            case 1:
+                                this.bookInfo.readingstep = 0;
+                                break;
+                            case 2:
+                                this.bookInfo.readingstep = 1;
+                                break;
+                            default:
+                                this.bookInfo.readingstep = 2;
+
+                        }
+                        readingBookUnitID = resp.readingbcid;
+                        this.userIsVip = JSON.parse($storage.getStorage('userVipInfo')).IsVIP;
+                        var arr = [];
+                        var stopFor = false;
+                        resp.publishdate.split('').map(function (item, index) {
+                            if (item === 'T') {
+                                stopFor = true;
+                            }
+                            if (stopFor) {
+                                return
+                            }
+                            arr.push(item);
+                        });
+                        this.bookInfo.date = arr.join('');
+                        this.bookInfo.publisher = resp.Publisher;
+                        this.bookInfo.rights = resp.Rights;
+                        this.bookInfo.info = resp.isbn;
+                        switch (resp.powerlevel) {
+                            case -1:
+                                this.bookInfo.bookLevelDes = "#icon-tuijianshuji_bijiaorongyi";
+                                break;
+                            case 0:
+                                this.bookInfo.bookLevelDes = "#icon-tuijianshuji_shiheyuedu";
+                                break;
+                            case 1:
+                                this.bookInfo.bookLevelDes = "#icon-tuijianshuji_juyoutiaozhan";
+                                break;
+                        }
+                        this.getBookChapters();
+                        this.bookIsDownLoad = $storage.getStorage(api.pageParam.bid);
+                    } else {
+                        this.toast.fail({
+                            title: resp.errMsg
+                        })
+                    }
+                },
+                // levelGrade: function levelgrade(level) {
+                //     var intLevel = parseInt(level);
+                //     var grade = Math.ceil(intLevel / 4);
+                //     var gradeStep = intLevel % 4;
+                //     switch (gradeStep) {
+                //         case 1:
+                //             this.bookInfo.gradeScaleName = grade + '年级初级';
+                //             break;
+                //         case 2:
+                //             this.bookInfo.gradeScaleName = grade + '年级中级';
+                //             break;
+                //         case 3:
+                //             this.bookInfo.gradeScaleName = grade + '年级中级';
+                //             break;
+                //         case 0:
+                //             this.bookInfo.gradeScaleName = grade + '年级高级';
+                //             break;
+                //     }
+                // },
+                startReadingAloudChapter: function (bcid) {
+                    var that = this;
+                    if (!$storage.getStorage(api.pageParam.bid)) {
+                        return that.toast.fail({
+                            title: '请下载图书'
+                        })
+                    }
+                    // $analysis.bindZhuge('图书阅读单元_朗读b');
+                    $homeService.readingStartCurrent(bcid, function(resp) {
+                        if (resp.errCode === 0) {
+                            unitID = resp.testid;
+                            that.openWin('unit_ReadingAloudTest_frm', {
+                                bcid: bcid,
+                                testId: unitID,
+                                data: bookInfo,
+                                bookchaptersData: bookchaptersData,
+                                chapters: bookchapters});
+                        }
+                    }, this.funErr);
+                },
+                startReadingChapter: function (bcid, cfiFrom, isFinish) {
+                    var that = this;
+                    if (!$storage.getStorage(api.pageParam.bid)) {
+                        return that.toast.fail({
+                            title: '请下载图书'
+                        })
+                    }
+                    // $analysis.bindZhuge('图书阅读单元_阅读b');
+                    if (isFinish === 'false') {
+                        return
+                    }
+                    $homeService.readingStartCurrent(bcid, function(resp) {
+                        if (resp.errCode === 0) {
+                            unitID = resp.testid;
+                            $homeService.startReading(unitID, function (resp) {
+                                if (resp.errCode === 0) {
+                                    api.setScreenOrientation({
+                                        orientation: 'portrait_up'
+                                    });
+                                    that.openWin('readBooks_frm', {
+                                        bid: api.pageParam.bid,
+                                        bookPath: $storage.getStorage(api.pageParam.bid),
+                                        cfi: cfiFrom,
+                                        bcid: bcid,
+                                        data: bookInfo,
+                                        bookchaptersData: bookchaptersData,
+                                        chapters: bookchapters,
+                                        testId: unitID
+                                    });
+                                }
+                            }, that.funErr);
+                        }
+                    }, that.funErr);
+                },
+                startChoiceChapter: function (bcid, isFinish) {
+                    var that = this;
+                    if (!$storage.getStorage(api.pageParam.bid)) {
+                        return that.toast.fail({
+                            title: '请下载图书'
+                        })
+                    }
+                    // $analysis.bindZhuge('图书阅读单元_测试b');
+                    if (isFinish === 'false') {
+                        return
+                    }
+                    $homeService.readingStartCurrent(bcid, function(resp) {
+                        if (resp.errCode === 0) {
+                            unitID = resp.testid;
+                            that.openWin('unit_choiceTest_frm',{
+                                bcid: bcid,
+                                testId: unitID,
+                                data: bookInfo,
+                                bookchaptersData: bookchaptersData,
+                                chapters: bookchapters
+                            });
+                        }
+                    }, that.funErr);
+                },
+                startRead: function () {
+                    var that = this;
+                    if (that.bookInfo.bookIsVip && !that.userIsVip) {
+                        return that.toast.fail({
+                            title: '请开通VIP'
+                        });
+                    }
+                    $homeService.readingStartCurrent(readingBookUnitID, function (resp) {
+                        if (resp.errCode === 0) {
+                            if ($storage.getStorage(api.pageParam.bid)) {
+                                switch (bookInfo.readingstep) {
+                                    case 0:
+                                        that.goToStepBook('reading_guide', bookInfo, resp.testid);
+                                        break;
+                                    case 1:
+                                        that.goToStepBook('unit_ReadingAloudTest_frm', bookInfo, resp.testid);
+                                        break;
+                                    case 2:
+                                        api.setScreenOrientation({
+                                            orientation: 'portrait_up'
+                                        });
+                                        that.goToStepBook('readBooks_frm', bookInfo, resp.testid);
+                                        break;
+                                    case 3:
+                                        that.goToStepBook('unit_choiceTest_frm', bookInfo, resp.testid);
+                                        break;
+                                    case 4:
+                                        that.goToStepBook('reading_guide', bookInfo, resp.testid);
+                                        break;
+                                }
+                            } else {
+                                this.downLoadBook();
+                            }
+                        } else {
+                            toast.fail({
+                                title: resp.errMsg
+                            })
+                        }
+                    }, this.funErr);
+                },
+                goToStepBook: function (url, resp, testId) {
+                    api.openWin({
+                        name: url,
+                        url: './' + url + '.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        bounces: false,
+                        slidBackEnabled: false,
+                        pageParam: {
+                            data: resp,
+                            testId: testId,
+                            bookchaptersData: bookchaptersData,
+                            chapters: bookchapters,
+                            bookPath: $storage.getStorage(api.pageParam.bid),
+                            bid: api.pageParam.bid,
+                            cfi: resp.readingcfi,
+                            bcid: resp.readingbcid
+                        },
+                        delay: 100,
+                        animation: {
+                            type: "fade",
+                            subType: "from_right",
+                            duration: 300
+                        }
+                    });
+                },
+                downLoadBook: function () {
+                    var that = this;
+                    if (that.bookInfo.bookIsVip && !that.userIsVip) {
+                        return that.toast.fail({
+                            title: '请开通VIP'
+                        });
+                    }
+                    $comm.tryReadFolder('book');
+                    that.isDownloading = true;
+                    var saveBookPath = 'fs://book/b_' + api.pageParam.bid + '.zip';
+                    api.download({
+                        url: $comm.wsUri + '/Reading/DownloadBook?bid=' + api.pageParam.bid,
+                        savePath: saveBookPath,
+                        report: true,
+                        cache: true,
+                        allowResume: true
+                    }, function(ret, err) {
+                        that.downloadPercent = ret.percent;
+                        if (ret.state === 1) {
+                            $storage.setStorage(api.pageParam.bid, saveBookPath);
+                            that.bookIsDownLoad = true;
+                            that.isDownloading = false;
+                        } else {
+                        }
+                    })
+                },
+                openWin: function (url, pageParam) {
+                    api.openWin({
+                        name: url,
+                        url: './' + url + '.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        bounces: false,
+                        slidBackEnabled: false,
+                        pageParam: pageParam,
+                        delay: 100,
+                        animation: {
+                            type: "fade",
+                            subType: "from_right",
+                            duration: 300
+                        }
+                    });
+                },
+                goBuyVip: function () {
+                    api.openFrame({
+                        name: 'set',
+                        url: '../personalCenter/vip.html',
+                        bounces: false,
+                        slidBackEnabled: false
+                    });
+                },
+                bindEvent: function () {
+                    var that = this;
+                    api.addEventListener({
+                        name: 'turn-the-page'
+                    }, function () {
+                        that.loadBookInfo();
+                        api.setFullScreen({ fullScreen: true});
+                    });
+                    api.addEventListener({
+                        name: 'change_userVip'
+                    }, function() {
+                        that.userIsVip = JSON.parse($storage.getStorage('userVipInfo')).IsVIP;
+                    });
+                }
+            }
+        })
+    }
+</script>
+</html>

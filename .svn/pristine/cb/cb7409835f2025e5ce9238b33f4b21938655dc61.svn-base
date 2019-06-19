@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>设置密码</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/loginNewStyle/login.css">
+    <link rel="stylesheet" type="text/css" href="../../css/loginNewStyle/set_password.css">
+</head>
+
+<body>
+    <div id="exit" class="top">
+        <svg class="icon" aria-hidden="true">
+            <use xlink:href="#icon-zuoyoujiantou"></use>
+        </svg>
+        <span>设置密码<span>
+    </div>
+    <div class="mag"></div>
+    <div class="content">
+        <div class="input-btn">
+            <span>+86</span>
+            <input class="input-code" id="verCode" type="number" placeholder="请输入手机号">
+            <button class="btn-verCode" id="btnVerCode">发送验证码</button>
+        </div>
+        <div class="input-btn">
+            <input class="input" id="checkoutValue"  type="password" placeholder="请输入验证码"><br>
+        </div>
+        <div class="input-btn">
+            <input class="input" id="checkoutValue"  type="password" placeholder="请输入密码（6-8位数字或密码）"><br>
+        </div>
+        <button class="btn-login" id="btn">确定</button><br>
+    </div>
+</body>
+<link rel="stylesheet" type href="../../css/custom-toast.css" />
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+        $analysis.bindEvent($api.byId('exit'), 'touchend', function () {
+            api.closeFrame({});
+        });
+    };
+</script>
+</html>

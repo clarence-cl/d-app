@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>个人中心</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/myCenter_frm.css">
+</head>
+<body id="body" class="body">
+    <div id="myCenter">
+        <div id="myCenterTaItem" class="item">
+            <div class="personal_enter_t">
+                <!-- <div style="display: flex;justify-content: space-between;">
+                    <span></span>
+                    <span id="goSetBtn" @touchend="goRouter('set')">设置</span>
+                </div> -->
+                <div class="myVip">
+                    <span></span>
+                    <span @click="goRouter('vip')" v-show="userVIPInfo.IsVIP">我的VIP会员<i class="font_family iconfont-left">&#xe700;</i></span>
+                    <span id="goVipLevel" @click="goRouter('vip')" v-show="!userVIPInfo.IsVIP">
+            			<div style="font-size:2.3rem;">升级VIP</div>
+            			<div style="font-size:1.5rem;">图书畅读、多个专享特权等着你<i class="font_family">&#xe700;</i></div>
+            		</span>
+                </div>
+                <div class="per_user">
+                    <div class="head_portrait">
+                        <img id="headImg" :src="userInfo.headimgUrl" alt="headImg">
+                        <!--<div id="userSex" class="user_sex">-->
+                        <!--<svg class="icon icon-sex" aria-hidden="true">-->
+                        <!--<use xlink:href="#icon-nvsheng"></use>-->
+                        <!--</svg>-->
+                        <!--</div>-->
+                    </div>
+                    <div class="user">
+                        <div class="name-wrap">
+                            <span id="user_name">{{userInfo.userName}}</span>
+                            <svg v-show="userVIPInfo.IsVIP" style="width: 2rem;height: 2rem;" class="icon" aria-hidden="true">
+                                <use xlink:href="#icon-VIPbiaoshi"></use>
+                            </svg>
+                        </div>
+                        <div>{{userInfo.sign == '' ? '读的好认真，都没空改签名' : userInfo.sign}}</div>
+                        <div>
+                            <svg style="width: 2rem;height: 2rem;" class="icon" aria-hidden="true">
+                                <use xlink:href="#icon-touxiangyouceyezi"></use>
+                            </svg>
+                            <span>{{userData.todayintegrals}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="personal_enter_c">
+                <div class="personal_enter_c_ct">
+                    <div>今天阅读时长</div>
+                    <div>
+                        <span class="font_b">{{userData.todayreading}}</span>
+                        <span>分钟</span>
+                    </div>
+                </div>
+                <div @touchend="shareSerialReadDays" class="personal_enter_c_ct">
+                    <div>连续朗读</div>
+                    <div class="share-icon">
+                        <svg class="icon icon-font" aria-hidden="true">
+                            <use xlink:href="#icon-fenxiang"></use>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font_b">{{userData.serialreading}}</span>
+                        <span>天</span>
+                    </div>
+                </div>
+                <div @touchend="shareSerialReadingDays" class="personal_enter_c_ct">
+                    <div>连续阅读</div>
+                    <div class="share-icon">
+                        <svg class="icon icon-font" aria-hidden="true">
+                            <use xlink:href="#icon-fenxiang"></use>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="font_b">{{userData.serialreadblokc}}</span>
+                        <span>天</span>
+                    </div>
+                </div>
+                <div class="personal_enter_c_ct">
+                    <div>我的任务</div>
+                    <div>
+                        <!-- <span id="myTasks" class="font_b"></span> -->
+                        <span>即将开放</span>
+                    </div>
+                </div>
+            </div>
+            <div class="personal_enter_b">
+
+                <div class="personal_enter_b_ct" @click="goLeafShop">
+                    <span>叶子特权馆</span>
+                    <span>0个叶子</span>
+                    <svg class="icon icon-font big" aria-hidden="true">
+                        <use xlink:href="#icon-yezitequanguan-copy"></use>
+                    </svg>
+                </div>
+                <div @click="goToAppStore" class="personal_enter_b_ct">
+                    <span>给我们一个好评</span>
+                    <span>求鼓励求点赞</span>
+                    <svg class="icon icon-font big" aria-hidden="true">
+                        <use xlink:href="#icon-geiwoyigehaoping-copy"></use>
+                    </svg>
+                </div>
+                <div @click="goRouter('set')" class="personal_enter_b_ct">
+                    <span>个人设置</span>
+                    <span></span>
+                    <svg class="icon icon-font big" aria-hidden="true">
+                        <use xlink:href="#icon-shezhi"></use>
+                    </svg>
+                </div>
+                <div @click="goToSpokesman" class="personal_enter_b_ct">
+                    <span>阅读代言人</span>
+                    <span>为阅读代言，赢7天VIP</span>
+                    <svg class="icon icon-font big" aria-hidden="true">
+                        <use xlink:href="#icon-tuijiangeihaoyou-copy"></use>
+                    </svg>
+                </div>
+            </div>
+            <!-- <div class="personal_enter_b" style="margin-top:4rem;">
+              <div @click="goToSpokesman" class="personal_enter_b_ct">
+                  <span>阅读代言人</span>
+                  <span>为阅读代言，赢7天VIP</span>
+                  <svg class="icon icon-font big" aria-hidden="true">
+                      <use xlink:href="#icon-tuijiangeihaoyou-copy"></use>
+                  </svg>
+              </div>
+            </div> -->
+            <!-- <div class="personal_enter_b">
+                <div @click="goToSpokesman" class="personal_enter_b_ct">
+                    <span>推荐给好友</span>
+                    <span>最高赢30天VIP时长卡劵</span>
+                    <svg class="icon icon-font big" aria-hidden="true">
+                        <use xlink:href="#icon-tuijiangeihaoyou-copy"></use>
+                    </svg>
+                </div>
+            </div> -->
+            <!--<div class="qiyu-btn" id="qiyuBtn">-->
+            <!--<svg cslass="icon icon-qiyu" aria-hidden="true">-->
+            <!--<use xlink:href="#icon-lianxixiaodita"></use>-->
+            <!--</svg>-->
+            <!--</div>-->
+            <div class="qiyu-btn" @click="goFeedback">
+              <img src="../../../common/image/logo002.png">
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<link rel="stylesheet" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script src="../../../common/script/lib-analysis.js"></script>
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var readingAloudTime = null;
+        var readingTime = null;
+        var app = new Vue ({
+            el: '#myCenter',
+            data: {
+                userData: {
+                    todayintegrals: 0,
+                    todayreading: 0,
+                    serialreading: 0,
+                    serialreadblokc: 0,
+                    mycoupons: 0
+                },
+                userInfo: {},
+                userVIPInfo: {}
+            },
+            created: function () {
+                FastClick.attach(document.body);
+                this.toast = new customToast();
+                this.adaptationModel();
+                this.loadUserData();
+                this.bindEvent();
+            },
+            methods: {
+                bindEvent: function () {
+                    var that = this;
+                    api.addEventListener({
+                        name: 'change_userInfo'
+                    }, function() {
+                        that.loadUserData();
+                    });
+                    api.addEventListener({
+                        name: 'change_userVip'
+                    }, function() {
+                        that.loadUserData();
+                    });
+                    api.addEventListener({
+                        name: 'change_MyCoupons'
+                    }, function() {
+                        that.loadUserData();
+                    });
+                    api.addEventListener({
+                        name: 'turn-the-page-bookInfo'
+                    }, function () {
+                        that.loadUserData();
+                    });
+                },
+                adaptationModel: function () {
+                    $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+                    $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+                },
+                loadUserData: function () {
+                    var that = this;
+                    $myCenter.MyTotalInfo(function (resp) {
+                        that.loadUserInfo();
+                        if (resp.errCode === 0) {
+                            that.userData = resp.totalinfo;
+                            readingAloudTime = resp.totalinfo.serialreading;
+                            readingTime = resp.totalinfo.serialreadblokc;
+                        } else {
+                            that.toast.fail({
+                                title: resp.errMsg
+                            });
+                        }
+                    }, that.funErr);
+                },
+                loadUserInfo: function () {
+                    var that = this;
+                    that.userVIPInfo = JSON.parse($storage.getStorage('userVipInfo'));
+                    that.userInfo = JSON.parse($storage.getStorage('user-info'));
+                    if (that.userInfo.headimgUrl === '') {
+                        that.userInfo.headimgUrl = '../../../common/image/avatar.png';
+                    } else {
+                        api.imageCache({
+                            url: $comm.resUri + that.userInfo.headimgUrl,
+                            thumbnail: false
+                        }, function(ret, err) {
+                            that.userInfo.headimgUrl = ret.url;
+                        })
+                    }
+                },
+                goRouter : function (url) {
+                    if (url === 'vip') {
+                        // $analysis.bindZhuge('我-升级VIP');
+                    }
+                    api.openFrame({
+                        name: url,
+                        url: '../personalCenter/' + url + '.html',
+                        bounces: false,
+                        slidBackEnabled: false,
+                        animation: {
+                            type: "fade", //动画类型（详见动画类型常量）
+                            subType: "from_right", //动画子类型（详见动画子类型常量）
+                            duration: 600 //动画过渡时间，默认300毫秒
+                        }
+                    });
+                },
+                goToAppStore: function () {
+                    api.openApp({
+                        iosUrl: 'https://itunes.apple.com/cn/app/%E5%98%80%E5%97%92%E4%BC%B4%E6%88%91%E8%AF%BB%E4%B9%A6-%E5%B0%8F%E5%AD%A6%E7%94%9F%E5%9C%A8%E7%94%A8%E7%9A%84%E4%B8%AD%E6%96%87%E5%88%86%E7%BA%A7%E9%98%85%E8%AF%BB%E5%88%A9%E5%99%A8/id1376433637?mt=8'
+                    });
+                },
+                goToSpokesman: function () {
+                    api.openFrame({
+                        name: 'spokesman',
+                        url: '../task/book_spokesman.html',
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 'auto',
+                            h: 'auto'
+                        },
+                        bounces: false,
+                        slidBackEnabled: false,
+                        animation: {
+                            type: "fade", //动画类型（详见动画类型常量）
+                            subType: "from_right", //动画子类型（详见动画子类型常量）
+                            duration: 600 //动画过渡时间，默认300毫秒
+                        }
+                    });
+                },
+                shareSerialReadDays: function () {
+                    $weChatShare.shareSerialReadDays(readingAloudTime, this.shareSuc, this.funErr)
+                },
+                shareSuc: function (resp) {
+                    var that = this;
+                    if (resp.errCode === 0) {
+                        var params = {
+                            desc: resp.Description,
+                            url: resp.ShareUrl,
+                            shareQrcode: resp.ShareQrcode
+                        };
+                        $wechatShareAlert.show(params, function (type, ret) {
+                            if (ret.status) {
+                                that.toast.success({
+                                    title: '分享成功'
+                                })
+                            } else {
+                                that.toast.success({
+                                    title: '分享失败'
+                                })
+                            }
+                        })
+                    } else {
+                        that.toast.fail({
+                            title: resp.errMsg
+                        })
+                    }
+                },
+                goFeedback: function () {
+                    var browser = api.require('webBrowser');
+                    var name = 'senbo';
+                    var url = "http://wx.qlogo.cn/mmopen/eBhXuS1y3rCIEeLp5YtNHLISibBfee8aNHoFKA7RbjgXQB6LB8YpiaTR6XOibwZNRv5neg4dYnfnibITanHzibk6W6nDFm73etJTm/0";
+                    var aa = 'https://support.qq.com/products/38200?openid=12345678&nickname='+name+'&avatar=' + url;
+                    api.setScreenOrientation({
+                        orientation: 'portrait_up'
+                    });
+                    var url='https://support.qq.com/products/38200?openid=12345678&nickname='+name+'&avatar=' + url;
+                    api.openWin({
+                        name: 'supportqq',
+                        url: './supportqq.html',
+                        pageParam: {
+                            url: url
+                        }
+                    });
+                },
+                //https://support.qq.com/products/38200?openid=12345678&nickname=senbo&avatar=http://wx.qlogo.cn/mmopen/eBhXuS1y3rCIEeLp5YtNHLISibBfee8aNHoFKA7RbjgXQB6LB8YpiaTR6XOibwZNRv5neg4dYnfnibITanHzibk6W6nDFm73etJTm/0
+                goLeafShop: function () {
+                    api.openWin({
+                        name: 'leafShop',
+                        url: '../task/leafShop.html',
+                        bounces: false,
+                        slidBackEnabled: false,
+                        animation: {
+                            type: "fade", //动画类型（详见动画类型常量）
+                            subType: "from_right", //动画子类型（详见动画子类型常量）
+                            duration: 600 //动画过渡时间，默认300毫
+                            }
+                    });
+                },
+                shareSerialReadingDays: function () {
+                    $weChatShare.shareSerialReadingDays(readingTime, this.shareSuc, this.funErr)
+                },
+                funErr: function () {
+                    this.toast.fail({
+                        title: "网络异常，请检查网络链接"
+                    })
+                }
+            }
+
+        });
+    };
+</script>
+
+</html>

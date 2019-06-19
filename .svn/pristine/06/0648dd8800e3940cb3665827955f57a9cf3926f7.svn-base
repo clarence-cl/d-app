@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Module Develop</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <style type="text/css">html,body{ height: 100% } body{ background-color: #fff; margin: 0; } #wrap{ height: 100%; position: relative; } #header{ background-color: #5082c2; height: 44px; position: relative; } #header h1{ font-size: 20px; height: 44px; line-height: 44px; margin: 0em; color: #fff; margin-left: 100px; margin-right: 100px; text-align: center; } #main{ display: block; } a.button{ display: -webkit-box; -webkit-box-pack: center; -webkit-box-align: center; height: 36px; margin: 8px; background-color: rgba(240,240,240,1.0); border-color: rgba(220,220,220,1.0); border-width: 2px; border-style: solid; } a.active{ background-color: rgba(240,240,240,0.6); }</style>
+	</head>
+	<body>
+    <div style="width:100px;height:100px;background-color:red;" id="close"></div>
+    <div id="testK">
+
+    </div>
+    <!-- <div id="wrap">
+      <header id="header">
+        <h1 id="title">模块开发</h1></header>
+      <div id="main">
+        <p>
+          <a class="button" tapmode="active" onclick="creatCloudEngine()">创建语音测评引擎</a></p>
+        <p>
+          <textarea id="refText" style="width:100%;height:5rem;">重复别人所说的话，只需要教育；而要挑战别人所说的话，则需要头脑。对一个人来说，所期望的不是别的，而仅仅是他能全力以赴和献身于一种美好事业。</textarea></p>
+          <p>
+            <select id="sltCode">
+              <option value="1">句子内核(拼音)</option>
+              <option value="2">段落内核(汉字)</option>
+              <option value="3">段落内核(拼音)[文档中没有此内核且返回结果比较简单，估计是在开发中]</option>
+            </select>
+          <p>
+        <p>
+          <a class="button" tapmode="active" onclick="start()">开始录音</a></p>
+        <p>
+          <a class="button" tapmode="active" onclick="stop()">结束录音并启动测评</a></p>
+        <p>
+          <a class="button" tapmode="active" onclick="replay()">回放</a></p>
+        <p>
+          <p>
+            <a class="button" tapmode="active" onclick="stopReplay()">停止回放</a></p>
+          <p>
+          <a class="button" tapmode="active" onclick="deleteCloudEngine()">删除语音测评引擎</a></p>
+          <p>
+            <textarea id="resText" style="width:100%;height:30rem;"></textarea></p>
+      </div>
+    </div> -->
+  </body>
+	<script>
+	apiready = function(){
+		// apiready();
+    document.getElementById('testK').innerHTML = JSON.stringify(api.pageParam.name)
+    document.getElementById('close').addEventListener('touchend',function(){
+      api.closeWin({
+
+      });
+    })
+	}
+	// 		var demo = null;
+	//     function fncb(ret, err) {
+	//       var msg = '';
+	//       if (ret) {
+	//         msg = JSON.stringify(ret);
+	//         api.toast({
+	//           msg: msg
+	//         });
+	//       } else if (err) {
+	//         msg = JSON.stringify(err);
+	//         api.toast({
+	//           msg: msg
+	//         });
+	//       }
+	//     };
+	//     function creatCloudEngine() {
+	//       demo = api.require('moduleChivox');
+	//       console.log('new对象成功')
+	//       var data = {};
+	//       //demo.creatCloudEngine(data, fncb);
+	//       demo.creatCloudEngine(data, fncb);
+  //
+	//     };
+	//     function deleteCloudEngine() {
+	//       var data = {};
+	//       demo.deleteCloudEngine(data, fncb);
+	//     };
+	//     function start() {
+	//       var privacy = api.require('privacy');
+	// privacy.microphone(function(ret, err) {//这里一定先要开启麦克风权限，因为录音模块不会自动提示此权限
+	//     if (ret.status) {
+	//       var data = {
+	//         refText: document.getElementById('refText').value,
+	//         codeSw:"cn.pred.raw"//cn.sent.raw表示中文句子评测//cn.pred.raw表示中文段落评测score
+	//         ,isCnWord:false
+	//         ,isSoundCallBack:1//是否实时返回音量 默认1 0不反回
+	//       };
+	//       var sectCode=document.getElementById('sltCode');
+	//       var index=sectCode.selectedIndex;
+	//       var value = sectCode.options[index].value; // 选中值
+	//       if(value==1)
+	//       {
+	//         console.log('句子内核');
+	//         data = {
+	//           refText: document.getElementById('refText').value
+	//           ,isSoundCallBack:1//是否实时返回音量 默认1 0不反回
+	//         };
+	//       }
+	//       else if(value==3)
+	//       {
+	//         data = {
+	//           refText: document.getElementById('refText').value,
+	//           codeSw:"cn.pred.score"//cn.sent.raw表示中文句子评测//cn.pred.raw表示中文段落评测score
+	//           ,isCnWord:true
+	//           ,isSoundCallBack:1//是否实时返回音量 默认1 0不反回
+	//         };
+	//       }
+	//       else if(value==4) //句子汉字评测 cn.sent.raw
+	//       {
+	//         data = {
+	//           refText: document.getElementById('refText').value,
+	//           codeSw:"cn.sent.raw"//cn.sent.raw表示中文句子评测//cn.pred.raw表示中文段落评测score
+	//           ,isCnWord:false
+	//           ,isSoundCallBack:1//是否实时返回音量 默认1 0不反回
+	//         };
+	//       }
+	//       demo.start(data, fncb);
+	//     } else {
+	//         alert(JSON.stringify(err));
+	//     }
+	// });
+  //
+	//     };
+	//     function stop() {
+	//       var data = {};
+	//       demo.stop(data, fncb);
+	//     };
+	//     function replay() {
+	//       var data = {};
+	//       demo.replay(data, fncb);
+	//     };
+	//     function stopReplay(){
+	//       var data={};
+	//       demo.stopReplay(data,fncb);
+	//     }
+	//     function apiready() {
+	//       var header = document.getElementById('header');
+	//       header.style.paddingTop = api.safeArea.top + 'px';
+  //
+	//       api.addEventListener({
+	//         name: 'chivoxInitCallback'//初始化引擎异步回调
+	//       },
+	//       function(ret, err) {
+	//         if (ret) {
+	//             console.log('chivoxInitCallback:'+JSON.stringify(ret));
+	//           api.toast(JSON.stringify(ret));
+	//         }
+	//       });
+	//       api.addEventListener({
+	//         name: 'chivoxAllResult'//录音评分结果回调  engineStartCallBackWithRet评分回调自定义事件
+	//       },
+	//       function(ret, err) {
+	//         if (ret) {
+	//             console.log('chivoxAllResult:'+JSON.stringify(ret));
+	//           //api.toast(JSON.stringify(ret));
+	//            document.getElementById('resText').value=JSON.stringify(ret);
+	//         }
+	//       });
+  //
+	//       api.addEventListener({
+	//         name: 'chivoxReplayStart'// 开始回放回调 filePath 回放文件路径
+	//       },
+	//       function(ret, err) {
+	//         if (ret) {
+	//           console.log('开始回放');
+	//           api.toast(JSON.stringify(ret));
+	//         }
+	//       });
+	//       api.addEventListener({
+	//         name: 'chivoxReplayFinished'//回放完成回调
+	//       },
+	//       function(ret, err) {
+	//         if (ret) {
+	//             console.log('回放完成');
+	//           api.toast(JSON.stringify(ret));
+	//         }
+	//       });
+	//       api.addEventListener({
+	//       name: 'chivoxSoundResult'// 说话声音大小回调
+	//       },
+	//       function(ret, err) {
+	//       if (ret) {
+	//       console.log('说话音量'+JSON.stringify(ret));
+	//       //api.toast(JSON.stringify(ret));
+	//       }	                                                                                                                });
+	//     }
+  </script>
+</html>

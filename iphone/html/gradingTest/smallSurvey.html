@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <title>小调查</title>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/smallSurvey.css">
+</head>
+<body id="body" class="body">
+    <div>
+        <h1 class="title-text">小调查</h1>
+        <h6 class="text-desc">2017年你一共读了多少书?</h6>
+    </div>
+    <div class="footer">
+        <button class="btn-continue"  onclick="continueTo()">确定</button>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var UICustomPicker = null;
+    var count = 0;
+    apiready = function () {
+        adaptationModel();
+        loadUICustomPicker();
+    };
+
+    function adaptationModel() {
+        console.log('api.frameHeight' + api.frameHeight);
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+        var fontSize = api.frameHeight / 768 * 10 + 'px';
+        document.documentElement.style.fontSize = fontSize;
+    }
+
+    function loadUICustomPicker() {
+        UICustomPicker = api.require('UICustomPicker');
+        UICustomPicker.open({
+            rect: {
+                x: api.frameWidth / 2  - api.frameWidth / 8 ,
+                y: api.frameHeight / 2 - 100,
+                w: api.frameWidth / 4,
+                h: 220
+            },
+            styles: {
+                bg: 'rgba(0,0,0,0)',
+                normalColor: '#999999',
+                selectedColor: '#07afb9',
+                selectedSize: 20,
+                tagSize: 12
+            },
+            data: [{
+                scope: ['0','1','2', '3', '4', '5', '6', '7', '8', '9']
+            }, {
+                scope: ['0','1','2', '3', '4', '5', '6', '7', '8', '9']
+            }],
+            rows: 5,
+            fixedOn: api.frameName,
+            fixed: true,
+            autoHide: false,
+            loop: false
+        }, function(ret, err) {
+            if (ret && ret.data) {
+                count = ret.data[0] + ret.data[1];
+            } else {
+            }
+        });
+    }
+
+    function continueTo () {
+        $GradingTest.surveyBookCount(Number(count), funSuc, funErr);
+    }
+
+    function funSuc (resp) {
+        if (resp.errCode === 0) {
+            goToWarmTest()
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funErr (err) {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        })
+    }
+
+    function goToWarmTest () {
+        api.openFrame({
+            name: 'warm_up_testfrm',
+            url: './warm_up_testfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {name: 'warm_up_testfrm'},
+            bounces: false,
+            reload: true,
+            animation: {
+                type: "ripple",
+                subType: "from_right",
+                duration: 1000
+            }
+        });
+    }
+
+</script>
+</html>

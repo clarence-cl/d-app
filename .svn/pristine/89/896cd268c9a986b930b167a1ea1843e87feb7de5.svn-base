@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>读纸书</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css">
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/myBookshelfStyle/paperBooks.css">
+</head>
+<body>
+	<div id="app">
+			<div class="return">
+				 <svg class="icon" aria-hidden="true" @touchend="back">
+						 <use xlink:href="#icon-gb_"></use>
+				 </svg>
+				 <div style="position:absolute;right:2.1rem;top:3.2rem;">
+					 <svg class="icon" aria-hidden="true">
+  						 <use xlink:href="#icon-gm_-copy"></use>
+  				 </svg>
+					 <span style="margin-left:1rem;font-size:1.4rem;color:#c9c9c9;">获取纸书</span>
+				 </div>
+
+			</div>
+			<div class="content">
+				<!-- <h2>请阅读原书 第{{ chapterIndex }}章 内容</h2> -->
+				<h2>请在这本纸书上阅读</h2>
+				<h2 style="text-align:center;max-width:80%;line-height:4rem;">从<span style="color:#00b596">{{chapterTocListData[0].tocLabel}}</span>—<span style="color:#00b596;">{{chapterTocListData[chapterTocListData.length-1].tocLabel}}</span>的内容</h2>
+				<div class="finishTip">阅读完请点击<span>结束</span>按钮</div>
+				<img :src="bookCover">
+				<h1>{{ bookName }}</h1>
+				<h3 style="color:#708782">{{ publisher }}</h3>
+				<span class="time">{{ time }}</span>
+				<div class="tab">
+					<span :class="isReadFlag ? 'pause' : 'pause1 '" @touchend="startRead">{{ isReadFlag ? '暂停' : '继续' }}</span>
+					<span class="end" @touchend="endRead">结束</span>
+				</div>
+				<span class="leave">已读过，去答题</span>
+		  </div>
+			<div class="popup" v-show="recordProgress">
+				<div class="pragress">
+					<svg class="icon close" aria-hidden="true" @touchend="closerecordProgress">
+							<use xlink:href="#icon-gb_-copy"></use>
+					</svg>
+					<h1>记录进度</h1>
+					<!-- <span class="chapter">本阅读单元共{{ chapterTocListData.length }}个章节</span> -->
+					<span class="readTime">本次阅读时长：{{ time }}</span>
+					<h2>请选择本次阅读<span style="color:#00b596;">最后结束</span>的章节,保存进度</h2>
+					<div class="list">
+						<div class="radio" @touchend="radio(index,item.boxChapterTocID,item.tocWordNumber)" v-for="(item,index) in chapterTocListData">
+							<div class="select"><i v-show="item.isSure"></i></div>
+			        <span>{{item.tocLabel}} </span>
+					  </div>
+				  </div>
+					<div class="btn">
+						<span @touchend="saveAndExit" id="saveAndExit">保存并退出</span>
+						<span @touchend="countineCount" style="color:#000;">继续计时</span>
+						<span class="color" @touchend="saveAndAnswer">保存并去答题</span>
+				  </div>
+				</div>
+			</div>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/epub.min.js"></script>
+<script type="text/javascript" src="../../../common/script/libs/jszip315.min.js"></script>
+<script type="text/javascript" src="../../../common/script/hooks.js"></script>
+<!-- 存储在离线磁盘的缓存库，h5的只有5M -->
+<script type="text/javascript" src="../../../common/script/libs/localforage.min.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+  apiready = function() {
+		var toast = new customToast();
+		var app = new Vue({
+			el:'#app',
+			data(){
+				return{
+					recordProgress:false,
+					chapterIndex:null,
+					chapterInd:1,
+					publisher:'',
+					chapterTocListData:[],
+					isReadFlag:true,
+					isRadio:false,
+					n_sec:1,
+					n_min:0,
+					n_hour:0,
+					time:'00:00:00',
+					timer:null,
+					chapterNumber:null,
+					num:null,
+					bookName:'',
+					allSec:0,
+					startReadData:{},
+					chartId:'',
+					readCharpterId:'',
+				}
+
+			},
+			mounted(){
+				this.start();
+				// this.chapterTocListData = api.pageParam.chapterTocListData;
+				this.readCharpterId = api.pageParam.recordData.readBoxChapterId
+				console.log(this.readCharpterId,api.pageParam.boxId+'____++++++');
+				console.log(api.pageParam.needBoxChapterId,api.pageParam.boxId+'____++++++');
+
+				this.getList(api.pageParam.boxId,api.pageParam.needBoxChapterId);
+
+				this.chapterTocListData.map((v,i)=>{
+					this.$set(v,'isSure',false)
+				})
+				this.publisher = api.pageParam.publisher;
+				this.bookName = api.pageParam.name;
+				console.log(this.publisher)
+				this.chapterIndex = api.pageParam.chapterIndex;
+				console.log('api.pageParam.chapterIndex+++++++'+api.pageParam.chapterIndex)
+				this.bookCover = api.pageParam.bookCover;
+				this.createTimer();
+			},
+			methods:{
+				//调取开始阅读
+				start(){
+					var data ={
+						BoxId:api.pageParam.boxId,
+						// BoxChapterId:api.pageParam.needBoxChapterId,
+						BoxChapterId:api.pageParam.recordData.readBoxChapterId,
+						BoxChapterTocID:api.pageParam.recordData.readBoxChapterTocId,
+						CFI:api.pageParam.recordData.readCFI ? api.pageParam.recordData.readCFI :api.pageParam.cfiFrom
+					}
+					$comm.socket(3002,data,res=>{
+						console.log(res)
+						res = JSON.parse(res);
+						if(res.error==0){
+							console.log('testId:'+res.datas)
+							this.startReadData = JSON.parse(res.datas);
+						}else{
+							api.toast({
+							    msg: res.errMsg,
+							    duration: 2000,
+							    location: 'middle'
+							});
+
+						}
+					})
+				},
+				// 获取章节列表
+				getList(boxId,chartId){
+					console.log('------'+boxId+'-----'+chartId+'-------')
+					var data = {
+						BoxId:boxId,
+						BoxChapterId:chartId
+					}
+					$comm.socket(2004,data,res=>{
+						console.log(res)
+						if(res){
+							res = JSON.parse(res);
+							if(res.error===0){
+								this.chapterTocListData = JSON.parse(res.datas).chapterTocList;
+								this.chapterTocListData.sort($comm.compare('tocSpinePos'))
+									console.log('+++++++++++'+JSON.stringify(this.chapterTocListData)+'++++++++++')
+							}else{
+								api.toast({
+								    msg: res.errMsg,
+								    duration: 2000,
+								    location: 'bottom'
+								});
+
+							}
+						}
+					})
+				},
+				//计时器
+				createTimer(){
+						// console.log('计时')
+						var that = this;
+					if(that.timer){
+						clearInterval(that.timer)
+					}
+
+					that.timer = setInterval(function () {
+						// console.log(111)
+						var str_sec = that.n_sec;
+						var str_min = that.n_min;
+						var str_hour = that.n_hour;
+						if ( that.n_sec < 10) {
+						str_sec = "0" + that.n_sec;
+						}
+						if ( that.n_min < 10 ) {
+						str_min = "0" + that.n_min;
+						}
+						if ( that.n_hour < 10 ) {
+						str_hour = "0" + that.n_hour;
+						}
+						that.time = str_hour + ":" + str_min + ":" + str_sec;
+						that.n_sec++;
+						if (that.n_sec > 59){
+							that.n_sec = 0;
+							that.n_min++;
+						}
+						if (that.n_min > 59) {
+								that.n_sec = 0;
+								that.n_hour++;
+							}
+						that.allSec++;
+						}, 1000);
+				},
+				//点击开始/暂停
+				startRead(){
+					if(this.isReadFlag && this.timer){
+						clearInterval(this.timer)
+					}else{
+						this.createTimer();
+					}
+					this.isReadFlag = !this.isReadFlag;
+				},
+				//点击结束按钮
+				endRead(){
+					this.recordProgress = true;
+				},
+				//点击返回按钮
+				back(){
+					var that = this;
+					toast.alert({
+	            title: '正在计时中，确定要退出',
+	            msg: '统计的时间不会被保存',
+	            buttons: [{
+	                name: '取消',
+	                onclick: function() {
+	                    toast.hide();
+	                }
+	            }, {
+	                name: '退出',
+	                onclick: function() {
+										// alert(api.pageParam.bcid)
+	                    clearInterval(that.timer);
+	                    toast.hide();
+											api.sendEvent({
+											    name: 'turn-the-page',
+											    extra: {
+											        id:api.pageParam.thisBookId
+											    }
+											});
+											api.closeWin({
+											    // name: 'page1'
+											});
+	                }
+	            }]
+	        });
+
+				},
+				//关闭记录进度弹窗
+				closerecordProgress(){
+					this.recordProgress = false;
+				},
+				// 点击选择章节
+				radio(index,chartId,num){
+					this.chapterTocListData.map((v,i)=>{
+						if(index!=i){
+							this.chapterTocListData[i].isSure = false;
+						}
+					})
+					this.chapterTocListData[index].isSure = !this.chapterTocListData[index].isSure;
+					if(this.chapterTocListData[index].isSure){
+						this.chartId = chartId,
+						this.chapterInd = index+1;
+						this.num += this.chapterTocListData[index].tocWordNumber;
+						console.log(this.allSec)
+						if(this.allSec>0){
+							$api.byId('saveAndExit').style.color="#000";
+						}
+					}else{
+						this.chartId = '';
+						this.num = null;
+						$api.byId('saveAndExit').style.color="";
+					}
+				},
+				//继续计时
+				countineCount(){
+					// this.createTimer();
+					this.recordProgress = false;
+				},
+				// 调取退出阅读协议
+				exitRead(){
+					var data = {
+						TestID:this.startReadData.testID
+					}
+					$comm.socket(3007,data,res=>{
+						if(res){
+							console.log(res)
+							res = JSON.parse(res);
+							if(res.error===0){
+
+							}else{
+								api.toast({
+								    msg: res.errorMsg,
+								    duration: 2000,
+								    location: 'middle'
+								});
+							}
+						}
+					})
+				},
+				//保存并退出
+				saveAndExit(){
+					console.log(this.chartId)
+					if(!this.chartId){
+						return;
+					}
+					if(this.allSec>=180 && this.chartId){
+						this.pageBook();
+						// this.exitRead();
+						// this.recordProgress = false;
+					}else{
+						api.toast({
+						    msg: '时间太短了哦，小于三分钟无法保存',
+						    duration: 2000,
+						    location: 'middle'
+						});
+					}
+				},
+				//调取图书翻页接口
+				pageBook(){
+					console.log(JSON.stringify(this.chapterTocListData)+'--------------cnm,numsl')
+					let data = {
+						TestID:this.startReadData.testID,
+						BoxChapterTocId:this.chartId,
+						CFI:'',
+						WordCount:this.num,
+						Percentage:Math.floor(this.chapterInd/this.chapterTocListData.length*100),
+						ReadSecondsCount:this.allSec
+					}
+					$comm.socket(3003,data,res=>{
+						console.log(res);
+						res = JSON.parse(res);
+						if(res.error==0){
+							clearInterval(this.timer)
+							$api.byId('saveAndExit').style.color = '';
+							// this.recordProgress = false;
+							this.exitRead();
+							api.sendEvent({
+							    name: 'turn-the-page',
+									extra:{
+										id:api.pageParam.thisBookId
+									}
+							});
+							api.closeWin({
+									// name: 'page1'
+							});
+						}else{
+							api.toast({
+							    msg: res.errMsg,
+							    duration: 2000,
+							    location: 'middle'
+							});
+						}
+					})
+				},
+				//保存并答题
+				saveAndAnswer(){
+					return;
+					this.pageBook();
+					this.recordProgress = false;
+					if(this.n_sec>=180){
+						// this.pageBook();
+					}else{
+						api.toast({
+					    msg: '时间太短了哦，小于三分钟无法保存',
+					    duration: 2000,
+					    location: 'middle'
+					});
+					}
+				},
+			}
+		})
+}
+
+
+</script>
+</html>

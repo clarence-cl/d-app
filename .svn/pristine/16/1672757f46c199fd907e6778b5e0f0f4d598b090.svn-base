@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>正式朗读</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" href="../../css/myBookshelfStyle/unit_ReadingAloudTest_frm.css">
+</head>
+
+<body id="body" class="body">
+    <div id="exitWarmReading" class="icon-wrap">
+        <i class="iconfont font_family">&#xe78c;</i>
+    </div>
+    <div class="reading-content">
+        <div id="textWrap" class="read-text-wrap">
+            <p class="read-text" id="refText">
+            </p>
+        </div>
+        <span class="word-count" id="wordCount"></span>
+    </div>
+    <!-- 朗读测试 -->
+    <div class="text-title">
+        <h1>嘀嗒朗读</h1>
+        <p>精华选读，大声读出感情</p>
+        <div id="btnRecord" class="btn-record">
+            <div id="maxScoreWrap" class="wrap-height">
+                <div id="maxScore" class="score03">90</div>
+                <h6 class="text-record">最高分</h6>
+            </div>
+            <div class="btn-wrap-recordC">
+                <div class="score-wrap">
+                    <div id="scoreIcon" class="icon-wrap-record">
+                        <svg class="icon" aria-hidden="true">
+                            <use xlink:href="#icon-dingjice_weidefenanniu"></use>
+                        </svg>
+                    </div>
+                    <p class="btn-text">得分</p>
+                    <div id="scoreResult" class="score01"></div>
+                </div>
+            </div>
+            <div class="btn-wrap-recordB">
+                <div style="width: 50%" id="iconWrap">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-dingjiceluyin_moren"></use>
+                    </svg>
+                </div>
+                <p class="btn-text">点击话筒，开始朗读</p>
+            </div>
+            <div class="btn-wrap-recordB">
+                <div style="width: 50%" id="playIcon">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-dingjice_huifanganniu"></use>
+                    </svg>
+                </div>
+                <p class="btn-text">回放</p>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <div style="font-size: 1.6rem;">
+            <div class="positive-timing">
+                <i id="dot2" class="dot"></i><span id="time02"></span>
+            </div>
+        </div>
+    </div>
+    <div id="showTestResult" class="go_book">去读书</div>
+    <!-- 弹窗 -->
+    <div id="popup" class="popup">
+        <div id="exitTestResults" class="icon-wrap">
+            <i class="iconfont font_family">&#xe76e;</i>
+        </div>
+        <!-- <div class="icon-wrap-right">
+            <i class="iconfont font_family">&#xe6f1;</i>
+            <span class="share-text">分享</span>
+        </div> -->
+        <div class="popup-t">
+            <img id="userAvatar" src="">
+            <span id="userName" class="span01"></span>
+            <span>在嘀嗒朗读环节中获得<span id="scoreTest" class="span02"></span>分</span>
+        </div>
+        <div class="content">
+            <p>内容选自《<span id="bookName"></span>》<span id="unitName"></span></p>
+            <div id="bookGradeIcon" class="popup-hard">
+                <!--<svg class="icon icon-data" aria-hidden="true">-->
+                    <!--<use xlink:href="#icon-dingjice_dengji_feichangrongyi"></use>-->
+                <!--</svg>-->
+                <!--难度 <span id="bookGrade"></span>-->
+            </div>
+            <div class="popup-chart">
+                <div class="popup-play">
+                    <img id="imagePlayer" src="../../../common/image/sound@3x.png">
+                </div>
+                <div class="popup-score">
+                    <h6>
+                        <i></i>各项成绩<i></i>
+                    </h6>
+                    <div class="data-map">
+                        <div>
+                            <div class="data-results">
+                                <div id="integrity" class="data">
+                                    <svg class="icon icon-data" aria-hidden="true">
+                                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_wanzhengduicon"></use>
+                                    </svg>
+                                    <h6 class="score" id="scoreIntegrity"></h6>
+                                </div>
+                            </div>
+                            <div class="desc-text">完整度</div>
+                        </div>
+                        <div style="margin: 0 4rem;">
+                            <div class="data-results">
+                                <div id="accuracy" class="data">
+                                    <svg class="icon icon-data" aria-hidden="true">
+                                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_zhengqueduicon"></use>
+                                    </svg>
+                                    <h6 class="score" id="scoreAccuracy"></h6>
+                                </div>
+                            </div>
+                            <div class="desc-text">正确度</div>
+                        </div>
+                        <div>
+                            <div class="data-results">
+                                <div id="fluency" class="data">
+                                    <svg class="icon icon-data" aria-hidden="true">
+                                        <use xlink:href="#icon-dingjice_zuizhongjieguoye_liuliduicon"></use>
+                                    </svg>
+                                    <h6 class="score" id="scoreFluency"></h6>
+                                </div>
+                            </div>
+                            <div class="desc-text">流利度</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="popup-f">
+            <div>
+                <div id="btn01" class="btn btn-color01">去书房</div>
+                <div id="goToReading" class="btn btn-color02">去读书</div>
+                <div id="shareAloud" class="btn btn-color03">炫耀一下</div>
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript" src="../../newbieGuide/unitTestReading-guide.js"></script>
+<script type="text/javascript" src="../../newbieGuide/unitTestGoReading.js"></script>
+<script type="text/javascript" src="../../newbieGuide/unitTestResults-guide.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var testId = '';
+    var qid = '';
+    var isRecord = false;
+    var isPlay = false;
+    var demo = null;
+    var chivoxEngineOn = false;
+    var readResult = null;
+    var hasReadResult = false;
+    var score;
+    var readBook;
+    var timer = null;
+    var audioUri;
+    var audioPath;
+    var audioDownload = false;
+    var timeCount = 0;
+    var interval = null;
+    var cfi;
+    var isCommit = false;
+    var userGrade;
+    var currentScore;
+    var totalData;
+    apiready = function() {
+        timeCount = api.pageParam.timeCount ? api.pageParam.timeCount : 0;
+        userGrade = JSON.parse($storage.getStorage('user-info')).grade;
+        testId = api.pageParam.testId;
+        adaptationModel();
+        //记载朗读数据
+        loadPaper();
+        //初始化驰声模块
+        create();
+        //注册驰声的事件监听
+        registChivoxCallback();
+        bindEvent();
+        timeCountFun();
+    };
+
+    function bindEvent() {
+        var isMove = false;
+        var moveX = 0;
+        var moveY = 0;
+        $api.byId('iconWrap').addEventListener('touchstart', function() {
+            btnRecord();
+        });
+        $api.byId('playIcon').addEventListener('touchstart', function() {
+            playRecording();
+        });
+        $analysis.bindEvent($api.byId('exitWarmReading'), 'touchend', function () {
+            clearInterval(interval);
+            destroy();
+            $homeService.readingFinishCurrent(api.pageParam.bcid, testId, 1, funSucFinish, funErr);
+        }, '单元朗读返回');
+
+        var eventProperty = {
+            '用户朗读成绩': score,
+            '是否VIP图书': api.pageParam.data.vipbook,
+            '图书名称': api.pageParam.data.bname,
+            '图书等级': api.pageParam.data.gradeScaleName,
+            '作者': api.pageParam.data.author,
+            '已读人数': api.pageParam.data.readingNumber,
+            '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+            '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+        };
+
+        $analysis.bindEvent($api.byId('showTestResult'), 'touchend', function () {
+            if (!readResult) {
+                return toast.fail({
+                    title: '请朗读文章...'
+                })
+            }
+            if (!hasReadResult) {
+                return toast.fail({
+                    title: '正在测评语音成绩...'
+                })
+            }
+            stopReplay();
+            submit();
+        }, '单元朗读去读书', eventProperty);
+
+        $analysis.bindEvent($api.byId('exitTestResults'), 'touchend', function () {
+            isCommit = false;
+            stopPlay();
+            $homeService.readingFinishCurrent(api.pageParam.bcid, testId, 1, funSucFinishGoBack, funErr);
+        }, '单元朗读关闭结果页');
+
+        $analysis.bindEvent($api.byId('imagePlayer'), 'touchend', function () {
+            if (!isPlay && audioDownload) {
+                isPlay = true;
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/soundplay.png');
+                audioPlayerStartDesc();
+            } else {
+                stopPlay();
+            }
+        }, '单元朗读结果页回放', eventProperty);
+        $api.byId('goToReading').addEventListener('touchend', function() {
+            stopPlay();
+            goToRead();
+        });
+
+
+        $analysis.bindEvent($api.byId('btn01'), 'touchend', function () {
+            stopPlay();
+            $homeService.readingFinishCurrent(api.pageParam.bcid, testId, 1, funSucFinishGoBack, funErr);
+        }, '单元朗读去书房', eventProperty);
+
+        $analysis.bindEvent($api.byId('shareAloud'), 'touchstart', function () {
+            $weChatShare.shareReadBlockScore(testId, funSucReadBlock, funErr)
+        }, '分享-朗读结果页')
+    }
+
+    function funSucFinishGoBack (resp) {
+        if (resp.errCode === 0) {
+            api.sendEvent({
+                name: 'turn-the-page'
+            });
+            api.closeWin();
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funSucReadBlock (resp) {
+        if (resp.errCode === 0) {
+            var params = {
+                desc: resp.Description,
+                url: resp.ShareUrl,
+                shareQrcode: resp.ShareQrcode
+            };
+            $wechatShareAlert.show(params, function (type, ret) {
+                if (ret.status) {
+                    toast.success({
+                        title: '分享成功'
+                    })
+                } else {
+                    toast.fail({
+                        title: '分享失败'
+                    })
+                }
+            })
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function stopPlay() {
+        isPlay = false;
+        $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+        api.stopPlay();
+    }
+
+    function goToRead() {
+        var eventProperty = {
+            '用户朗读成绩': score,
+            '是否VIP图书': api.pageParam.data.vipbook,
+            '图书名称': api.pageParam.data.bname,
+            '图书等级': api.pageParam.data.gradeScaleName,
+            '作者': api.pageParam.data.author,
+            '已读人数': api.pageParam.data.readingNumber,
+            '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+            '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+        };
+        // $analysis.bindZhuge('单元朗读去阅读', eventProperty);
+        api.pageParam.chapters.forEach(function(item, index) {
+            if (api.pageParam.bcid === item.bcid) {
+                cfi = item.cfiFrom
+            }
+        });
+        destroy();
+        clearInterval(interval);
+        // $homeService.startReading(testId, funSucStartReading, funErr);
+    }
+
+    function funSucStartReading(resp) {
+        if (resp.errCode === 0) {
+            api.openFrame({
+                name: 'readBook',
+                url: './readBooks_frm.html',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                bounces: false,
+                reload: true,
+                slidBackEnabled:false,
+                pageParam: {
+                    bookPath: $storage.getStorage(api.pageParam.data.bid),
+                    cfi: cfi,
+                    bcid: api.pageParam.bcid,
+                    data: api.pageParam.data,
+                    bookchaptersData: api.pageParam.bookchaptersData,
+                    chapters: api.pageParam.chapters,
+                    testId: testId,
+                    timeCount: timeCount
+                }
+            });
+        }
+    }
+
+    function timeCountFun() {
+        // $api.byId('time01').innerHTML = timeCount + '分钟';
+        $api.byId('time02').innerHTML = timeCount + '分钟';
+        interval = setInterval(function() {
+            timeCount++;
+            // $api.byId('time01').innerHTML = timeCount + '分钟';
+            $api.byId('time02').innerHTML = timeCount + '分钟';
+            if (timeCount >= 30) {
+                //$api.css($api.byId('dot'), 'background-color: #428a32');
+                //$api.css($api.byId('time01'), 'color: #428a32');
+                $api.css($api.byId('dot2'), 'background-color: #8fc31f');
+                $api.css($api.byId('time02'), 'color: #8fc31f')
+            }
+        }, 60000);
+    }
+
+    function audioPlayerStartDesc() {
+      // console.log(audioPath)
+        $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/soundplay.png');
+        api.startPlay({
+            path: resetaudioUri(audioPath)
+        }, function(ret, err) {
+            if (ret) {
+                isPlay = false;
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+            } else {
+                isPlay = false;
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+                toast.fail({
+                    title: '你好像没有朗读哦～'
+                });
+            }
+        });
+    }
+
+    function resetaudioUri(filePath) {
+        //'../image/demo.zip'
+        var path = filePath.replace(/fs:\/\//g, '');
+        path = 'file:///' + api.fsDir + '/' + path;
+        return path;
+    }
+
+    function showBookMenu() {
+        if ($api.hasCls($api.byId('bigMenu'), 'show-right-menu')) {
+            $api.removeCls($api.byId('bigMenu'), 'show-right-menu');
+            $api.addCls($api.byId('bigMenu'), 'menu-hide');
+        } else {
+            $api.addCls($api.byId('bigMenu'), 'show-right-menu');
+            $api.removeCls($api.byId('bigMenu'), 'menu-hide');
+        }
+    }
+
+    function reloadBookMenuInfoUI() {
+        api.pageParam.chapters.forEach(function(item, index) {
+            if (api.pageParam.bcid === item.bcid) {
+                var unitIndex = index + 1;
+                $api.html($api.byId('menuUnitName'), unitIndex + item.bcname);
+                $api.html($api.byId('nameUnit'), unitIndex + item.bcname);
+                $api.attr($api.byId('unitCover'), 'src', $comm.resUri + item.bccover);
+                if (item.choiceComplete) {
+                    $api.html($api.byId('choice'), '&#xe722;');
+                }
+                $api.html($api.byId('readProgress'), '已读' + item.readingPercentage + '%');
+                $api.byId('readingProgressBar').style.width = item.readingPercentage + '%';
+            }
+        });
+        $api.html($api.byId('menuBookName'), api.pageParam.data.bname);
+    }
+
+    function showMenu() {
+        if ($api.hasCls($api.byId('topMenu'), 'menu-show')) {
+            $api.removeCls($api.byId('topMenu'), 'menu-show');
+            $api.addCls($api.byId('topMenu'), 'menu-hide');
+            $api.removeCls($api.byId('bottomMenu'), 'menu-show');
+            $api.addCls($api.byId('bottomMenu'), 'menu-hide');
+        } else {
+            $api.addCls($api.byId('topMenu'), 'menu-show');
+            $api.removeCls($api.byId('topMenu'), 'menu-hide');
+            $api.addCls($api.byId('bottomMenu'), 'menu-show');
+            $api.removeCls($api.byId('bottomMenu'), 'menu-hide');
+        }
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function loadPaper() {
+        demo = api.require('moduleChivox');
+        $homeService.getReadingTestPaper(api.pageParam.bcid, testId, funSucGetPaper, funErr)
+    }
+
+    function playRecording() {
+        if (isRecord) {
+            return;
+        }
+        if (!readResult) {
+            return toast.fail({
+                title: '请先录音'
+            });
+        }
+        if (!isPlay) {
+            var eventProperty = {
+                '用户朗读成绩': score,
+                '是否VIP图书': api.pageParam.data.vipbook,
+                '图书名称': api.pageParam.data.bname,
+                '图书等级': api.pageParam.data.gradeScaleName,
+                '作者': api.pageParam.data.author,
+                '已读人数': api.pageParam.data.readingNumber,
+                '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+                '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+            };
+            // $analysis.bindZhuge('单元朗读回放', eventProperty);
+            isPlay = true;
+            replay();
+            $api.html($api.byId('playIcon'), ' <svg id="playAloudBtn" class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_tingzhianniu"></use>\n' +
+                '                </svg>');
+        } else {
+            isPlay = false;
+            stopReplay();
+        }
+    }
+
+    function btnRecord() {
+        var privacy = api.require('privacy');
+        privacy.microphone(function(ret, err) {
+            if (ret.status) {
+                if (!readBook) {
+                    return;
+                }
+                if (readResult) {
+                    stopReplay();
+                }
+                if (!isRecord) {
+                    var eventProperty = {
+                        '用户朗读成绩': score,
+                        '是否VIP图书': api.pageParam.data.vipbook,
+                        '图书名称': api.pageParam.data.bname,
+                        '图书等级': api.pageParam.data.gradeScaleName,
+                        '作者': api.pageParam.data.author,
+                        '已读人数': api.pageParam.data.readingNumber,
+                        '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+                        '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+                    };
+                    // $analysis.bindZhuge('单元朗读录音', eventProperty);
+                    hasReadResult = false;
+                    isRecord = true;
+                    changBtnUI();
+                    start();
+                } else {
+                    stopRecord();
+                    stop();
+                }
+            } else {
+                toast.fail({
+                    title: '请开启麦克风权限'
+                });
+            }
+        });
+    }
+
+    function stopRecord() {
+        isRecord = false;
+        clearInterval(timer);
+        $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+            '                <use xlink:href="#icon-dingjice_kaishiluyinanniu"></use>\n' +
+            '            </svg>');
+    }
+
+    function funSucGetPaper(resp) {
+        if (resp.errCode === 0) {
+            if (resp.readblock.length < 1) {
+                return;
+            }
+            qid = resp.readblock[0].qid;
+            $api.html($api.byId('refText'), resp.readblock[0].qtext);
+            $api.html($api.byId('wordCount'), '字数：' + resp.readblock[0].wordcount + '个');
+            readBook = resp.readblock[0].qtext;
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+    }
+
+    function changBtnUI() {
+        $api.byId('refText').style.color = '#333333';
+        $api.html($api.byId('refText'), readBook);
+        var btn = false;
+        $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+            '                <use xlink:href="#icon-dingjiceluyin_kaishi"></use>\n' +
+            '            </svg>');
+        timer = setInterval(function() {
+            if (btn) {
+                $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+                    '                <use xlink:href="#icon-dingjiceluyin_kaishi"></use>\n' +
+                    '            </svg>');
+            } else {
+                $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+                    '                <use xlink:href="#icon-dingjiceluyin_moren"></use>\n' +
+                    '            </svg>');
+            }
+            btn = !btn;
+        }, 500)
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: "网络异常，请检查网络链接"
+        });
+    }
+    function submit() {
+        currentScore = score;
+        console.log(readResult)
+        if (!isCommit) {
+            isCommit = true;
+            $homeService.postReadingScore(testId, qid, score, readResult, 0, 0, 0, funSucSubmit, funErr)
+        }
+    }
+
+    function funSucFinish(resp) {
+        if (resp.errCode === 0) {
+            toast.alert({
+                title: '确定要退出朗读吗？',
+                msg: '退出将会记 0 分哦',
+                buttons: [{
+                    name: '继续',
+                    onclick: function() {
+                        toast.hide();
+                    }
+                }, {
+                    name: '退出',
+                    onclick: function() {
+                        clearInterval(interval);
+                        clearInterval(timer);
+                        api.sendEvent({
+                            name: 'turn-the-page'
+                        });
+                        api.closeToWin({
+                          name:'bookInfo'
+                        });
+                    }
+                }]
+            });
+        } else {
+            clearInterval(interval);
+            clearInterval(timer);
+            api.sendEvent({
+                name: 'turn-the-page'
+            });
+            api.closeWin();
+        }
+    }
+
+    function funSucSubmit(resp) {
+        // console.log(resp)
+        if (resp.errCode === 0) {
+          // alert('dayinsubmit')
+            reloadReadAloudUI(resp)
+            // var chapters = api.pageParam.chapters;
+            // api.openWin({
+            //     name: 'readingTest',
+            //     url: './unit_ReadingTest_frm.html',
+            //     pageParam: {
+            //         name: 'test',
+            //         chapters:chapters,
+            //         bcid:api.pageParam.bcid,
+            //         bookName:api.pageParam.data.bname,
+            //         currentScore:currentScore,
+            //         audioPath:audioPath
+            //     }
+            // });
+
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+    }
+
+    function reloadReadAloudUI(data) {
+        // $api.byId('popup').style.display = 'block';
+        // $unitTestGuide.show();
+        // var userInfo = JSON.parse($storage.getStorage('user-info'));
+        // $api.html($api.byId('userName'), userInfo.userName);
+        // if (userInfo.headimgUrl === '') {
+        //     $api.attr($api.byId('userAvatar'), 'src', userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+        // } else {
+        //     $api.attr($api.byId('userAvatar'), 'src', $comm.resUri + userInfo.headimgUrl);
+        // }
+        // api.pageParam.chapters.forEach(function(item, index) {
+        //     if (api.pageParam.bcid === item.bcid) {
+        //         $api.html($api.byId('unitName'), item.bcname);
+        //     }
+        // });
+        // $api.html($api.byId('scoreTest'), data.readscore);
+        // if (parseInt(api.pageParam.data.gradeScaleName) > parseInt(JSON.parse($storage.getStorage('user-info')).gradeScaleName)) {
+        //     $api.byId('bookGradeIcon').style.background = '#fff4cc';
+        //     $api.byId('bookGradeIcon').innerHTML = '                <svg class="icon icon-grade" aria-hidden="true">\n' +
+        //         '                    <use xlink:href="#icon-dingjice_dengji_juyoutiaozhan"></use>\n' +
+        //         '                </svg>\n' +
+        //         '                <span style="color: #ffc800">图书难度'+ api.pageParam.data.gradeScaleName +' </span>';
+        // } else if (parseInt(api.pageParam.data.gradeScaleName) === parseInt(JSON.parse($storage.getStorage('user-info')).gradeScaleName)) {
+        //     $api.byId('bookGradeIcon').style.background = '#edf6db';
+        //     $api.byId('bookGradeIcon').innerHTML = '                <svg class="icon icon-grade" aria-hidden="true">\n' +
+        //         '                    <use xlink:href="#icon-dingjice_dengji_shiheyuedu"></use>\n' +
+        //         '                </svg>\n' +
+        //         '                <span style="color: #8fc31f">图书难度 '+ api.pageParam.data.gradeScaleName +' </span>';
+        // } else {
+        //     $api.byId('bookGradeIcon').style.background = '#d6f2fc';
+        //     $api.byId('bookGradeIcon').innerHTML = '                <svg class="icon icon-grade" aria-hidden="true">\n' +
+        //         '                    <use xlink:href="#icon-dingjice_dengji_feichangrongyi"></use>\n' +
+        //         '                </svg>\n' +
+        //         '                <span style="color: #00aeef">图书难度'+ api.pageParam.data.gradeScaleName +' </span>';
+        // }
+        // $api.html($api.byId('bookName'), api.pageParam.data.bname);
+        // var integrity = (data.complete > 35 ? data.complete : 35) + '%';
+        // var accuracy = (data.correct > 35 ? data.correct : 35) + '%';
+        // var fluency = (data.fluency > 35 ? data.fluency : 35) + '%';
+        // $api.css($api.byId('integrity'), 'height:' + integrity + ';');
+        // $api.css($api.byId('accuracy'), 'height:' + accuracy + ';');
+        // $api.css($api.byId('fluency'), 'height:' + fluency + ';');
+        // $api.html($api.byId('scoreIntegrity'), data.complete);
+        // $api.html($api.byId('scoreAccuracy'), data.correct);
+        // $api.html($api.byId('scoreFluency'), data.fluency);
+        audioUri = data.audiouri;
+        var totalData = data;
+        $comm.tryReadFolder('chivox');
+        audioPath = 'fs://chivox/c_' + $comm.guid(true) + '.mp3';
+        api.download({
+            url: $comm.resUri + audioUri,
+            savePath: audioPath,
+            report: true,
+            cache: true,
+            allowResume: true
+        }, function(ret, err) {
+            if (ret && ret.state == 1) {
+                audioDownload = true;
+                // console.log('我是'+ret)
+                // $api.css($api.byId('audioPlayer'), 'display: none');
+            } else {
+                if (err) {
+                    // console.log(JSON.stringify(err));
+                }
+            }
+        });
+        var chapters = api.pageParam.chapters;
+        // console.log('哈哈哈')
+        // console.log(timeCount)
+        // console.log(JSON.stringify(currentScore))
+
+        api.openWin({
+            name: 'readingTest',
+            url: './unit_ReadingTest_frm.html',
+            reload:true,
+            bgColor:'#fff',
+            slidBackEnabled:false,
+            pageParam: {
+                name: 'test',
+                chapters:chapters,
+                bcid:api.pageParam.bcid,
+                bookName:api.pageParam.data.bname,
+                currentScore:currentScore,
+                audioPath:audioPath,
+                totalData:totalData,
+                data:api.pageParam.data,
+                testId:api.pageParam.testId,
+                timeCount:timeCount,
+                bookchaptersData:api.pageParam.bookchaptersData
+            }
+        });
+    }
+
+    function registChivoxCallback() {
+        //chivox简单结果回调
+        api.addEventListener({
+            name: 'chivoxResult'
+        }, function(ret, err) {
+            if (ret) {
+                //$comm.debug('Chivox Callback Result:', JSON.stringify(ret), 'debug');
+            }
+        });
+        //chivox全结果回调
+        api.addEventListener({
+            name: 'chivoxAllResult'
+        }, function(ret, err) {
+            if (ret) {
+                stopRecord();
+                if (ret.value.errId === 60010) {
+                    return toast.fail({
+                        title: '网络异常，请检查网络链接'
+                    });
+                }
+                $unitTestReading.show();
+                reloadUI(ret);
+                hasReadResult = true;
+            }
+        });
+        //chivox开始回放回调
+        api.addEventListener({
+            name: 'chivoxReplayStart'
+        }, function(ret, err) {
+            if (ret) {
+                //$comm.debug('Chivox Replay Started:', JSON.stringify(ret), 'debug');
+            }
+        });
+        //chivox结束回放回调
+        api.addEventListener({
+            name: 'chivoxReplayFinished'
+        }, function(ret, err) {
+            if (ret) {
+                isPlay = false;
+                $api.html($api.byId('playIcon'), ' <svg id="playAloudBtn" class="icon" aria-hidden="true">\n' +
+                    '                    <use xlink:href="#icon-dingjice_huifanganniu"></use>\n' +
+                    '                </svg>');
+            }
+        });
+    }
+
+    function reloadUI(ret) {
+        var value = $chivox.parse(ret);
+        if (!value || !value.details) {
+            return;
+        }
+        var arrIndex = [];
+        var item;
+        for (var i = 0; i < value.details.length; i++) {
+            if (value.details[i].overall >= 80) {
+                item = {
+                    idx: i,
+                    type: 1
+                };
+                arrIndex.push(item)
+            } else if (value.details[i].overall >= 50 && value.details[i].overall < 80) {
+                item = {
+                    idx: i,
+                    type: 2
+                };
+                arrIndex.push(item)
+            } else if (value.details[i].overall < 50) {
+                item = {
+                    idx: i,
+                    type: 3
+                };
+                arrIndex.push(item)
+            }
+        }
+        $api.html($api.byId('refText'), $matchText(readBook, arrIndex));
+        var readingScore = $chivox.calcTotalScore(ret, userGrade).totalscore;
+        if (readingScore >= 80) {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-1"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), readingScore);
+        } else if (80 > readingScore && readingScore >= 60) {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-2"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), readingScore);
+        } else {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), ' ');
+        }
+        if (!score || readingScore > score) {
+            score = isNaN(readingScore) ? 0 : readingScore;
+            $api.byId('maxScoreWrap').style.visibility = 'visible';
+            $api.byId('maxScore').innerText = score;
+            // currentScore = score;
+            readResult = ret;
+        }
+    }
+
+    function create() {
+        //初始化
+        if (demo) {
+            demo.creatCloudEngine({}, function(ret, err) {
+                if (ret) {
+                    chivoxEngineOn = true;
+                    $comm.debug('Chivox Engine Created:', JSON.stringify(ret), 'debug');
+                } else {
+                    chivoxEngineOn = false;
+                }
+            });
+        }
+    }
+    //卸载
+    function destroy() {
+        if (demo && chivoxEngineOn) {
+            demo.deleteCloudEngine({}, function(ret, err) {
+                if (ret) {
+                    chivoxEngineOn = false;
+                    demo = null;
+                    $comm.debug('Chivox Engine Destroyed:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+    //开始录音
+    function start() {
+        if (demo && chivoxEngineOn) {
+            var reg = /^[\u4e00-\u9fa5]+$/;
+            var wordArr = [];
+            var dataStr = $api.byId('refText').innerText;
+            var strArr = dataStr.split('');
+            strArr.forEach(function (item, index) {
+                if (reg.test(item)) {
+                    wordArr.push(item)
+                }
+            });
+            dataStr = wordArr.join('');
+            var data = {
+                refText: dataStr
+            };
+            demo.start(data, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret, data)), 'debug');
+                }
+            });
+        }
+    }
+    //停止录音
+    function stop() {
+        if (demo) {
+            demo.stop({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret)), 'debug');
+                }
+            });
+        }
+    }
+    //停止播放音频
+    function stopReplay() {
+        if (demo) {
+            demo.stopReplay({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine ' +
+                        ':', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+    //播放音频
+    function replay() {
+        if (demo) {
+            demo.replay({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Replaying:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+</script>
+
+</html>

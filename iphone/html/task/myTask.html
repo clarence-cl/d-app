@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>我的任务</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/taskStyle/myTask.css">
+</head>
+<body id="body" class="body">
+    <div id="exitTask" class="icon-btn">
+        <i class="iconfont font_family">&#xe770;</i>
+    </div>
+    <div class="leaf">
+        <div class="leaf-box">
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-touxiangyouceyezi"></use>
+            </svg>
+            <span>+200</span>
+        </div>
+    </div>
+    <h2>我的任务</h2>
+    <div id="taskList" class="task">
+        <div class="task-box">
+            <div class="fl">
+                <h3>任务名称</h3>
+                <p>任务描述任务描述任务描述任务描述</p>
+            </div>
+            <div class="leaf-box">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-touxiangyouceyezi"></use>
+                </svg>
+                <span>+200</span>
+            </div>
+            <div class="btn">未完成</div>
+        </div>
+        <div class="task-box">
+            <div class="fl">
+                <h3>任务名称</h3>
+                <p>任务描述任务描述任务描述任务描述</p>
+            </div>
+            <div class="leaf-box">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-touxiangyouceyezi"></use>
+                </svg>
+                <span>+200</span>
+            </div>
+            <div class="btn finish">领取</div>
+            <div class="share">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-fenxiang"></use>
+                </svg>
+            </div>
+        </div>
+        <div class="task-box">
+            <div class="fl">
+                <h3>任务名称</h3>
+                <p>任务描述任务描述任务描述任务描述</p>
+            </div>
+            <div class="leaf-box">
+                <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-touxiangyouceyezi"></use>
+                </svg>
+                <span>+200</span>
+            </div>
+            <div class="btn">未完成</div>
+        </div>
+    </div>
+    <div id="mapMask" class="map" style="display: none">
+        <div class="popup">
+            <h4>完成任务-每日朗读</h4>
+            <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-touxiangyouceyezi"></use>
+            </svg>
+            <p>+200</p>
+            <div id="hideMask" class="popup-btn">好的</div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript">
+
+    apiready = function() {
+        loadMyTasks();
+        bindEvent();
+    };
+
+    function bindEvent() {
+        console.log('---------->');
+
+        $analysis.bindEvent($api.byId('exitTask'), 'touchend', function () {
+            api.closeFrame({});
+        });
+
+        $analysis.bindEvent($api.byId('hideMask'), 'touchend', function () {
+            $api.byId('mapMask').style.display = 'none';
+        })
+    }
+
+    function loadMyTasks() {
+        var a = [0, 1, 2, 0];
+        a.forEach(function (item, index) {
+            if (item) {
+                var taskDom = '<div class="task-box">\n' +
+                    '            <div class="fl">\n' +
+                    '                <h3>任务名称</h3>\n' +
+                    '                <p>任务描述任务描述任务描述任务描述</p>\n' +
+                    '            </div>\n' +
+                    '            <div class="leaf-box">\n' +
+                    '                <svg class="icon" aria-hidden="true">\n' +
+                    '                  <use xlink:href="#icon-touxiangyouceyezi"></use>\n' +
+                    '                </svg>\n' +
+                    '                <span>+200</span>\n' +
+                    '            </div>\n' +
+                    '            <div class="btn">未完成</div>\n' +
+                    '        </div>';
+            } else {
+                var taskDom = '<div class="task-box">\n' +
+                    '            <div class="fl">\n' +
+                    '                <h3>任务名称</h3>\n' +
+                    '                <p>任务描述任务描述任务描述任务描述</p>\n' +
+                    '            </div>\n' +
+                    '            <div class="leaf-box">\n' +
+                    '                <svg class="icon" aria-hidden="true">\n' +
+                    '                  <use xlink:href="#icon-touxiangyouceyezi"></use>\n' +
+                    '                </svg>\n' +
+                    '                <span>+200</span>\n' +
+                    '            </div>\n' +
+                    '            <div class="btn finish" onclick="toReceive( ' + index +')">领取</div>\n' +
+                    '            <div class="share">\n' +
+                    '                <svg class="icon" aria-hidden="true">\n' +
+                    '                  <use xlink:href="#icon-fenxiang"></use>\n' +
+                    '                </svg>\n' +
+                    '            </div>\n' +
+                    '        </div>'
+            }
+            $api.append($api.byId('taskList'), taskDom)
+        })
+    }
+
+    function toReceive (index) {
+        $api.byId('mapMask').style.display = 'block';
+        console.log('------->' + index);
+    }
+</script>
+</html>

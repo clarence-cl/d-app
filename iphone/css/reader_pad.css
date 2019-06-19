@@ -1,0 +1,43 @@
+﻿/*
+配合epub.js解决图片剪裁,需要app端在epub.js渲染前注入该css
+与上版本相比,该css中不再担负img对象的样式处理
+2018-5-31
+*/
+p {
+    line-height: 40px !important;
+}
+
+body {
+    font-size: 20px !important;
+    color: #333333 !important;
+}
+
+h1 {
+    font-size: 36px !important;
+    line-height: 42px !important;
+}
+
+h2 {
+    font-size: 34px !important;
+    line-height: 40px !important;
+}
+
+h3 {
+    font-size: 30px !important;
+    line-height: 36px !important;
+}
+
+h4 {
+    font-size: 28px !important;
+    line-height: 32px !important;
+}
+
+h5 {
+    font-size: 26px !important;
+    line-height: 30px !important;
+}
+
+h6 {
+    font-size: 24px !important;
+    line-height: 28px !important;
+}

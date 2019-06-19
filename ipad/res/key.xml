@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<security>
+    <item name="wxPay_appId" value="wx61df40d70986a750"/>
+    <item name="wxPay_mchId" value="1497357202"/>
+    <item name="wxPay_partnerKey" value="ITTtnGVYlKcUTwRhEFZMW1nPBEpmfbsQ"/>
+    <item name="wxPay_notifyUrl" value="http://101.201.113.88:9746/api/Pay/WechatNotify"/>
+</security>

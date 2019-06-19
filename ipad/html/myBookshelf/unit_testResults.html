@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+    content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>正式朗读</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" href="../../css/myBookshelfStyle/unit_testResults.css">
+</head>
+<body id="body" class="body">
+  <div id="app" v-cloak>
+      <div class="popup">
+          <div class="popup-t">
+              <img class="img-avatar" id="headImg" src="">
+              <span id="name" class="span01">{{ userInfo.userName }}</span>
+              <div class="popup-hard">
+                  <i class="iconfont font_family">&#xe757;</i>
+                  阅读能力等级 <span id="userGrade">{{ userInfo.gradeScaleName }}</span>
+              </div>
+              <div class="ranking-list">排行榜</div>
+          </div>
+          <div class="content">
+              <div class="result">
+                <h3>阅读理解得分</h3>
+                <h1>{{ totalData.choicescore }}</h1>
+              </div>
+              <div class="answer">
+                <h3>答题情况</h3>
+                <div class="answer-box">
+                  <span v-for="(item,index) in answerData" :key="index" :class="item.qscore==0 ? 'wrong' :'right'">{{ item.qscore==0 ? '错' : '对' }}</span>
+                </div>
+              </div>
+              <div class="ability">
+                <h3>能力成长</h3>
+                <div class="ability-box">
+                  <span v-for="(item,index) in newData" :key="index" :style="{background:item.bgcolor}">{{ item.dimname }}<br><i class="dimscore">{{ item.dimscore }}<i></span>
+                  <!-- <span>记忆力+1</span>
+
+                  <span>记忆力+1</span>
+                  <span>记忆力+1</span>
+                  <span>记忆力+1</span>
+                  <span>记忆力+1</span> -->
+                </div>
+              </div>
+          </div>
+      </div>
+      <div class="popup-f">
+          <div>
+              <div id="btn01" class="btn btn-color01" @touchend="backHome">回书页</div>
+              <div id="btn02" class="btn btn-color02" @touchend="newUnit">新的单元</div>
+              <div id="shareChoiceScore" class="btn btn-color03" @touchend="shareChoiceScore">分享</div>
+          </div>
+      </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript">
+    apiready = function(){
+        var toast = new customToast();
+        var app = new Vue({
+          el:'#app',
+          data:{
+              userInfo:{},
+              totalData:{},
+              answerData:[],
+              instr:'',
+              newData:[],
+              nextUnitIndex:0
+              // bgcolor:'red'
+          },
+          mounted:function(){
+            this.pullDownFresh();
+            this.getHeadInfo();
+            // console.log(JSON.stringify(api.pageParam.data))
+            this.answerData = api.pageParam.questions;
+            console.log(JSON.stringify(this.answerData))
+            this.loadUnitTestResults(api.pageParam.data)
+
+          },
+          methods:{
+            //下拉刷新
+            pullDownFresh:function(){
+              var that = this;
+              var bounce=true;
+              // api.setFrameAttr({
+              //     name: 'grow_up_frm',
+              //     bounces: true,
+              // });
+              api.setRefreshHeaderInfo({
+                    visible: true,
+                    // loadingImg: '../image/timg.gif',
+                    bgColor: '#fff',
+                    textColor: '#ccc',
+                    textDown: '下拉刷新...',
+                    textUp: '松开刷新...',
+                    showTime: true
+                }, function(ret, err) {
+                    // _this.taskListWait();
+                    console.log('下拉刷新')
+                    that.getHeadInfo();
+                    // console.log(JSON.stringify(api.pageParam.data))
+                    that.answerData = api.pageParam.questions;
+                    // console.log(JSON.stringify(this.answerData))
+                    that.loadUnitTestResults(api.pageParam.data);
+                    setTimeout('api.refreshHeaderLoadDone()', '500');
+                    // api.setFrameAttr({
+                    //     name: 'grow_up_frm',
+                    //     bounces: false,
+                    // });
+                });
+                setInterval(function(){
+
+                },1000)
+                // window.addEventListener("scroll",function(){
+                //   var t = document.documentElement.scrollTop || document.body.scrollTop;
+                //   if(t<=30){
+                //         if(!bounce){
+                //             console.log(123)
+                //             api.setFrameAttr({
+                //                 name: 'grow_up_frm',
+                //                 bounces: true,
+                //             });
+                //             bounce=true;
+                //         }
+                //     }else{
+                //         if(bounce){
+                //             console.log(456)
+                //             api.setFrameAttr({
+                //                 name: 'grow_up_frm',
+                //                 bounces: false,
+                //             });
+                //             bounce=false;
+                //         }
+                //     }
+                // })
+            },
+            //点击炫耀一下
+            shareChoiceScore:function(){
+              var that = this;
+              //调用微信分享api
+              $weChatShare.shareChoiceScore(api.pageParam.testId, that.funSucReadBlock, that.funErr)
+            },
+            //成功回调
+            funSucReadBlock:function(resp){
+              if (resp.errCode === 0) {
+                  var params = {
+                      desc: resp.Description,
+                      url: resp.ShareUrl,
+                      shareQrcode: resp.ShareQrcode
+                  };
+                  $wechatShareAlert.show(params, function (type, ret) {
+                      if (ret.status) {
+                          toast.success({
+                              title: '分享成功'
+                          })
+                      } else {
+                          toast.success({
+                              title: '分享失败'
+                          })
+                      }
+                  })
+              } else {
+                  toast.fail({
+                      title: resp.errMsg
+                  })
+              }
+            },
+            //失败回调
+            funErr:function(err) {
+                console.log(err);
+            },
+            // 获取头部信息
+            getHeadInfo:function(){
+              console.log(JSON.parse($storage.getStorage('user-info')))
+              this.userInfo = JSON.parse($storage.getStorage('user-info'));
+              console.log(this.userInfo.userName)
+              // $api.html($api.byId('name'), userInfo.userName);
+              // $api.html($api.byId('userGrade'), userInfo.gradeScaleName);
+              $api.byId('userGrade').innerText = this.userInfo.gradeScaleName.slice(0, this.userInfo.gradeScaleName.length - 1);
+              if (JSON.parse($storage.getStorage('user-info')).headimgUrl === '') {
+                  $api.attr($api.byId('headImg'), 'src', this.userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+              } else {
+                  $api.attr($api.byId('headImg'), 'src', $comm.resUri + JSON.parse($storage.getStorage('user-info')).headimgUrl);
+              }
+            },
+            loadUnitTestResults:function (data) {
+                // console.log(JSON.stringify(data));
+                var nextUnitIndex;
+                api.pageParam.chapters.forEach(function (item, index) {
+                    if (item.bcid === api.pageParam.bcid) {
+                        // $api.html($api.byId('unitName'), item.bcname);
+                        // alert(item.bcid)
+                        nextUnitIndex = index + 1
+                    }
+                });
+                // console.log(nextUnitIndex)
+                if (nextUnitIndex === api.pageParam.chapters.length) {
+                    $api.byId('btn02').innerText = '完成本书';
+                }
+                this.nextUnitIndex = nextUnitIndex
+                this.totalData = data;
+
+                var newData = [];
+                for(var pro in data){
+                  if(typeof(data[pro])=='object' && data[pro]){
+                    newData.push(data[pro])
+                  }
+                }
+
+                newData.forEach(function(v,i){
+                  // console.log(typeof(v)=='object');
+                  // console.log(v.dimscore);
+                  if(v.dimscore>0){
+                    v.dimscore = '+'+ v.dimscore
+                  }
+                  if(v.dimname=='表层信息力'){
+                    v.bgcolor = '#26c931'
+                  }else if(v.dimname=='联系推论力'){
+                    v.bgcolor = '#ffbe00'
+                  }else if(v.dimname=='联想推论力'){
+                    v.bgcolor = '#ec6867'
+                  }else if(v.dimname=='整体解释力'){
+                    v.bgcolor = '#2ea7e0'
+                  }else if(v.dimname=='整体应用力'){
+                    v.bgcolor = '#8fc31f'
+                  }else if(v.dimname=='整体评估力'){
+                    v.bgcolor = '#00a29a'
+                  }
+                })
+                this.newData = newData;
+                console.log(JSON.stringify(this.newData))
+                // console.log(JSON.stringify(newData));
+                // if (data.readscore === 0) {
+                //     $api.byId('isShowTotalScore').style.display = 'none';
+                // } else {
+                //     $api.html($api.byId('totalScore'), data.totalscore);
+                //     $api.byId('isShowTotalScore').style.display = 'inline';
+                // }
+                // api.pageParam.chapters.forEach(function (item, index) {
+                //     if (item.bcid === api.pageParam.bcid) {
+                //         $api.html($api.byId('unitName'), item.bcname);
+                //         nextUnitIndex = index + 1
+                //     }
+                // });
+                // readingAloudScoreBtn = data.readscore;
+                // choiceScoreBtn = data.choicescore;
+                // lightsScoreBtn = data.lightingstarts;
+                // $api.html($api.byId('bookName'), api.pageParam.bookData.bname);
+                // var userInfo = JSON.parse($storage.getStorage('user-info'));
+                // $api.html($api.byId('name'), userInfo.userName);
+                // $api.html($api.byId('userGrade'), userInfo.gradeScaleName);
+                // if (userInfo.headimgUrl === '') {
+                //     $api.attr($api.byId('headImg'), 'src', userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+                // } else {
+                //     $api.attr($api.byId('headImg'), 'src', $comm.resUri + userInfo.headimgUrl);
+                // }
+                // if (data.readscore === 0) {
+                //     $api.byId('isShowTotalScore').style.display = 'none';
+                // } else {
+                //     $api.html($api.byId('totalScore'), data.totalscore);
+                //     $api.byId('isShowTotalScore').style.display = 'inline';
+                // }
+                // $api.html($api.byId('wordNumbers'), data.wordnumbers);
+                // // $api.html($api.byId('nextWordNumbers'), data.nextwordnumbers);
+                // $api.html($api.byId('choiceScore'), data.choicescore);
+                // $api.html($api.byId('readScore'), data.readscore);
+                // if (data.choicescore1.dimscore > 0) {
+                //     data.choicescore1.dimscore = '+'+ data.choicescore1.dimscore;
+                //     $api.byId('score1').style.background= '#19db95'
+                // } else if (data.choicescore1.dimscore === 0) {
+                //     $api.byId('score1').style.background= '#e5e5e5'
+                // }
+                // if (data.choicescore2.dimscore > 0) {
+                //     data.choicescore2.dimscore = '+'+ data.choicescore2.dimscore;
+                //     $api.byId('score2').style.background= '#19db95'
+                // } else if (data.choicescore2.dimscore === 0) {
+                //     $api.byId('score2').style.background= '#e5e5e5'
+                // }
+                // if (data.choicescore3.dimscore > 0) {
+                //     data.choicescore3.dimscore = '+'+ data.choicescore3.dimscore;
+                //     $api.byId('score3').style.background= '#19db95'
+                // } else if (data.choicescore3.dimscore === 0) {
+                //     $api.byId('score3').style.background= '#e5e5e5'
+                // }
+                // if (data.choicescore4.dimscore > 0) {
+                //     data.choicescore4.dimscore = '+'+ data.choicescore4.dimscore;
+                //     $api.byId('score4').style.background= '#19db95'
+                // } else if (data.choicescore4.dimscore === 0) {
+                //     $api.byId('score4').style.background= '#e5e5e5'
+                // }
+                // if (data.choicescore5.dimscore > 0) {
+                //     data.choicescore5.dimscore = '+'+ data.choicescore5.dimscore;
+                //     $api.byId('score5').style.background= '#19db95'
+                // } else if (data.choicescore5.dimscore === 0) {
+                //     $api.byId('score5').style.background= '#e5e5e5'
+                // }
+                // if (data.choicescore6.dimscore > 0) {
+                //     data.choicescore6.dimscore = '+'+ data.choicescore6.dimscore;
+                //     $api.byId('score6').style.background= '#19db95'
+                // } else if (data.choicescore6.dimscore === 0) {
+                //     $api.byId('score6').style.background= '#e5e5e5'
+                // }
+                // $api.byId('score1').innerHTML = data.choicescore1.dimname + '<span>'+ data.choicescore1.dimscore +'</span>';
+                // $api.byId('score2').innerHTML = data.choicescore2.dimname + '<span>'+ data.choicescore2.dimscore +'</span>';
+                // $api.byId('score3').innerHTML = data.choicescore3.dimname + '<span>'+ data.choicescore3.dimscore +'</span>';
+                // $api.byId('score4').innerHTML = data.choicescore4.dimname + '<span>'+ data.choicescore4.dimscore +'</span>';
+                // $api.byId('score5').innerHTML = data.choicescore5.dimname + '<span>'+ data.choicescore5.dimscore +'</span>';
+                // $api.byId('score6').innerHTML = data.choicescore6.dimname + '<span>'+ data.choicescore6.dimscore +'</span>';
+                // var integrity = (data.complete > 35 ? data.complete : 35)  + '%';
+                // var accuracy = (data.correct > 35 ? data.correct : 35) + '%';
+                // var fluency = (data.fluency > 35 ? data.fluency : 35) + '%';
+                // $api.css($api.byId('integrity'), 'height:' + integrity + ';');
+                // $api.css($api.byId('accuracy'), 'height:' + accuracy + ';');
+                // $api.css($api.byId('fluency'), 'height:' + fluency + ';');
+                // $api.html($api.byId('scoreIntegrity'), data.complete);
+                // $api.html($api.byId('scoreAccuracy'), data.correct);
+                // $api.html($api.byId('scoreFluency'), data.fluency);
+                // switch (data.lightingstarts) {
+                //     case 0:
+                //         $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-0@3x.png');
+                //         break;
+                //     case 1:
+                //         $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-1@3x.png');
+                //         break;
+                //     case 2:
+                //         $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-2@3x.png');
+                //         break;
+                //     case 3:
+                //         $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-3@3x.png');
+                //         break;
+                // }
+                // if (nextUnitIndex === api.pageParam.chapters.length) {
+                //     $api.byId('btn02').innerText = '完成本书';
+                // }
+                // api.pageParam.questions.forEach(function (item) {
+                //     if (item.qscore === 0) {
+                //         var answerDom = '<span class="a-wrong">错</span>'
+                //     } else {
+                //         var answerDom = '<span>对</span>'
+                //     }
+                //     $api.append($api.byId('answerList'), answerDom);
+                // });
+                // audioUri = data.audiouri;
+                // audioPath = 'fs://' + $comm.guid(true) + '.mp3';
+                // api.download({
+                //     url : $comm.resUri + audioUri,
+                //     savePath : audioPath,
+                //     report : true,
+                //     cache : true,
+                //     allowResume : true
+                // }, function(ret, err) {
+                //     if (ret.state == 1) {
+                //         audioDownload = true;
+                //     } else {
+                //         if (err) {
+                //             console.log(JSON.stringify(err));
+                //         }
+                //     }
+                // });
+            },
+            backHome:function(){
+              // console.log('回去了')
+              api.sendEvent({
+                  name: 'turn-the-page'
+              });
+              api.closeToWin({
+                  name: 'bookInfo'
+              });
+            },
+            newUnit:function(){
+              var that = this;
+              var nextUnitIndex = that.nextUnitIndex
+              if (nextUnitIndex === api.pageParam.chapters.length) {
+                  api.sendEvent({
+                      name: 'turn-the-page'
+                  });
+                  api.closeToWin({
+                    name:'bookInfo'
+                  });
+                  return;
+              }
+              $homeService.readingStartCurrent(api.pageParam.chapters[nextUnitIndex].bcid, that.funSucGetTestID, that.funErr);
+            },
+            funSucGetTestID:function(resp) {
+                var that = this;
+                if (resp.errCode === 0) {
+                    that.goToUnitInfo(resp.testid);
+                } else {
+                    toast.fail({
+                        title: resp.errMsg
+                    })
+                }
+            },
+            goToUnitInfo:function(testId) {
+                var nextUnitIndex = this.nextUnitIndex;
+
+                api.openWin({
+                    name : 'ReadingGuide',
+                    url : './reading_guide.html',
+                    rect : {
+                        x : 0,
+                        y : 0,
+                        w : 'auto',
+                        h : 'auto'
+                    },
+                    bounces: false,
+                    reload: true,
+                    slidBackEnabled:false,
+                    animation: {
+                        type: "fade", //动画类型（详见动画类型常量）
+                        subType: "from_right", //动画子类型（详见动画子类型常量）
+                        duration: 300 //动画过渡时间，默认300毫秒
+                    },
+                    pageParam : {
+                        bcid: api.pageParam.chapters[nextUnitIndex].bcid,
+                        data: api.pageParam.bookData,
+                        testId: testId,
+                        bookchaptersData: api.pageParam.bookchaptersData,
+                        chapters : api.pageParam.chapters,
+                        timeCount: api.pageParam.timeCount
+                    }
+                });
+                api.closeWin({
+                    name: 'testResultsPage'
+                });
+
+            },
+          }
+        })
+    }
+</script>
+<!-- <script type="text/javascript">
+    var toast = new customToast();
+    var audioDownload = false;
+    var isPlay = false;
+    var nextUnitIndex;
+    var readingAloudScoreBtn = 0;
+    var choiceScoreBtn = 0;
+    var lightsScoreBtn = 0;
+
+    apiready = function () {
+        adaptationModel();
+        loadUnitTestResults(api.pageParam.data);
+        bindEvent();
+    };
+
+    function bindEvent() {
+        var eventProperty = {
+            '图书名称': api.pageParam.data.bname,
+            '朗读成绩': readingAloudScoreBtn,
+            '阅读成绩': choiceScoreBtn,
+            '点亮行星星': lightsScoreBtn,
+            '是否VIP图书': api.pageParam.data.vipbook,
+            '图书等级': api.pageParam.data.gradeScaleName,
+            '作者': api.pageParam.data.author,
+            '已读人数': api.pageParam.data.readingNumber,
+            '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+            '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+        };
+
+        $analysis.bindEvent($api.byId('imageBtn'), 'touchend', function () {
+            if (!isPlay && audioDownload) {
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/soundplay.png');
+                isPlay = true;
+                audioPlayerStartDesc();
+            } else {
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+                isPlay = false;
+                api.stopPlay();
+            }
+        }, '单元阅读测结果页返回', eventProperty);
+
+        $analysis.bindEvent($api.byId('btn01'), 'touchend', function () {
+            goBackHome();
+        }, '单元阅读测结果页回书房', eventProperty);
+
+        $analysis.bindEvent($api.byId('btn02'), 'touchend', function () {
+            if (nextUnitIndex === api.pageParam.chapters.length) {
+                api.sendEvent({
+                    name: 'turn-the-page'
+                });
+                api.closeWin({});
+                return;
+            }
+            $homeService.readingStartCurrent(api.pageParam.chapters[nextUnitIndex].bcid, funSucGetTestID, funErr);
+        }, '单元阅读测结果页新单元', eventProperty);
+
+        $analysis.bindEvent($api.byId('shareChoiceScore'), 'touchstart', function () {
+            $weChatShare.shareChoiceScore(api.pageParam.testId, funSucReadBlock, funErr)
+        }, '分享-阅读结果页')
+    }
+
+    function funSucReadBlock (resp) {
+        if (resp.errCode === 0) {
+            var params = {
+                desc: resp.Description,
+                url: resp.ShareUrl,
+                shareQrcode: resp.ShareQrcode
+            };
+            $wechatShareAlert.show(params, function (type, ret) {
+                if (ret.status) {
+                    toast.success({
+                        title: '分享成功'
+                    })
+                } else {
+                    toast.success({
+                        title: '分享失败'
+                    })
+                }
+            })
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+
+    function audioPlayerStartDesc () {
+        $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/soundplay.png');
+        api.startPlay({
+            path: resetaudioUri(audioPath)
+        }, function(ret, err) {
+            if (ret) {
+                isPlay = false;
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+            } else {
+                isPlay = false;
+                $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+                toast.fail({
+                    title: '你好像没有朗读哦～'
+                });
+            }
+        });
+    }
+
+    function funSucGetTestID (resp) {
+        if (resp.errCode === 0) {
+            goToUnitInfo(resp.testid);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funWordNumber () {
+        var c = (document.documentElement.clientHeight / 768 * 10) * 2.3 * 2;
+        var a = $api.offset($api.byId('result-t')).w - c;
+        var b = $api.offset($api.byId('number')).w;
+        if (b < a) {
+            $api.css($api.byId('result-t'),'line-height:6.6rem;text-align:center;');
+        }
+    }
+
+    function funErr(err) {
+        console.log(err);
+    }
+
+    function goToUnitInfo (testId) {
+        api.openFrame({
+            name : 'ReadingGuide',
+            url : './reading_guide.html',
+            rect : {
+                x : 0,
+                y : 0,
+                w : 'auto',
+                h : 'auto'
+            },
+            bounces: false,
+            reload: true,
+            pageParam : {
+                bcid: api.pageParam.chapters[nextUnitIndex].bcid,
+                data: api.pageParam.bookData,
+                testId: testId,
+                bookchaptersData: api.pageParam.bookchaptersData,
+                chapters : api.pageParam.chapters,
+                timeCount: api.pageParam.timeCount
+            }
+        });
+    }
+
+    function goBackHome () {
+        goback();
+    }
+
+    function resetaudioUri(filePath) {
+        //'../image/demo.zip'
+        var path = filePath.replace(/fs:\/\//g, '');
+        path = 'file:///' + api.fsDir + '/' + path;
+        return path;
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'width:' + api.framewidth + 'px');
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.fixStatusBar($api.byId('body'));
+    }
+
+    function loadUnitTestResults (data) {
+        api.pageParam.chapters.forEach(function (item, index) {
+            if (item.bcid === api.pageParam.bcid) {
+                $api.html($api.byId('unitName'), item.bcname);
+                nextUnitIndex = index + 1
+            }
+        });
+        readingAloudScoreBtn = data.readscore;
+        choiceScoreBtn = data.choicescore;
+        lightsScoreBtn = data.lightingstarts;
+        $api.html($api.byId('bookName'), api.pageParam.bookData.bname);
+        var userInfo = JSON.parse($storage.getStorage('user-info'));
+        $api.html($api.byId('name'), userInfo.userName);
+        $api.html($api.byId('userGrade'), userInfo.gradeScaleName);
+        if (userInfo.headimgUrl === '') {
+            $api.attr($api.byId('headImg'), 'src', userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+        } else {
+            $api.attr($api.byId('headImg'), 'src', $comm.resUri + userInfo.headimgUrl);
+        }
+        if (data.readscore === 0) {
+            $api.byId('isShowTotalScore').style.display = 'none';
+        } else {
+            $api.html($api.byId('totalScore'), data.totalscore);
+            $api.byId('isShowTotalScore').style.display = 'inline';
+        }
+        $api.html($api.byId('wordNumbers'), data.wordnumbers);
+        // $api.html($api.byId('nextWordNumbers'), data.nextwordnumbers);
+        $api.html($api.byId('choiceScore'), data.choicescore);
+        $api.html($api.byId('readScore'), data.readscore);
+        if (data.choicescore1.dimscore > 0) {
+            data.choicescore1.dimscore = '+'+ data.choicescore1.dimscore;
+            $api.byId('score1').style.background= '#19db95'
+        } else if (data.choicescore1.dimscore === 0) {
+            $api.byId('score1').style.background= '#e5e5e5'
+        }
+        if (data.choicescore2.dimscore > 0) {
+            data.choicescore2.dimscore = '+'+ data.choicescore2.dimscore;
+            $api.byId('score2').style.background= '#19db95'
+        } else if (data.choicescore2.dimscore === 0) {
+            $api.byId('score2').style.background= '#e5e5e5'
+        }
+        if (data.choicescore3.dimscore > 0) {
+            data.choicescore3.dimscore = '+'+ data.choicescore3.dimscore;
+            $api.byId('score3').style.background= '#19db95'
+        } else if (data.choicescore3.dimscore === 0) {
+            $api.byId('score3').style.background= '#e5e5e5'
+        }
+        if (data.choicescore4.dimscore > 0) {
+            data.choicescore4.dimscore = '+'+ data.choicescore4.dimscore;
+            $api.byId('score4').style.background= '#19db95'
+        } else if (data.choicescore4.dimscore === 0) {
+            $api.byId('score4').style.background= '#e5e5e5'
+        }
+        if (data.choicescore5.dimscore > 0) {
+            data.choicescore5.dimscore = '+'+ data.choicescore5.dimscore;
+            $api.byId('score5').style.background= '#19db95'
+        } else if (data.choicescore5.dimscore === 0) {
+            $api.byId('score5').style.background= '#e5e5e5'
+        }
+        if (data.choicescore6.dimscore > 0) {
+            data.choicescore6.dimscore = '+'+ data.choicescore6.dimscore;
+            $api.byId('score6').style.background= '#19db95'
+        } else if (data.choicescore6.dimscore === 0) {
+            $api.byId('score6').style.background= '#e5e5e5'
+        }
+        $api.byId('score1').innerHTML = data.choicescore1.dimname + '<span>'+ data.choicescore1.dimscore +'</span>';
+        $api.byId('score2').innerHTML = data.choicescore2.dimname + '<span>'+ data.choicescore2.dimscore +'</span>';
+        $api.byId('score3').innerHTML = data.choicescore3.dimname + '<span>'+ data.choicescore3.dimscore +'</span>';
+        $api.byId('score4').innerHTML = data.choicescore4.dimname + '<span>'+ data.choicescore4.dimscore +'</span>';
+        $api.byId('score5').innerHTML = data.choicescore5.dimname + '<span>'+ data.choicescore5.dimscore +'</span>';
+        $api.byId('score6').innerHTML = data.choicescore6.dimname + '<span>'+ data.choicescore6.dimscore +'</span>';
+        var integrity = (data.complete > 35 ? data.complete : 35)  + '%';
+        var accuracy = (data.correct > 35 ? data.correct : 35) + '%';
+        var fluency = (data.fluency > 35 ? data.fluency : 35) + '%';
+        $api.css($api.byId('integrity'), 'height:' + integrity + ';');
+        $api.css($api.byId('accuracy'), 'height:' + accuracy + ';');
+        $api.css($api.byId('fluency'), 'height:' + fluency + ';');
+        $api.html($api.byId('scoreIntegrity'), data.complete);
+        $api.html($api.byId('scoreAccuracy'), data.correct);
+        $api.html($api.byId('scoreFluency'), data.fluency);
+        switch (data.lightingstarts) {
+            case 0:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-0@3x.png');
+                break;
+            case 1:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-1@3x.png');
+                break;
+            case 2:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-2@3x.png');
+                break;
+            case 3:
+                $api.attr($api.byId('imgStars'), 'src', '../../../common/image/star-3@3x.png');
+                break;
+        }
+        if (nextUnitIndex === api.pageParam.chapters.length) {
+            $api.byId('btn02').innerText = '完成本书';
+        }
+        api.pageParam.questions.forEach(function (item) {
+            if (item.qscore === 0) {
+                var answerDom = '<span class="a-wrong">错</span>'
+            } else {
+                var answerDom = '<span>对</span>'
+            }
+            $api.append($api.byId('answerList'), answerDom);
+        });
+        audioUri = data.audiouri;
+        audioPath = 'fs://' + $comm.guid(true) + '.mp3';
+        api.download({
+            url : $comm.resUri + audioUri,
+            savePath : audioPath,
+            report : true,
+            cache : true,
+            allowResume : true
+        }, function(ret, err) {
+            if (ret.state == 1) {
+                audioDownload = true;
+            } else {
+                if (err) {
+                    console.log(JSON.stringify(err));
+                }
+            }
+        });
+        funWordNumber();
+    }
+
+    function goback() {
+        api.sendEvent({
+            name: 'turn-the-page'
+        });
+        api.closeWin({})
+    }
+
+
+</script> -->
+</html>

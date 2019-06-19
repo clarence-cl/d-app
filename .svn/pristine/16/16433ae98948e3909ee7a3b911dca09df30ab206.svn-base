@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>正式朗读</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <!-- <link rel="stylesheet" href="../../css/myBookshelfStyle/unit_ReadingAloudTest_frm.css"> -->
+</head>
+<style>
+.top{
+    position: fixed;
+    height: 6rem;
+    width: 100%;
+    background-color: rgba(0,0,0,0.6);
+}
+.icon {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+    font-size: 2rem;
+    margin-left:2.5rem;
+    margin-top: 2.5rem;
+}
+span{
+  color: #fff;
+  font-size: 1.5rem;
+}
+</style>
+<body id="body" class="body">
+  <div class="top">
+      <div id="exit" onclick="goBack()">
+          <svg class="icon" aria-hidden="true">
+              <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+          </svg>
+          <span>返回</span>
+      </div>
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript">
+var browser=null;
+    apiready = function() {
+      api.addEventListener({
+          name: 'swiperight'//向右侧滑
+      }, function(ret, err) {
+
+          if(browser!=null)
+          {
+              //console.log('物理返回键');
+              browser.historyBack(function(ret,err){
+                  if(!ret.status){//false表示没有任何后退记录了
+                    //console.log('没有后退记录了 退出');
+                    browser.closeView();
+                    api.setScreenOrientation({
+                        orientation: 'landscape_left'
+                    });
+                    api.closeWin();
+                  }
+              });
+
+          }
+      });
+
+
+        // $api.css($api.byId('popup'),'display:none');
+        var url = api.pageParam.url ? api.pageParam.url : "";
+        if(url!="")
+        {
+          browser = api.require('webBrowser');
+          browser.openView({
+                              url: url,
+                              rect: {
+                                  x: 0,
+                                  y: 78,
+                                  w: 'auto',
+                                  h: 'auto'
+                              }
+                          }, function(ret, err) {
+                              switch (ret.state) {
+                                  case 0:
+                                      break;
+                                  case 1:
+                                      break;
+                                  case 2:
+                                      break;
+                                  case 3:
+                                      break;
+                                  case 4:
+                                      break;
+                                  default:
+                                      break;
+                              }
+                          });
+
+        }
+    };
+    function goBack()
+    {
+      //按钮返回
+      if(browser!=null)
+      {
+          //console.log('物理返回键');
+          browser.historyBack(function(ret,err){
+              if(!ret.status){//false表示没有任何后退记录了
+                //console.log('没有后退记录了 退出');
+                browser.closeView();
+                api.setScreenOrientation({
+                    orientation: 'landscape_left'
+                });
+                api.closeWin();
+              }
+          });
+
+      }
+    }
+</script>
+
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>兴趣选书</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css"/>
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/bookLevel.css">
+</head>
+<body>
+  <div id="app">
+      <div class="book" style="width: calc(100% - 7rem);height:100%;">
+        <div class="box" v-for="(item,index) in bookData" style="overflow:hidden;" @touchstart="start($event)" @touchend="goBookDetail($event,item.bookID)">
+           <img :src="resUri+item.bookCover">
+           <div >
+             <h2>{{ item.bookName }}</h2>
+             <span>{{ item.author }}</span>
+             <p>{{item.description}}</p>
+           </div>
+        </div>
+        		<p v-if="tips" style="text-align: center;margin-top: 30%;color: #98aca8;font-size:1.6rem;">该分级暂无图书</p>
+        <p v-if="onoff" style="text-align:center;height:2rem;color: #98aca8;">{{loadData}}</p>
+      </div>
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+  apiready = function(){
+    var app = new Vue({
+      el:'#app',
+      data:{
+        tips:false,
+        bookData:[],
+        resUri:'',
+        dtid:api.pageParam.dtid,
+        did:api.pageParam.tId,
+        pages:1,
+        onoff:false,
+        loadData:"加载中...",
+        levelId:api.pageParam.levelId,
+        type:api.pageParam.type,//0为普通分类图书展示，1为等级分类数据
+        token:$storage.getStorage('token'),
+        x1:0,
+        y1:0
+      },
+      watch:{
+        did(){
+          this.pages = 1
+        }
+      },
+      mounted(){
+        api.parseTapmode();
+        this.resUri = $comm.resUri;
+        this.pullDownFresh()
+        this.scroll();
+      },
+      methods:{
+        start(event){
+          this.x1 = event.touches[0].pageX
+          this.y1 = event.touches[0].pageY
+        },
+        //图书详情
+        goBookDetail(event,id){
+           var calX = event.changedTouches[0].pageX - this.x1||0
+           var calY = event.changedTouches[0].pageY - this.y1||0
+          if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+            if(!this.token){
+              api.openWin({
+                  name: 'loginIndex',
+                  url: '../login_new/login_index.html',
+                  slidBackEnabled: false
+              });
+            }else{
+              api.openWin({
+                //读书详情
+                  name: 'bookInfo',
+                  url: './VIPUser_bookInfo_win.html',
+                  slidBackEnabled: false,
+                  pageParam: {
+                      thisBookId: id
+                  }
+              });
+            }
+          }
+        },
+
+
+        //从分类列表选书
+        chooseBookByType(pages){
+          if(this.type==0){
+            var data={
+              DTID:this.dtid,
+              DID:this.did,
+              Page:pages,
+            }
+            this.getData(2008,data,pages)
+          }else{
+            //根据等级获取图书
+            var data = {
+              levelId:this.levelId,
+              page:pages
+            }
+              this.getData(2010,data,pages)
+          }
+        },
+
+        getData(pCode,Data,pages){
+          $comm.socket(pCode,Data,(res)=>{
+          if(res){
+            console.log("返回结果————————————————————————"+res)
+            res = JSON.parse(res)
+            if(res.error===0){
+              Data = JSON.parse(res.datas)
+              if(Data.bookList==""){
+                this.loadData = "没有更多了"
+                if(pages==1){
+                  Data.bookList.length==0?this.tips=true:this.tips=false
+                  this.onoff = false
+                }
+
+              }else{
+                this.bookData = pages==1?Data.bookList:(this.bookData).concat(Data.bookList)
+              }
+            }
+          }
+          })
+        },
+        pullDownFresh: function() {
+          var that = this;
+          var bounce = true;
+          api.refreshHeaderLoading()
+          api.setRefreshHeaderInfo({
+            visible: true,
+            loadingImg: '../image/timg.gif',
+            bgColor: '#fff',
+            textColor: '#ccc',
+            textDown: '下拉更新...',
+            textUp: '松开刷新...',
+            showTime: true
+          }, function(ret, err) {
+            that.pages = 1
+            that.loadData = "加载中..."
+            that.chooseBookByType(1)
+            setTimeout(()=>{
+              api.refreshHeaderLoadDone()
+            }, '1000');
+          });
+        },
+        scroll() {
+          var that = this
+          api.addEventListener({
+            name: 'scrolltobottom',
+            extra: {
+              threshold: 0 //设置距离底部多少距离时触发，默认值为0，数字类型
+            }
+          }, function(ret, err) {
+            if(that.bookData.length>=10){
+              that.onoff= true
+              that.loadData = "加载中..."
+              that.chooseBookByType(that.pages++)
+            }
+          });
+        },
+      }
+    })
+  }
+</script>
+
+</html>

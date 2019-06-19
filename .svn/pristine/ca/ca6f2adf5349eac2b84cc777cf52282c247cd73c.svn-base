@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>$Title$</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" href="../../css/myBookshelfStyle/unit_choiceTest_frm.css">
+</head>
+<body id="body" class="body">
+    <div id="exitWarmReading" class="icon-wrap" onclick="goback()">
+        <svg class="icon menu-icon" aria-hidden="true">
+            <use xlink:href="#icon-tongyongban_guanbianniu_moren"></use>
+        </svg>
+    </div>
+    <div class="numTest">
+        <div id="numBar" class="num-bar">
+            <div id="num0"><div class="num01">1</div></div>
+            <div class="span"></div>
+            <div id="num01"><div class="num01">2</div></div>
+            <div class="span"></div>
+            <div id="num02"><div class="num01">3</div></div>
+        </div>
+    </div>
+    <div class="title-wrap">
+        <div class="header-bar-wrap">
+            <div class="header-bar" id="headerBar"></div>
+        </div>
+    </div>
+    <div class="reading-content">
+        <h1 id="title" class="answer-name"></h1>
+        <div id="optionsWrap">
+        </div>
+        <div id="answerAlert" class="test-img"></div>
+        <div id="testSpan" class="test-span">
+            本题帮助锻炼你的
+        </div>
+    </div>
+</body>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    var choice = null;
+    var qid, score = 0, iconCount;
+    var subData = {
+        bcid: '',
+        testid: '',
+        questions: []
+    };
+    var isSelect = false;
+    var choiceCount = 3;
+    var choiceResults;
+    var countDownTimer = null;
+    var time = 60;
+    apiready = function () {
+        adaptationModel();
+        $homeService.getReadChoicePaper(api.pageParam.bcid, api.pageParam.testId, funSucChoice, funErr);
+        subData.bcid = api.pageParam.bcid;
+        bindEvent();
+    };
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function bindEvent () {
+        $api.byId('optionsWrap').addEventListener('touchend', function (e) {
+            if (e.target && e.target.nodeName.toLowerCase() === 'button') {
+                // $analysis.bindZhuge('阅读理解测点击选项');
+                activeButton(e.target.id)
+            }
+        })
+    }
+
+    function loadQuestion() {
+        time = 60;
+        $api.byId('headerBar').style.width = 0;
+        $api.css($api.byId('headerBar'), 'transition: 60s linear;');
+        choice = JSON.parse($storage.getStorage('unit-choice-list'))[0];
+        qid = choice.qid;
+        $api.html($api.byId("optionsWrap"), '');
+        $api.html($api.byId('title'), choice.qtext.title);
+        choice.qtext.options.forEach(function (item, index){
+            if (item.text !== '') {
+                var liDom = document.createElement('button');
+                $api.attr(liDom, 'id', item.key);
+                $api.attr(liDom, 'class', 'option');
+                liDom.innerHTML = item.text;
+                $api.byId('optionsWrap').appendChild(liDom);
+            }
+        });
+        $api.byId('testSpan').innerHTML = '本题帮助锻炼你的';
+        choice.dimensions.forEach(function (item, index) {
+            var spanDom = '<span class="span01">'+ item.dimname + '</span>';
+            $api.byId('testSpan').innerHTML += spanDom;
+        });
+        var newChoice = JSON.parse($storage.getStorage('unit-choice-list'));
+        newChoice.splice(0 ,1);
+        $storage.setStorage('unit-choice-list', newChoice);
+    }
+
+    function loadNumUI (type) {
+        switch (choiceCount) {
+            case 3:
+                if (type) {
+                    $api.html($api.byId('num0'), '<svg class="icon" aria-hidden="true">\n' +
+                        '                <use xlink:href="#icon-zhengque"></use>\n' +
+                        '            </svg>');
+                } else {
+                    $api.html($api.byId('num0'), '<svg class="icon" aria-hidden="true">\n' +
+                        '                <use xlink:href="#icon-cuowu"></use>\n' +
+                        '            </svg>');
+                }
+                break;
+            case 2:
+                if (type) {
+                    $api.html($api.byId('num01'), '<svg class="icon" aria-hidden="true">\n' +
+                        '                <use xlink:href="#icon-zhengque"></use>\n' +
+                        '            </svg>');
+                } else {
+                    $api.html($api.byId('num01'), '<svg class="icon" aria-hidden="true">\n' +
+                        '                <use xlink:href="#icon-cuowu"></use>\n' +
+                        '            </svg>');
+                }
+                break;
+            case 1:
+                if (type) {
+                    $api.html($api.byId('num02'), '<svg class="icon" aria-hidden="true">\n' +
+                        '                <use xlink:href="#icon-zhengque"></use>\n' +
+                        '            </svg>');
+                } else {
+                    $api.html($api.byId('num02'), '<svg class="icon" aria-hidden="true">\n' +
+                        '                <use xlink:href="#icon-cuowu"></use>\n' +
+                        '            </svg>');
+                }
+                break;
+        }
+        choiceCount--;
+    }
+
+    function countDown () {
+        countDownTimer = setInterval(function () {
+            time --;
+            if (time === 0) {
+                $api.byId('headerBar').style.width = '100%';
+                $api.css($api.byId('headerBar'), 'transition: 0s linear;');
+                submit(false);
+            }
+        }, 1000)
+    }
+
+    function funSucChoice (resp) {
+        if (resp.errCode === 0) {
+            if (resp.choice.length < 1) {
+                return;
+            }
+            subData.testid = api.pageParam.testId;
+            iconCount = (resp.choice.length);
+            $storage.setStorage('unit-choice-list', resp.choice);
+            countDown();
+            loadQuestion();
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+
+    }
+    function activeButton (id) {
+        if (isSelect) {
+            return;
+        }
+        isSelect = true;
+        var allBottons = $api.domAll($api.byId("optionsWrap"), "button");
+        for (var i = 0; i < allBottons.length; i++) {
+            if (allBottons[i].id === id) {
+                if (choice.qtext.options[i].answer) {
+                    score = choice.qscore;
+                } else {
+                    score = 0;
+                }
+                $api.addCls(allBottons[i], 'selected');
+            } else{
+                $api.removeCls(allBottons[i], 'selected');
+            }
+        }
+        $api.byId('headerBar').style.width = '100%';
+        $api.css($api.byId('headerBar'), 'transition: 0s linear;');
+        submit(true);
+    }
+    function submit(type) {
+        if (!type ) {
+            score = 0;
+        }
+        $api.byId('answerAlert').style.display = 'none';
+        if (score === 0) {
+            $api.byId('answerAlert').style.display = 'block';
+            $api.removeCls($api.byId('answerAlert'), 'right');
+            $api.addCls($api.byId('answerAlert'), 'incorrect');
+            loadNumUI(false);
+        } else {
+            $api.byId('answerAlert').style.display = 'block';
+            $api.removeCls($api.byId('answerAlert'), 'incorrect');
+            $api.addCls($api.byId('answerAlert'), 'right');
+            loadNumUI(true);
+        }
+        var data = {
+            qid: qid,
+            qscore: score
+        };
+        setTimeout(function () {
+            $api.byId('answerAlert').style.display = 'none';
+            subData.questions.push(data);
+            if (JSON.parse($storage.getStorage('unit-choice-list')).length > 0){
+                loadQuestion();
+                isSelect = false;
+            } else {
+                submitChoiceScore(false);
+            }
+        },1000);
+    }
+
+    function submitChoiceScore (type) {
+        if (type) {
+            subData.questions = [
+                {
+                    qid: qid,
+                    qscore: 0
+                },
+                {
+                    qid: qid,
+                    qscore: 0
+                },
+                {
+                    qid: qid,
+                    qscore: 0
+                }];
+            $homeService.postChoiceScore(subData, funSucSubBack, funErr)
+        } else {
+            clearInterval(countDownTimer);
+            $homeService.postChoiceScore(subData, funSucSub, funErr)
+        }
+    }
+
+    function funSucSubBack (resp) {
+        if (resp.errCode === 0) {
+            api.sendEvent({
+                name: 'turn-the-page'
+            });
+            clearInterval(countDownTimer);
+        } else {
+            console.log(resp.errMsg)
+        }
+    }
+
+    function funSucFinish (resp) {
+        if (resp.errCode === 0) {
+            $storage.delStorage('unit-choice-list');
+            submitChoiceScore(true);
+        } else {
+            console.log(resp.errMsg)
+        }
+    }
+
+    function funSucSubFinish (resp) {
+        if (resp.errCode === 0) {
+            $storage.delStorage('unit-choice-list');
+            isSelect = false;
+            choiceResults = resp;
+            clearInterval(countDownTimer);
+            api.openFrame({
+                name: 'testResultsPage',
+                url: './unit_testResults_frm.html',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                bounces: false,
+                reload: true,
+                pageParam: {
+                    data: choiceResults,
+                    bcid: api.pageParam.bcid,
+                    questions: subData.questions,
+                    bookchaptersData: api.pageParam.bookchaptersData,
+                    chapters : api.pageParam.chapters,
+                    bookData: api.pageParam.data,
+                    timeCount: api.pageParam.timeCount,
+                    testId: api.pageParam.testId
+                }
+            });
+        }
+    }
+
+    function funSucSub (resp) {
+        if (resp.errCode === 0) {
+            $homeService.readingFinishCurrent(api.pageParam.bcid, api.pageParam.testId, 3, funSucSubFinish, funErr);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+        }
+    }
+
+    function funErr (err) {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        });
+    }
+    function goback() {
+        var eventProperty = {
+            '图书名称': api.pageParam.data.bname
+        };
+        api.closeWin();
+        // $analysis.bindZhuge('单元阅读测返回', eventProperty);
+        $homeService.readingFinishCurrent(api.pageParam.bcid, api.pageParam.testId, 3, funSucFinish, funErr);
+    }
+</script>
+</html>

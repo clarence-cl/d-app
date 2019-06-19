@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>$Title$</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/warm_up_testfrm.css">
+</head>
+<body id="body">
+    <div class="avatar-wrap">
+        <div>
+            <img class="avatar-icon" src="../../../common/image/xiaonanhai@3x.png" alt="avatar">
+        </div>
+    </div>
+    <div class="text-content">
+        <h2 class="text-desc">热身小测</h2>
+        <h2>调大音量，大声朗读</h2>
+    </div>
+    <div class="svg-circle">
+        <svg  width="150" height="150" viewbox="0 0 440 440">
+            <circle cx="220" cy="220" r="170" stroke-width="60" stroke="#e8e8e8" fill="none"></circle>
+            <circle cx="220" cy="220" r="170" stroke-width="60" stroke="#07afb9" fill="none" transform="matrix(0,-1,1,0,0,440)" stroke-dasharray="1069 1069" stroke-linecap="round"></circle>
+        </svg>
+        <h1 id="timerCount" class="timer-count">3</h1>
+    </div>
+</body>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript">
+    var timeCount = 5;
+    var timer;
+    apiready = function () {
+        adaptationModel();
+        countDown();
+    };
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function countDown() {
+        var percent = 4 / 5, perimeter = Math.PI * 2 * 170;
+        var circle = document.querySelectorAll("circle")[1];
+        $api.html($api.byId("timerCount"), timeCount+'');
+        console.log('perimeter' + perimeter);
+        circle.setAttribute('stroke-dasharray', perimeter * percent + " " + perimeter * (1 - percent));
+        timer = setInterval(function () {
+            timeCount--;
+            percent = percent - (1 / 5);
+            if(percent < 0) {
+                $api.html($api.byId("timerCount"), timeCount+'');
+                if (timeCount === 0) {
+                    clearInterval(timer);
+                    goToReading();
+                }
+            } else {
+                circle.setAttribute('stroke-dasharray', perimeter * percent + " " + perimeter * (1 - percent));
+                $api.html($api.byId("timerCount"), timeCount+'');
+                if (timeCount === 0) {
+                    clearInterval(timer);
+                    goToReading();
+                }
+            }
+        },1000)
+    }
+    function goToReading () {
+        clearInterval(timer);
+        api.openFrame({
+            name: 'warm_up_readingfrm',
+            url: './warm_up_readingfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {name: 'warm_up_readingfrm'},
+            bounces: false,
+            reload: true,
+            historyGestureEnabled: false
+            // animation: {
+            //     type: "movein",
+            //     subType: "from_right",
+            //     duration: 300
+            // }
+        });
+    }
+</script>
+</html>

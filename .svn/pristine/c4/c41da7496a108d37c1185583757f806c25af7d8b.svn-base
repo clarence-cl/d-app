@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width"/>
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>查看原文</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/look_bookfrm.css">
+</head>
+<body id="body" class="body">
+    <div class="title-wrap">
+        <div class="header-bar"></div>
+    </div>
+    <div class="icon-wrap-right" onclick="goback()">
+        <i class="iconfont font_family iconfont-btn">&#xe6f0;</i>
+        <span class="text-btn">关闭原文</span>
+    </div>
+    <div class="reading-content">
+        <p class="read-text" id="refText">
+        </p>
+    </div>
+</body>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript">
+    var isRecord = false;
+    apiready = function () {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+        $api.html($api.byId('refText'), api.pageParam.bookText);
+    };
+    function goback () {
+        api.closeFrame({
+        });
+    }
+</script>
+</html>

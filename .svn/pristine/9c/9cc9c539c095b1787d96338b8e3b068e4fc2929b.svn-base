@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>通用活动专题模板</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css"/>
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/currencyActivityTopic.css">
+</head>
+<body>
+  <div id="app">
+    <div class="head" :style="{backgroundImage:'url(' + resUri+activeData.backgroundImgUrl + ')', backgroundRepeat:'no-repeat',}">
+      <div class="mask">
+        <div class="top" >
+          <div class="return" @touchend="exit">
+             <svg class="icon" aria-hidden="true">
+                 <use xlink:href="#icon-zuoyoujiantou-2"></use>
+             </svg>
+          </div>
+          <h1>{{activeData.activityTitle}}</h1>
+          <div class="return">
+             <svg class="icon" aria-hidden="true">
+                 <use xlink:href="#icon"></use>
+             </svg>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+    apiready = function(){
+      var app = new Vue({
+        el:'#app',
+        data:{
+          ActivityId:api.pageParam.id,
+          ActivityName:api.pageParam.name,
+          activeData:"",
+          resUri:null,
+          token:$storage.getStorage('token'),
+          x1:0,
+          y1:0
+        },
+        mounted(){
+          this.resUri = $comm.resUri
+          this.getActive()
+        },
+        methods:{
+          exit(){
+            api.closeWin({});
+          },
+          start(event){
+            this.x1 = event.touches[0].pageX
+            this.y1 = event.touches[0].pageY
+          },
+          goBookDetail(event,index,id){
+            var calX = event.changedTouches[0].pageX - this.x1||0
+            var calY = event.changedTouches[0].pageY - this.y1||0
+            if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+              if(!this.token){
+                api.openWin({
+                    name: 'loginIndex',
+                    url: '../login_new/login_index.html',
+                    slidBackEnabled: false
+                });
+              }else{
+                api.openWin({
+                    name: 'bookInfo',
+                    slidBackEnabled:false,
+                    url: '../myBookshelf/VIPUser_bookInfo_win.html',
+                    pageParam: {
+                        thisBookId: id
+                    }
+                });
+              }
+            }
+          },
+          getActive(){
+            console.log("id------"+this.ActivityId)
+            var data = {
+              activityId:this.ActivityId
+            }
+            $comm.socket(6002,data,(res)=>{
+              ret = JSON.parse(res)
+              console.log("专题——————————"+res)
+              if(ret.error==0){
+                Data = JSON.parse(ret.datas)
+                this.activeData = Data.activityInfo
+                api.openFrame({
+                    name: 'currencyActivityTopic',
+                    url: './currencyActivityTopic.html',
+                    rect: {
+                        x: 0,
+                        y: 60,
+                        w: 'auto',
+                        h: 'auto'
+                    },
+                    pageParam: {
+                        resData: Data.activityInfo
+                    },
+                    bounces: false,
+                    bgColor: 'rgba(0,0,0,0)',
+                    vScrollBarEnabled: true,
+                    hScrollBarEnabled: true
+                });
+
+              }
+              console.log("专题内容====="+this.activeData.bookList)
+            })
+          }
+        }
+      })
+    }
+</script>
+
+</html>

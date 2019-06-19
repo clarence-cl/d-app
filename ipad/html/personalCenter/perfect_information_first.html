@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>完善信息1</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <link rel="stylesheet" href="../../css/personalCenterStyle/perfect_information_first.css">
+</head>
+
+<body id="body">
+    <header class="header-bar">
+        <div class="header-title">
+            <h1 class="text-title">参加挑战需要以下信息，请正确填写</h1>
+            <h4 class="text-subtitle">选择年龄和年级获得你的专属挑战</h4>
+        </div>
+    </header>
+    <div class="content-sex">
+        <!--<div class="gender-wrap">-->
+            <!--<div class="wrap">-->
+                <!--<div class="sex">-->
+                    <!--<img class="image" id="selectedMale" src="../../image/nanhai@3x.png" alt="男">-->
+                <!--</div>-->
+                <!--<h4 class="text-gender" id="textMale">我是男孩</h4>-->
+            <!--</div>-->
+            <!--<div class="wrap">-->
+                <!--<div class="sex">-->
+                    <!--<img class="image" id="selectedFemale" src="../../image/female@3x.png" alt="女">-->
+                <!--</div>-->
+                <!--<h4 class="text-gender" id="textFemale">我是女孩</h4>-->
+            <!--</div>-->
+        <!--</div>-->
+    </div>
+    <div class="footer">
+        <button id="continueTo" class="btn-continue">继续</button>
+    </div>
+    <p class="text-tip" onclick="agreement()"><span style="color: black">点击"继续"即代表你同意</span>《嘀嗒伴我读书用户隐私授权协议》</p>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-login-service.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var basicData = {
+        gender: 1,
+        grade: '',
+        age: ''
+    };
+    var UICustomPicker = null;
+    var UICustomPickerId;
+    var toast = new customToast();
+    apiready = function() {
+        adaptationModel();
+        loadUICustomPicker();
+        bindEvent();
+    };
+    function bindEvent() {
+        // $api.byId('selectedMale').addEventListener('touchend', function() {
+        //     selectedGender(1)
+        // });
+        // $api.byId('selectedFemale').addEventListener('touchend', function() {
+        //     selectedGender(2)
+        // })
+        $api.byId('continueTo').addEventListener('touchend', function() {
+            continueTo()
+        })
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+        var fontSize = api.frameHeight / 768 * 10 + 'px';
+        document.documentElement.style.fontSize = fontSize;
+    }
+
+    function loadUICustomPicker() {
+        UICustomPicker = api.require('UICustomPicker');
+        UICustomPicker.open({
+            rect: {
+                x: api.frameWidth / 2 - api.frameWidth / 6,
+                y: api.frameHeight / 3,
+                w: api.frameWidth / 3,
+                h: 300
+            },
+            styles: {
+                bg: 'rgba(0,0,0,0)',
+                normalColor: '#999999',
+                selectedColor: '#07afb9',
+                selectedSize: 20,
+                tagSize: 12
+            },
+            data: [{
+                scope: ['未选择', '6岁', '7岁', '8岁', '9岁', '10岁', '11岁', '12岁']
+            }, {
+                scope: ['未选择', '小学三年级', '小学四年级', '小学五年级']
+            }],
+            rows: 5,
+            fixedOn: api.frameName,
+            fixed: true,
+            autoHide: false,
+            loop: false
+        }, function(ret, err) {
+            if (ret) {
+                basicData = {
+                    gender: basicData.gender,
+                    grade: '',
+                    age: ''
+                };
+                UICustomPickerId = ret.id;
+                if (!ret.data) {
+                    return;
+                }
+                basicData.age = parseInt(ret.data[0]);
+                switch (ret.data[1]) {
+                    case '小学一年级':
+                        basicData.grade = 1;
+                        break;
+                    case '小学二年级':
+                        basicData.grade = 2;
+                        break;
+                    case '小学三年级':
+                        basicData.grade = 3;
+                        break;
+                    case '小学四年级':
+                        basicData.grade = 4;
+                        break;
+                    case '小学五年级':
+                        basicData.grade = 5;
+                        break;
+                    case '小学六年级':
+                        basicData.grade = 6;
+                        break;
+                }
+            } else {}
+        });
+        setTimeout(function() {
+            UICustomPicker.setValue({
+                id: UICustomPickerId,
+                data: ['未选择', '未选择']
+            });
+        }, 10);
+
+    }
+
+    function selectedGender(type) {
+        basicData.gender = type;
+        if (type === 1) {
+            $api.attr($api.byId('selectedMale'), 'src', '../../../common/image/nanhai-xz@3x.png');
+            $api.attr($api.byId('selectedFemale'), 'src', '../../../common/image/female@3x.png');
+            $api.addCls($api.byId('textMale'), 'selected-sex');
+            $api.removeCls($api.byId('textFemale'), 'selected-sex')
+        } else {
+            $api.attr($api.byId('selectedMale'), 'src', '../../../common/image/nanhai@3x.png');
+            $api.attr($api.byId('selectedFemale'), 'src', '../../../common/image/nvhai-xz@3x.png');
+            $api.addCls($api.byId('textFemale'), 'selected-sex');
+            $api.removeCls($api.byId('textMale'), 'selected-sex')
+        }
+    }
+
+    function closeUICustomPicker() {
+        UICustomPicker.close({
+            id: UICustomPickerId
+        })
+    }
+
+    function continueTo() {
+        closeUICustomPicker();
+        if (basicData.gender === '') {
+            toast.fail({
+                title: "请选择性别"
+            });
+            setTimeout(function() {
+                loadUICustomPicker();
+            }, 1500);
+            return
+        }
+        if (!basicData.grade || basicData.grade === '未选择') {
+            toast.fail({
+                title: "请选择年级"
+            });
+            setTimeout(function() {
+                loadUICustomPicker();
+            }, 1500);
+            return
+        }
+        if (!basicData.age || basicData.age === '未选择') {
+            toast.fail({
+                title: "请选择年龄"
+            });
+            setTimeout(function() {
+                loadUICustomPicker();
+            }, 1500);
+            return
+        }
+        toast.alert({
+            title: '确认一下你的信息',
+            msg: '确认好后将为你定制试题，不能再改了哦！',
+            iconHtml: '<i class="iconfont iconfont-alert">&#xe700;</i>',
+            buttons: [{
+                name: '重新选择',
+                onclick: function() {
+                    toast.hide();
+                    loadUICustomPicker();
+                }
+            }, {
+                name: '确定',
+                onclick: function() {
+                    toast.hide();
+                    $Login.completeMsg(basicData, funSuc, funErr);
+                    //goToTest();
+                }
+            }]
+        });
+    }
+
+    function funSuc(resp) {
+        if (resp.errCode === 0) {
+            // $analysis.bindZhuge('信息完善_完善成功b');
+            $storage.setStorage('user-info', resp.user);
+            var userProperties = {
+                '性别': resp.user.gender,
+                'vip': resp.user.vip,
+                '名称': resp.user.userName,
+                '能力等级': resp.user.gradeScaleName,
+                '电话号码': resp.user.userMobile
+
+            };
+            $analysis.identify(resp.user.userMobile, userProperties);
+            goToTest();
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            });
+            setTimeout(function() {
+                loadUICustomPicker();
+            }, 1500);
+        }
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: "网络异常，请检查网络链接"
+        });
+        setTimeout(function() {
+            loadUICustomPicker();
+        }, 1500);
+    }
+
+    function goToTest() {
+        api.openFrame({
+            name: 'warm_up_testfrm',
+            url: '../gradingTest/warm_up_testfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'warm_up_testfrm'
+            },
+            bounces: false,
+            reload: true
+        });
+    }
+    function agreement() {
+        api.openFrame({
+            name: 'user_agreement',
+            url: '../task/user_agreement.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            bgColor:'#fff',
+            pageParam: {
+                name: 'user_agreement'
+            },
+            bounces: false,
+            reload: true
+        });
+    }
+</script>
+
+</html>

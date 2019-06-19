@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>通用活动专题集合</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css"/>
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/myBookshelfStyle/specialActivities.css">
+</head>
+<body>
+  <div id="app">
+    <div class="top">
+      <div class="return" @touchend="exit">
+         <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon-fh_"></use>
+         </svg>
+      </div>
+      <h1>{{title}}</h1>
+      <div class="return">
+         <svg class="icon" aria-hidden="true">
+             <use xlink:href="#icon"></use>
+         </svg>
+      </div>
+    </div>
+    <!-- <div class="special">
+      <div class="bookList" v-for='(item, index) in listData'>
+        <div class="cover">
+          <div class="activeImg layer">
+            <img :src="item.coverImgUrl=='' ? '../../../common/image02/banner.png' : resUri+item.subjectCover">
+          </div>
+          <div class="mask">已结束</div>
+          <span class="bookNumber" v-if="item.isJoin">已报名</span>
+          <span class="number">{{item.totalJoinCount}}人在参加</span>
+        </div>
+        <h3>{{item.activityName}}</h3>
+        <p>{{item.activityTitle}}</p>
+      </div>
+    </div> -->
+  </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/bookshelf-guide.js"></script> -->
+<script type="text/javascript">
+apiready = function (){
+  var app = new Vue({
+    el:'#app',
+    data:{
+      listData:[],
+      resUri:'',
+      title:api.pageParam.til
+    },
+    mounted(){
+      console.log("标题==="+api.pageParam.til +"id===="+api.pageParam.ActivityTypeId)
+      this.resUri = $comm.resUri
+      this.openCon()
+    },
+    methods:{
+      exit(){
+        api.closeWin({
+        });
+      },
+      openCon(){
+        api.openFrame({
+            name: 'con',
+            url: './specialActivities.html',
+            bounces:true,
+            bgColor:'#fff',
+            reload:true,
+            rect: {
+                x: 0,
+                y: 65,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam:{
+              activityTypeId:api.pageParam.ActivityTypeId,
+              grade:api.pageParam.grade
+            }
+        });
+      }
+      // getList(){
+      //   var data = {
+      //     activityTypeId:api.pageParam.ActivityTypeId,
+      //     page:1
+      //   }
+      //     $comm.socket(6001,data,(res)=>{
+      //       let ret = JSON.parse(res)
+      //       console.log(res)
+      //       if(ret.error==0){
+      //         let Data = JSON.parse(ret.data)
+      //         this.listData = Data.activityList
+      //       }
+      //     })
+      // },
+      // goBookInfo(id){
+      //   api.openWin({
+      //       name: 'bookInfo',
+      //       url: '../myBookshelf/VIPUser_bookInfo_win.html',
+      //       pageParam: {
+      //           thisBookId:id
+      //       }
+      //   });
+      // }
+    }
+  })
+}
+
+</script>
+
+</html>

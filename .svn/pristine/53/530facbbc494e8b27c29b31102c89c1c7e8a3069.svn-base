@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>短信验证登录</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/loginStyle/login_SMS.css">
+</head>
+
+<body id="body">
+    <div class="content">
+        <h1 class="text-title">设置登陆密码</h1>
+        <div class="input-phone">
+            <input class="input" id="inputValue" onchange="checkPassword(this.value)"  type="password" placeholder="设置密码（6-8字母或数字）"><br>
+        </div>
+        <div class="input-phone">
+            <input class="input" id="checkoutValue"  type="password" placeholder="请确认密码"><br>
+        </div>
+        <button style="margin-top: 5rem" class="btn-login" id="btn">完成</button><br>
+    </div>
+</body>
+<link rel="stylesheet" type href="../../css/custom-toast.css" />
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-login-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+
+    var toast = new customToast();
+
+    apiready = function() {
+        adaptationModel();
+        bindEvent();
+    };
+
+    function bindEvent () {
+        $api.byId('btn').addEventListener('touchend', function () {
+            if ($api.byId('inputValue').value === '' && !$comm.isCorrectPassword($api.byId('inputValue').value)) {
+                return toast.fail({
+                    title: "请输入正确的格式的密码"
+                });
+            }
+            if ($api.byId('inputValue').value === '000000') {
+                return toast.fail({
+                    title: "密码设置太简单哦"
+                });
+            }
+            if ($api.byId('checkoutValue').value === '') {
+                return toast.fail({
+                    title: "请确认密码"
+                })
+            }
+            if ($api.byId('checkoutValue').value !== $api.byId('inputValue').value) {
+                return toast.fail({
+                    title: "两次密码不一致"
+                })
+            }
+            $Login.setUserPwd($api.byId('inputValue').value, funSuc, funErr)
+        })
+    }
+
+    function funSuc (resp) {
+        if (resp.errCode === 0) {
+            var userInfo = resp.user;
+            $storage.setStorage('user-info', userInfo);
+            $storage.setStorage('token', userInfo.userToken);
+            if (userInfo.gender && userInfo.grade && userInfo.age) {
+                $storage.setStorage('user-info', resp.user);
+                if (userInfo.gradeScaleId) {
+                    if (userInfo.userName.length !== 11) {
+                        if (userInfo.IsHaveBooks){
+                            goToHomePage();
+                        } else {
+                            goToReport();
+                        }
+                    } else {
+                        goToCompleteUserName();
+                    }
+                } else {
+                    goToGradeTest();
+                }
+            } else {
+                goToGradeTest();
+            }
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+    function funErr () {
+        toast.fail({
+            title: '网络异常，请检查网络链接'
+        })
+    }
+
+    function goToReport() {
+        // $analysis.bindZhuge('信息完善_进入信息完善页面b');
+        api.openFrame({
+            name: 'test_resultsfrm',
+            url: '../gradingTest/recommended_books_frm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            reload: true,
+            pageParam: {
+                name: 'test_resultsfrm'
+            },
+            bounces: false,
+            slidBackEnabled: false
+        })
+    }
+
+    function goToHomePage() {
+        api.openWin({
+            name: 'indexHomePage',
+            url: '../homePage/index_home_win.html',
+            pageParam: {
+                name: 'home_page'
+            },
+            bounces: false,
+            reload: true,
+            slidBackEnabled: false
+        });
+    }
+
+    function goToGradeTest() {
+        api.openWin({
+            name: 'index_start_test',
+            url: '../gradingTest/index_start_test.html',
+            pageParam: {
+                name: 'index_start_test'
+            },
+            reload: true,
+            bounces: false,
+            slidBackEnabled: false
+        });
+    }
+
+    function goToCompleteUserName () {
+        api.openWin({
+            name: 'perfect_userName_frm',
+            url: 'html/personalCenter/perfect_userName_frm.html',
+            pageParam: {
+                name: 'index_start_test'
+            },
+            bounces: false,
+            slidBackEnabled: false
+        });
+    }
+
+    function goToPerfectInfo() {
+        api.openFrame({
+            name: 'perfect_information',
+            url: '../personalCenter/perfect_information_first.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            reload: true,
+            pageParam: {
+                name: 'perfect_information'
+            },
+            bounces: false
+        });
+    }
+
+    function checkPassword(value) {
+        if (!$comm.isCorrectPassword(value)) {
+            toast.fail({
+                title: '密码需为6-8位字母或数字'
+            })
+        }
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+</script>
+
+</html>

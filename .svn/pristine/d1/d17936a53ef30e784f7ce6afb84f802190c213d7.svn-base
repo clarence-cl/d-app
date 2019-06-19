@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>阅读能力测评</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/readingAbility.css">
+</head>
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+        <!-- 返回 -->
+        <div class="head">
+          <div class="top">
+              <div class="return" @touchend="exit">
+                 <svg class="icon" aria-hidden="true">
+                     <use xlink:href="#icon-fh_"></use>
+                 </svg>
+              </div>
+              <h1>阅读能力测评</h1>
+              <div class="explain">
+                 <svg class="icon" aria-hidden="true">
+                     <use xlink:href="#icon-shuoming_huaban_huaban"></use>
+                 </svg><span class="prohibit">查看说明</span>
+              </div>
+          </div>
+          <div class="tab">
+            <div class="tabList">
+              <span>个人模式</span>
+              <strong></strong>
+            </div>
+            <div class="tabList">
+              <span>竞赛模式</span>
+              <strong style="display:none"></strong>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+            <div class="test">
+                <span>嘀嗒阅读能力测评，全方位专家级诊断，十余年中文儿童阅读与语文教育经验沉淀，历时两年打造，是了解自己当前真实语文水平和阅读能力的好帮手，嘀嗒机器人将会推荐更适合的书给你！</span>
+                <span class="tip">
+                  小提示：<br>
+                  1. 首次测评将奖励  阅读力指数 +1000<br>
+                  2. 题量不等，需要用时20-30分钟<br>
+                  3. 阅读能力测评，每季度开放3次，题库持续更新，建议你每季度都来挑战一下
+                </span>
+                <div class="new">
+                  <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-new_huaban"></use>
+                  </svg>
+                  <span>现已加入：名著、古诗文阅读测评内容</span>
+                </div>
+            </div>
+            <div class="level bg">
+              <h2>阅读能力等级  {{lv}}</h2>
+             <h3>已达到 {{grade}}年级{{levelDisplay}}水平</h3>
+            </div>
+            <div class="result">
+              <div class="left" @touchend="goCertificate">
+                  <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-zs_"></use>
+                  </svg>
+                  <h4>我的证书</h4>
+                  <span>详细的评测结果</span>
+              </div>
+              <div class="right start" v-if="testCount==0">
+                  <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-cp_-copy"></use>
+                  </svg>
+                  <h4>开始测评</h4>
+                  <span>本季度剩余 {{testCount}}次</span>
+              </div>
+              <div class="right" v-if="testCount!=0" @touchend="goEvaluation">
+                  <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-cp_"></use>
+                  </svg>
+                  <h4>开始测评</h4>
+                  <span>本季度剩余 {{testCount}}次</span>
+              </div>
+            </div>
+            <div class="record">
+                <h5>测试记录</h5>
+                <div class="list" ref="list">
+                    <div class="box" v-for="(item, index) in recordList" @touchend="toDetail(item.testId)">
+                      <i></i>
+                      <p>阅读能力等级 {{item.lv}}级</p>
+                      <span>{{item.testDate}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var readingAloudTime = null;
+        var readingTime = null;
+        var app = new Vue ({
+            el: '#app',
+            data: {
+              userInfo:{},
+              recordList:[],
+              abilityCard:{},
+              testCount:null,
+              grade:null,
+              lv:null,
+              levelDisplay:null
+            },
+            mounted(){
+              this.userInfo = JSON.parse($storage.getStorage('user-info'))
+              this.getData()
+              this.addEvent()
+            },
+            methods: {
+              addEvent(){
+                api.addEventListener({
+                    name: 'backEvent'
+                }, (ret, err)=>{
+                    this.getData()
+                });
+
+              },
+              goEvaluation(){
+                if(this.userInfo.testCount>0){
+                  api.openWin({
+                      name: 'startTest',
+                      url: './startTest.html',
+                      slidBackEnabled: false
+                  });
+                }
+              },
+              goCertificate(){
+                this.sucFn(this.recordList[0].testId)
+              },
+              toDetail(id){
+                this.sucFn(id)
+              },
+              sucFn(id){
+                var data = {
+                  testId:id
+                }
+                $comm.socket(8009,data,(res)=>{
+                  if(res){
+                    var req = JSON.parse(res)
+                    if(req.error==0){
+                      var ret = JSON.parse(req.datas)
+                      Data = ret.abilityCard
+                      api.openWin({
+                          name: 'testResult',
+                          url: './testResult.html',
+                          slidBackEnabled:false,
+                          reload:true,
+                          pageParam: {
+                              result: Data,
+                              from:1
+                          }
+                      });
+
+                    }
+                  }
+                })
+              },
+              getData(){
+                var data = {
+                  Page:1
+                }
+                $comm.socket(8008,data,(res)=>{
+                  if(res){
+                    ret = JSON.parse(res)
+                    if(ret.error == 0){
+                      Data = JSON.parse(ret.datas)
+                      this.testCount= Data.remainingTestCount
+                      this.grade = Data.grade
+                      this.lv = Data.lv
+                      this.levelDisplay = Data.levelDisplay
+                      this.recordList = Data.abilities
+                      // if(frequency==1){
+                      //   var json = {
+                      //     testId:Data.abilities[0].testId
+                      //   }
+                      //   $comm.socket(8009,json,(res)=>{
+                      //     console.log(res)
+                      //     if(res){
+                      //       var ret = JSON.parse(res)
+                      //       if(ret.error==0){
+                      //         var Data = JSON.parse(ret.datas)
+                      //         this.abilityCard = Data.abilityCard
+                      //       }
+                      //     }
+                      //   })
+                      // }
+                    }
+                  }
+                })
+              },
+                exit: function() {
+                    api.closeWin()
+                }
+            }
+
+        });
+    };
+</script>
+
+</html>

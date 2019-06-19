@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>书摘朗读详情页</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css"/>
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css">
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/myBookshelfStyle/Readresults_detail.css">
+</head>
+<body>
+<!-- <div id="app" v-cloak> -->
+<div id="app">
+	<!-- 返回 -->
+	<div class="top">
+		<div class="return">
+			 <svg class="icon" aria-hidden="true">
+					 <use xlink:href="#icon-fh_"></use>
+			 </svg>
+	  </div>
+	  <h1>书摘朗读</h1>
+		<div class="return">
+			 <svg class="icon" aria-hidden="true">
+					 <use xlink:href="#icon"></use>
+			 </svg>
+	  </div>
+	</div>
+	<!-- 朗读详情 -->
+	<div class="readResults">
+	  <div class="headPortrait">
+	  	<img src="../../../common/image/boy@3x.png">
+			<span>{{name}}</span>
+	  </div>
+		<div class="record">
+			 <svg class="icon" aria-hidden="true">
+					<use xlink:href="#icon-bf_"></use>
+			 </svg>
+			 <!-- <div class="soundWave"></div> -->
+			 <span>03：30</span>
+		</div>
+		<p>近日，由接力出版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+			自少儿创作界、出版版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+			自少儿创作界、出版版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+			自少儿创作界、出版版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+			自少儿创作界、出版界。</p>
+		<div class="bookDetails clearfix">
+			  <img src="../../../common/image/book_cover.png">
+				<div class="personNumber">
+					  <h2>长袜子皮皮</h2>
+						<span>【瑞典】阿斯特丽德·林格伦</span>
+						<span class="span02">内容选自：林格伦和她创造的儿童世界</span>
+				</div>
+				<div class="bookScore">
+					  <div class="mark">99</div>
+						<span>朗读得分</span>
+				</div>
+		</div>
+		<div class="bookFoot">
+			<div class="bookTime">
+				<span class="time">发表于   {{publishTime}}<span class="delete">删除</span></span>
+			  <div class="bookLike">
+					<svg class="icon" aria-hidden="true">
+						<use xlink:href="#icon-sc_"></use>
+					</svg>
+					<span>568</span>
+			  </div>
+			</div>
+			<div class="bookShare">
+				 <div class="like">
+					 <svg class="icon" aria-hidden="true">
+						 <use xlink:href="#icon-xqdz_-copy"></use>
+					 </svg>
+					 <span>赞</span>
+				 </div>
+				 <div class="share" @click="goReadresults">
+					 <svg class="icon" aria-hidden="true" @click="">
+						 <use xlink:href="#icon-xqfx_-copy"></use>
+					 </svg>
+					 <span>分享</span>
+				 </div>
+			</div>
+		</div>
+	</div>
+	<!-- 弹窗 -->
+	<div class="popup">
+		<div class="popupBox">
+			<div class="close" @click="goReadresults">
+				<svg class="icon" aria-hidden="true">
+					<use xlink:href="#icon-gb_-copy"></use>
+				</svg>
+			</div>
+			<div id="share">
+				<div class="readResults smart">
+					 <div class="headPortrait">
+						 <img :src="userImage">
+						 <span>{{name}} <span style="color:#fa716f">·</span> 书摘朗读</span>
+					 </div>
+					 <div class="record">
+							<svg class="icon" aria-hidden="true"  @click="play">
+								<use :xlink:href="[ isPlay ? '#icon-tz_-1' : '#icon-bf_1']"></use>
+						  </svg>
+							<div class="soundWave"></div>
+							<span>03：30</span>
+					 </div>
+					 <p>近日，由接力出版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+						 自少儿创作界、出版版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+						 自少儿创作界、出版版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+						 自少儿创作界、出版版社和北京师范大学中国儿童文学研究中心共同举办的“中国儿童分级阅读研讨会”在京召开，来
+						 自少儿创作界、出版界。</p>
+					 <div class="bookDetails clearfix">
+							 <img :src="BookCover">
+							 <div class="personNumber">
+									 <h2>长袜子皮皮{{bookName}}</h2>
+									 <span>【瑞典】阿斯特丽德·林格伦{{author}}</span>
+									 <span class="span02">内容选自：林格伦和她创造的儿童世界{{chapterName}}</span>
+							 </div>
+							 <div class="bookScore">
+									 <div class="mark">99</div>
+									 <span>朗读得分</span>
+							 </div>
+					 </div>
+					 <div class="bookFoot">
+						 <div class="bookTime">
+							 <span class="time">发表于   {{publishTime}}</span>
+							 <div class="bookLike">
+								 <svg class="icon" aria-hidden="true">
+			 						<use xlink:href="#icon-sc_"></use>
+			 					</svg>
+								 <span>568</span>
+							 </div>
+						 </div>
+						 <!-- src="../../../common/image/code.png" -->
+						 <img  :src="newShareUrl" class="code">
+						 <span class="span01">嘀嗒伴我读书  读书看见成长</span>
+					 </div>
+					 <div class="tabPopup" v-show="isTab">
+						 <div class="tabL" id="wechatFriend">
+							<svg class="icon" aria-hidden="true">
+								 <use xlink:href="#icon-wx_"></use>
+							</svg>分享到微信
+						</div>
+						<div class="line"></div>
+						<div class="tabR" id="wechatMoments">
+							<svg class="icon" aria-hidden="true">
+								 <use xlink:href="#icon-pyq_"></use>
+							</svg>分享朋友圈
+						</div>
+					 </div>
+				</div>
+				<div class="tab">
+					<div class="tabL" @click="">
+						<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-bc_-copy"></use>
+				    </svg>保存
+					</div>
+					<div class="tabR" @click="inviteFriend">
+						<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-xqfx_-copy"></use>
+				    </svg>分享
+					</div>
+				</div>
+		  </div>
+		</div>
+	</div>
+</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<!-- <script type="text/javascript" src="../../../common/script/html2canvas.min.js"></script> -->
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/html2canvas.min.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-gradeTest-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<!-- <script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script> -->
+<script type="text/javascript">
+apiready = function () {
+		var app = new Vue({
+				el: '#app',
+				data: {
+						isShowRule: false,
+						name:'',
+						bookName:'',
+						author:'',    //作者
+						chapterName:'',  //单元名
+						shareInfo: '',
+						audioPath:'',
+						userImage: '../../../common/image/avatar.png',
+						BookCover: '../../../common/image/book_cover.png',
+						canShare: false,
+						contentUrl:'',
+						popup:false,
+						isTab:false,
+						publishTime:'',
+						newShareUrl:'',
+						flag:false,
+						flag1:false,
+						isPlay:false
+				},
+				created:function(){
+					// this.pullDownFresh();
+					this.loadInfo();
+					this.getStorageInfo();
+					this.getBookInfo();
+					// this.qrcode();
+				},
+				mounted: function () {
+						var that = this;
+						FastClick.attach(document.body);
+						that.toast = new customToast();
+				},
+				methods: {
+						// 下拉刷新
+						pullDownFresh:function(){
+							var that = this;
+							// var bounce=true;
+							// api.setFrameAttr({
+							//     name: 'grow_up_frm',
+							//     bounces: true,
+							// });
+							api.setRefreshHeaderInfo({
+										visible: true,
+										// loadingImg: '../image/timg.gif',
+										bgColor: '#fff',
+										textColor: '#ccc',
+										textDown: '下拉刷新...',
+										textUp: '松开刷新...',
+										showTime: true
+								}, function(ret, err) {
+										// _this.taskListWait();
+										console.log('下拉刷新')
+										// that.loadData();
+										// that.loadRadar("readRadar02");
+										setTimeout('api.refreshHeaderLoadDone()', '500');
+										// api.setFrameAttr({
+										//     name: 'grow_up_frm',
+										//     bounces: false,
+										// });
+								});
+								setInterval(function(){
+
+								},1000)
+						},
+						loadInfo: function () {
+							  this.publish();
+								var that = this;
+								that.audioPath = 'fs://' + $comm.guid(true) + '.mp3';
+								$weChatShare.getSpokesmanInfo(function (resp) {
+										// console.log(JSON.stringify(resp))
+										if (resp.errCode === 0) {
+												// that.qrcode(resp.ReadEndorsementModel.ShareUrl);
+
+												that.shareInfo = resp.ReadEndorsementModel;
+												if(resp.ReadEndorsementModel.HeadImgUrl){
+													api.imageCache({
+															url: $comm.resUri + resp.ReadEndorsementModel.HeadImgUrl
+													}, function(ret, err) {
+															that.userImage = ret.url || '../../../common/image/avatar.png';
+													});
+												}
+
+												// that.userImage = resp.ReadEndorsementModel.HeadImgUrl ? ($comm.resUri + resp.ReadEndorsementModel.HeadImgUrl) : '../../../common/image/avatar.png';
+												that.desc = resp.ReadEndorsementModel.Description;
+												that.url = resp.ReadEndorsementModel.ShareUrl;
+												that.shareQrcode = resp.ReadEndorsementModel.ShareQrcode;
+												// that.BookCover = $comm.resUri + resp.ReadEndorsementModel.BookCover;
+												console.log(88888)
+												console.log(JSON.stringify(resp))
+												api.imageCache({
+														url: $comm.resUri + resp.ReadEndorsementModel.BookCover
+												}, function(ret, err) {
+														that.BookCover = ret.url || '../../../common/image/book_cover.png';
+												});
+												that.canShare = true;
+												// console.log(that.url)
+												setTimeout(function(){
+														that.qrcode(that.url);
+												},500)
+
+												// that.drawImg();
+										} else if (resp.errCode === 1028) {
+
+												that.shareInfo = {
+														StudentName: JSON.parse($storage.getStorage('user-info')).userName,
+														TotalReadNumber: 0,
+														SerialReadingDays: 0,
+														BookReadIndex: 0,
+														BookName: '嘀嗒伴我读书'
+												};
+												that.userImage = JSON.parse($storage.getStorage('user-info')).headimgUrl ? $comm.resUri + JSON.parse($storage.getStorage('user-info')).headimgUrl : '../../../common/image/avatar.png';
+												that.canShare = false;
+
+										} else {
+												that.canShare = false;
+												// that.toast.fail({
+												// 		title: resp.errMsg
+												// })
+												api.toast({
+				                  msg: resp.errMsg,
+				                  duration: 2000,
+				                  location: 'middle'
+				                });
+										}
+								}, that.funErr);
+
+						},
+						goReadresults: function () {
+								api.openFrame({
+										name: 'Readresults_detail',
+										url: 'Readresults_detail.html',
+										bounces: false,
+										bgColor:'#fff',
+										slidBackEnabled: false,
+										animation: {
+												type: "fade", //动画类型（详见动画类型常量）
+												subType: "from_right", //动画子类型（详见动画子类型常量）
+												duration: 600 //动画过渡时间，默认300毫秒
+										}
+								});
+						},
+						//畫二維碼
+						qrcode:function (content) {
+								var that = this;
+								var FNScanner = api.require('FNScanner');
+								FNScanner.encodeImg({
+										content: content,
+										saveToAlbum: false,
+										saveImg: {
+												path: 'fs://qrcode' + Math.floor((Math.random() * 100) + 1) + 'goodShare.png',
+												w: 100,
+												h: 100
+										}
+								}, function(ret, err) {
+										// alert($api.jsonToStr(ret))
+										if (ret.status) {
+												// $api.dom('.qrcode-img').src = ret.imgPath;
+												that.newShareUrl = ret.imgPath;
+												that.flag = true
+												// console.log(that.flag)
+												if(that.flag){
+													that.drawImg();
+												}
+
+												// alert(JSON.stringify(ret));
+										} else {
+												// alert(JSON.stringify(err));
+										}
+								});
+						},
+						//畫分享頁面
+						drawImg:function(){
+								var that = this;
+								html2canvas(document.querySelector('#share'),{
+									useCORS:true
+								}).then(function(canvas){
+									var image = new Image();
+									image.src = canvas.toDataURL("image/png", 1);
+									var base64Str = image.src.split('base64,')[1];
+									console.log(base64Str)
+									var imgPath = "fs://qrcode/";
+									var imgName = Math.floor((Math.random() * 100) + 1) + "share.png";
+									// console.log(imgName)
+
+									var imgUri = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"); // 获取生成的图片的url
+									var trans = api.require('trans');
+									trans.saveImage({
+											base64Str: base64Str, //base64字符串不能包含data:image/png;base64,前缀
+											album: false,
+											imgPath: imgPath,
+											imgName: imgName
+									}, function(ret, err) {
+											if (ret.status) {
+													// console.log('success')
+													that.contentUrl = imgPath + imgName;
+											} else {
+													// alert(JSON.stringify(err));
+													console.log('fail');
+											}
+									});
+								});
+								// console.log(shareInfo)
+								//這裏想象著用畫布畫出來，但是思前想後換行等一系列有問題，放棄
+								// var drawing = document.getElementById("myCanvas");
+								// if(drawing.getContext){
+								//   var c=document.getElementById("myCanvas");
+								//   var ctx=c.getContext("2d");
+								//   var img = new Image();
+								//   var img1 = new Image();
+								//   // simg.src = 'https://ss0.bdstatic.com/94oJfD_bAAcT8t7mm9GUKT-xh_/timg?image&quality=100&size=b4000_4000&sec=1537549551&di=3f8d4d76679adcae225387f7d6b199aa&src=http://gss0.baidu.com/-4o3dSag_xI4khGko9WTAnF6hhy/lvpics/h=800/sign=b49dc48f8718367ab28972dd1e728b68/9922720e0cf3d7ca7f0736d0f31fbe096a63a9a6.jpg'
+								//   img.src = '../../../common/image/shares.png';
+								//   img1.src = $comm.resUri+shareInfo.BookCover;
+								//   img1.width = '40px';
+								//   img1.height = '40px'
+								//   img.onload = function(){
+								//     // alert('加载完毕');
+								//     ctx.drawImage(img,0,0);
+								//     ctx.font="30px Arial";
+								//     // ctx.textAlign = "center";
+								//     ctx.fillText(shareInfo.RecommendInfo,50,50);
+								//     ctx.fillText(shareInfo.SerialReadingDays,150,1050);
+								//     ctx.fillText(shareInfo.TotalReadNumber,500,1050);
+								//     ctx.fillText(shareInfo.StudentName+'  在读',400,200);
+								//     ctx.fillText(shareInfo.BookName,430,230);
+								//     ctx.fillText('这是我读的第'+shareInfo.BookReadIndex+'本书',280,260)
+								//   }
+								//   img1.onload = function(){
+								//     ctx.drawImage(img1,600,200,80,80)
+								//   }
+								//   //将画布上的内容转为base64编码
+								//   var imgUrl = drawing.toDataURL("image/png");
+								//   console.log(imgUrl)
+								//
+								// }else{
+								//   console.log(456)
+								// }
+						},
+						inviteFriend: function () {
+							  this.isTab=!this.isTab;
+								var that = this;
+								if(that.flag){
+								  that.drawImg();
+								}else{
+								  // toast.fail({
+								  //   title:'请稍后...'
+								  // })
+									api.toast({
+	                  msg: "请稍后...",
+	                  duration: 2000,
+	                  location: 'middle'
+	                });
+								  setTimeout(function(){
+								    that.drawImg();
+								  },2000)
+								}
+
+								console.log(that.canShare)
+								if (!that.canShare) {
+										// return that.toast.fail({
+										// 		title: '阅读后再分享哦'
+										// })
+										return api.toast({
+		                  msg: "阅读后再分享哦",
+		                  duration: 2000,
+		                  location: 'middle'
+		                });
+								}
+								if (!that.url || !that.shareQrcode || !that.desc) {
+										return;
+								}
+								var params = {
+										desc: that.desc,
+										realShareImageUrl:that.contentUrl,
+										readerPresent:true,
+										url: that.url,
+										shareQrcode: that.shareQrcode
+
+								};
+								console.log(JSON.stringify(params));
+
+								(function () {
+								    var comm = {};
+								    var isInstallWeChatApp = false;
+								    comm.show = function (params, callback) {
+								        if (!weChat) {
+								            var weChat = api.require('wx');
+								        }
+								        weChat.isInstalled(function (ret, err) {
+								            if (ret.installed) {
+								            } else {
+								                isInstallWeChatApp = true;
+								                alert('当前设备未安装微信客户端,请扫码分享');
+								            }
+								        });
+								        document.getElementById('wechatFriend').addEventListener('touchend', function () {
+								            if (isInstallWeChatApp) {
+								                return alert('当前设备未安装微信客户端,请扫码分享');
+								            } else {
+								                if(params.readerPresent){
+								                  weChat.shareImage({
+								                      apiKey: '',
+								                      scene: 'session',
+								                      thumb: 'widget://common/image/shares.png',
+								                      // contentUrl: 'widget://common/image/shares.png'
+								                      contentUrl: params.realShareImageUrl
+								                  }, function(ret, err){
+								                    callback('wechatFriend', ret);
+								                      if(ret.status){
+								                          // alert('分享成功');
+								                      }else{
+								                          // alert(err.code);
+								                      }
+								                  });
+								                }else{
+								                  weChat.shareWebpage({
+								                      apiKey: '',
+								                      scene: 'session',
+								                      title: params.desc,
+								                      description: params.desc,
+								                      thumb: 'widget://common/image/weChat.png',
+								                      contentUrl: params.url
+								                  }, function(ret, err) {
+								                      callback('wechatFriend', ret);
+								                  });
+								                }
+								            }
+								        });
+								        document.getElementById('wechatMoments').addEventListener('touchend', function () {
+								            if (isInstallWeChatApp) {
+								                return alert('当前设备未安装微信客户端,请扫码分享');
+								            } else {
+								                if(params.readerPresent){
+								                  weChat.shareImage({
+								                      apiKey: '',
+								                      scene: 'timeline',
+								                      thumb: 'widget://common/image/shares.png',
+								                      // contentUrl: 'widget://common/image/shares.png'
+								                      contentUrl: params.realShareImageUrl
+								                  }, function(ret, err){
+								                    callback('wechatMoments', ret);
+								                      // if(ret.status){
+								                      //   comm.hide();
+								                      //   callback('wechatMoments', ret);
+								                      // }else{
+								                      //     // alert(err.code);
+								                      // }
+								                  });
+								                }else{
+								                  weChat.shareWebpage({
+								                      apiKey: '',
+								                      scene: 'timeline',
+								                      title: params.desc,
+								                      description: params.desc,
+								                      thumb: 'widget://common/image/weChat.png',
+								                      contentUrl: params.url
+								                  }, function(ret, err) {
+								                      callback('wechatMoments', ret);
+								                  });
+								                }
+								            }
+								        });
+								    };
+								    window.$wechatShareAlert = comm
+								})();
+
+								$wechatShareAlert.show(params, function (type, ret) {
+										if (ret.status) {
+												that.toast.success({
+														title: '分享成功'
+												})
+										} else {
+												// that.toast.fail({
+												// 		title: '请稍后...'
+												// })
+												api.toast({
+													msg: '请稍后...',
+													duration: 2000,
+													location: 'middle'
+												});
+												that.drawImg();
+										}
+								});
+						},
+						publish:function () {
+							// 对Date的扩展，将 Date 转化为指定格式的String
+							// 月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，
+							// 年(y)可以用 1-4 个占位符，毫秒(S)只能用 1 个占位符(是 1-3 位的数字)
+							// 例子：
+							// (new Date()).Format("yyyy-MM-dd hh:mm:ss.S") ==> 2006-07-02 08:09:04.423
+							// (new Date()).Format("yyyy-M-d h:m:s.S")      ==> 2006-7-2 8:9:4.18
+							Date.prototype.Format = function (fmt) {
+							    var o = {
+							        "M+": this.getMonth() + 1, //月份
+							        "d+": this.getDate(), //日
+							        "h+": this.getHours(), //小时
+							        "m+": this.getMinutes(), //分
+							        "s+": this.getSeconds(), //秒
+							        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+							        "S": this.getMilliseconds() //毫秒
+							    };
+							    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+							    for (var k in o)
+							    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+							    return fmt;
+							}
+							var time1 = new Date().Format("yyyy-MM-dd");
+							var time2 = new Date().Format("yyyy-MM-dd hh:mm:ss");
+							this.publishTime = time2;
+						},
+
+
+            // 其他页面的代码
+
+						//缓存录音地址
+	          resetaudioUri:function(filePath) {
+	              //'../image/demo.zip'
+	              var path = filePath.replace(/fs:\/\//g, '');
+	              path = 'file:///' + api.fsDir + '/' + path;
+	              return path;
+	          },
+	          //获取用户缓存信息
+	          getStorageInfo:function(){
+							var that=this
+	            var userInfo = JSON.parse($storage.getStorage('user-info'));
+							// console.log(JSON.stringify($storage.getStorage('user-info')))
+							that.name = userInfo.userName;
+	            // 设置用户头像
+	            // if (userInfo.headimgUrl === '') {
+	            //     $api.attr($api.byId('headImg'), 'src', userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+							// 		that.
+	            // } else {
+	            //     $api.attr($api.byId('headImg'), 'src', $comm.resUri + userInfo.headimgUrl);
+	            // }
+	          },
+
+	          //获取图书的信息
+						getBookInfo:function(){
+	            var that = this;
+	            // api.pageParam.chapters.forEach(function(item, index) {
+	            //     if (api.pageParam.bcid === item.bcid) {
+	            //         that.chapterName = item.bcname
+	            //     }
+	            // });
+	            that.bookName = api.pageParam.bookName;
+	            that.currentScore = api.pageParam.currentScore;
+							that.author = api.pageParam.Author;
+	          },
+
+	          //调用音频播放
+	          audioPlayerStartDesc:function() {
+							  var that=this;
+	              api.startPlay({
+	                  path: that.resetaudioUri(audioPath)
+	              }, function(ret, err) {
+	                  if (ret) {
+	                      that.isPlay = false;
+	                  } else {
+	                      that.isPlay = false;
+	                  }
+	              });
+	          },
+						play:function () {
+							  var that=this;
+								if (that.isPlay) {
+									that.isPlay = false;
+									api.stopPlay();
+								}else {
+									that.isPlay = true;
+									that.audioPlayerStartDesc();
+								}
+
+						},
+						funErr: function () {
+								// this.toast.fail({
+								// 		title: '网络异常，请检查网络链接'
+								// })
+								api.toast({
+                  msg: "网络异常，请检查网络链接",
+                  duration: 2000,
+                  location: 'middle'
+                });
+						}
+				},
+		});
+};
+</script>
+</html>

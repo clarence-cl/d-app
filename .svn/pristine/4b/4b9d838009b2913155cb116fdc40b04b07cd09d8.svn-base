@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>登陆页</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css" />
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/loginStyle/login_page.css">
+</head>
+
+<body id="body" class="body">
+    <div class="img-wrap">
+         <img class="image-wrap" src="../../../common/image02/top.png" alt="图标">
+         <h1 class="text-color">嘀嗒伴我读书</h1>
+    </div>
+    <div class="content">
+        <div class="btn-wrap">
+            <button class="btn-login" id="goToLogin">登录</button>
+            <button class="btn-reg" id="goToRegistration">注册</button>
+        </div>
+    </div>
+    <img class="foot-bg" src="../../../common/image/login03.png">
+</body>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script>
+    apiready = function() {
+        console.log('login_page.apiready');
+        adaptationModel();
+        bindEvent();
+    };
+
+    function bindEvent() {
+        $analysis.bindEvent($api.byId('goToLogin'), 'touchend', function () {
+            goToLogin()
+        }, '首页_登录');
+
+        $analysis.bindEvent($api.byId('goToRegistration'), 'touchend', function () {
+            goToRegistration();
+        }, '首页_注册');
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function goToLogin() {
+        api.openFrame({
+            name: 'login_password',
+            url: './login_SMS.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'login'
+            },
+            bounces: false,
+            reload: true,
+            animation: {
+                type: "movein",
+                subType: "from_right",
+                duration: 300
+            }
+        });
+    }
+
+    function goToRegistration() {
+        api.openFrame({
+            name: 'registration',
+            url: './registration.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'registration'
+            },
+            bounces: false,
+            reload: true,
+            animation: {
+                type: "movein",
+                subType: "from_right",
+                duration: 300
+            }
+        });
+    }
+</script>
+
+</html>

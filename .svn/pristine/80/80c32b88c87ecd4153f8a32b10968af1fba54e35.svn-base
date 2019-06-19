@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>注册新账号</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/loginStyle/registration.css">
+</head>
+<body id="body">
+    <i class="iconfont iconfont-i font_family" id="goback">&#xe6fe;</i>
+    <div class="content">
+        <h1 class="text-title">加入 嘀嗒伴我读书</h1>
+        <div class="input-phone">
+            <input onfocus="focusInput()" class="input" id="mobileValue" oninput="if(value.length>11)value=value.slice(0, 11)" type="number" placeholder="输入手机号"><br>
+        </div>
+        <div class="ver-code">
+            <h7 class="text-verCode">点击获取验证码，开始手机验证</h7>
+            <div class="input-btn">
+                <input class="input-code" id="verCode" type="number" placeholder="输入手机验证码">
+                <button class="btn-verCode" id="btnVerCode">获取验证码</button>
+            </div>
+        </div>
+        <div class="input-phone">
+            <input onfocus="focusInput()" class="input" id="password" type="password" onchange="checkPassword(this.value)" maxlength="8" placeholder="设置密码（6-8字母或数字）"><br>
+        </div>
+        <button class="button-registration" id="btnRegistration">注册</button>
+    </div>
+</body>
+<link rel="stylesheet" type href="../../css/custom-toast.css" />
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-login-service.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript">
+    var isStart = false;
+    var message = '';
+    var setTimer = null;
+
+    var toast = new customToast();
+
+    apiready = function() {
+        adaptationModel();
+        bindEvent();
+    };
+
+    function bindEvent() {
+        $api.byId('btnVerCode').addEventListener('touchend', function() {
+            getVerificationCode();
+        });
+
+        $analysis.bindEvent($api.byId('goback'), 'touchend', function () {
+            goback();
+        }, '验证码注册_关闭b');
+
+        $api.byId('btnRegistration').addEventListener('touchend', function() {
+            registrationAccount();
+        });
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function getVerificationCode() {
+        var phoneNumber = $api.byId('mobileValue').value;
+        if (!$comm.isPoneAvailable(phoneNumber)) {
+            return toast.fail({
+                title: "手机号格式不正确",
+                duration: 2000
+            });
+        }
+        if (isStart) {
+            return;
+        }
+        isStart = true;
+        //发送获取验证码请求
+        $Login.sendVerCode(phoneNumber, 'signup', funSucVerCode, funErr);
+        var timer = 60;
+        $api.html($api.byId('btnVerCode'), timer + 's');
+        setTimer = setInterval(function() {
+            timer--;
+            $api.html($api.byId('btnVerCode'), timer + 's');
+            if (timer === 0) {
+                clearInterval(setTimer);
+                isStart = false;
+                $api.html($api.byId('btnVerCode'), '重新发送验证码');
+            }
+        }, 1000);
+        var eventProperty = {
+            '消息': message
+        };
+        // $analysis.bindZhuge('验证码注册_获取验证码b', eventProperty);
+    }
+
+    function checkPassword(value) {
+        if (!$comm.isCorrectPassword(value)) {
+            toast.fail({
+                title: '密码需为6-8位字母或数字'
+            })
+        }
+    }
+
+    function funSucVerCode(resp) {
+        if (resp.errCode === 0) {
+            message = "发送成功";
+            toast.success({
+                title: '发送成功'
+            })
+        } else {
+            if (setTimer) {
+                clearInterval(setTimer);
+            }
+            $api.html($api.byId('btnVerCode'), '发送验证码');
+            isStart = false;
+            message = "发送失败";
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function funErr(err) {
+        toast.fail({
+            title: "网络异常，请检查网络链接"
+        })
+    }
+
+    function registrationAccount() {
+        var mobile = $api.byId('mobileValue').value;
+        var verCode = $api.byId('verCode').value;
+        var pwd = $api.byId('password').value;
+
+        if (mobile === '') {
+            return toast.fail({
+                title: "请输入电话号码"
+            });
+        }
+        if (!$comm.isPoneAvailable(mobile)) {
+            return toast.fail({
+                title: "手机号格式不正确"
+            });
+        }
+        if (verCode === '') {
+            return toast.fail({
+                title: "请输入验证码"
+            });
+        }
+        if (pwd === '000000') {
+            return toast.fail({
+                title: "密码设置太简单哦"
+            });
+        }
+        if (pwd === '' && !$comm.isCorrectPassword(pwd)) {
+            return toast.fail({
+                title: "请输入正确的格式的密码"
+            });
+        }
+        // $analysis.bindZhuge('验证码注册_注册b');
+        $Login.signUp(mobile, verCode, pwd, funSucSignUP, funErr);
+    }
+
+    function funSucSignUP(resp) {
+        var eventProperty = {
+            '消息': resp.errCode === 0 ? '注册成功' : resp.errMsg
+        };
+        // $analysis.bindZhuge('验证码注册_完成注册b', eventProperty);
+
+        if (resp.errCode === 0) {
+            var userInfo = resp.user;
+            $storage.setStorage('user-info', userInfo);
+            $storage.setStorage('token', userInfo.userToken);
+            var userProperties = {
+                '性别': userInfo.gender,
+                'vip': userInfo.vip,
+                '名称': userInfo.userName,
+                '能力等级': userInfo.gradeScaleName,
+                '电话号码': userInfo.userMobile,
+                '年级': userInfo.gradeScaleName
+            };
+            $analysis.identify(userInfo.userMobile, userProperties);
+            toast.success({
+                title: '注册成功'
+            });
+            setTimeout(function() {
+                goToPerfectInfo();
+            }, 1500);
+        } else {
+            toast.fail({
+                title: resp.errMsg
+            })
+        }
+    }
+
+    function goToPerfectInfo() {
+        api.openFrame({
+            name: 'index_start_test',
+            url: '../gradingTest/index_start_test.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            reload: true,
+            pageParam: {
+                name: 'perfect_information'
+            },
+            bounces: false
+        });
+    }
+    function focusInput() {
+        setTimeout(function() {
+            $api.byId('password').scrollIntoView(false);
+        }, 300);
+    }
+    function goback() {
+        api.closeFrame({});
+    }
+</script>
+
+</html>

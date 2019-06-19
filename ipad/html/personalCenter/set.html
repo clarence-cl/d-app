@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>设置</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/set.css">
+</head>
+
+<body>
+	<div id="app">
+		<!-- 返回 -->
+		<div class="top">
+			<div class="return" @click="exit">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-fh_"></use>
+					 </svg>
+			</div>
+			<h1>设置</h1>
+			<div class="return">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon"></use>
+					 </svg>
+			</div>
+		</div>
+		<div class="set">
+			<div class="list" @click="editProfile">
+				<h2>个人资料编辑</h2>
+				<svg class="icon" aria-hidden="true">
+						 <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+				 </svg>
+			</div>
+		</div>
+		<div class="set">
+			<div class="list" >
+				<h2 style="color:#ccc;">修改密码</h2>
+				<svg style="display:none;" class="icon" aria-hidden="true">
+	 						 <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+	 				 </svg>
+			</div>
+			<div class="list">
+				<h2 style="color:#ccc;">绑定微信</h2>
+				<svg style="display:none;" class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+					 </svg>
+			</div>
+		</div>
+		<div class="set" @click="clearCache">
+			<div class="list">
+				<h2>清理缓存</h2>
+				<svg class="icon" aria-hidden="true">
+						 <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+				 </svg>
+			</div>
+		</div>
+		<!-- <div class="set">
+			<div class="list">
+				<h2>帮助与反馈</h2>
+				<svg class="icon" aria-hidden="true">
+	 						 <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+	 				 </svg>
+			</div>
+			<div class="list">
+				<h2>关于嘀嗒伴我读书</h2>
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-zuoyoujiantou-copy"></use>
+					 </svg>
+			</div>
+		</div> -->
+		<button @click="escLogin">退出登录</button>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+		var itemArr = ['一年级', '二年级', '三年级', '四年级', '五年级', '六年级'];
+		var app = new Vue({
+			el: '#app',
+			data: {
+				userInfo: JSON.parse($storage.getStorage('user-info')),
+				gradeName: '',
+				userImage: '',
+				placeholder: ''
+			},
+			mounted: function() {
+				FastClick.attach(document.body);
+				this.toast = new customToast();
+				this.loadUserInfo();
+				this.bindEvent();
+			},
+			methods: {
+				bindEvent: function() {
+					var that = this;
+					api.addEventListener({
+						name: 'change_userInfo'
+					}, function() {
+						that.loadUserInfo();
+					});
+				},
+				loadUserInfo: function() {
+					var that = this;
+					this.gradeName = itemArr[parseInt(this.userInfo.grade) - 1];
+					this.userInfo = JSON.parse($storage.getStorage('user-info'));
+					if (this.userInfo.headimgUrl === '') {
+						this.userImage = this.userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png';
+					} else {
+						api.imageCache({
+							url: $comm.resUri + that.userInfo.headimgUrl,
+							thumbnail: false
+						}, function(ret, err) {
+							that.userImage = ret.url;
+						});
+					}
+				},
+				exit: function() {
+					api.closeWin()
+				},
+				clearCache: function() {
+					var that = this;
+					that.toast.alert({
+						title: '确定要清除缓存吗?',
+						buttons: [{
+							name: '取消',
+							onclick: function() {
+								that.toast.hide();
+							}
+						}, {
+							name: '确定',
+							onclick: function() {
+								that.toast.hide();
+								var token = $storage.getStorage('token');
+								var userInfo = $storage.getStorage('user-info');
+								$comm.tryRemoveFolder('book');
+								// var userVipInfo = $storage.getStorage('userVipInfo');
+								// var buyVIPInfo = $storage.getStorage('buy-vip-info');
+								// $comm.clearAllData();
+								// window.localStorage.removeItem("user-info");
+								// window.localStorage.removeItem("token")
+								// window.localStorage.removeItem("level")
+								// window.localStorage.removeItem('slelectGrade')
+								// window.localStorage.removeItem('levelDesc')
+								// window.localStorage.removeItem('levelRemarks')
+								// $storage.setStorage('buy-vip-info', buyVIPInfo);
+								// $storage.setStorage('token', token);
+								// $storage.setStorage('user-info', userInfo);
+								// $storage.setStorage('userVipInfo', userVipInfo);
+								// that.toast.success({
+								// 	title: '清除缓存完成'
+								// });
+								api.toast({
+									msg:'清除缓存完成',
+									duration: 2000,
+									location: "middle"
+								});
+							}
+						}]
+					});
+				},
+				escLogin: function() {
+						api.closeFrame({ //退出后避免进入验证码页面
+							name: 'loginPassword'
+						});
+
+						api.closeWin({
+							name: 'loginIndex'
+						});
+					var buyVIPInfo = $storage.getStorage('buy-vip-info');
+					// var storage=window.localStorage;
+					//清除缓存方法冲突，手动清除
+          window.localStorage.removeItem("user-info");
+					window.localStorage.removeItem("token")
+					window.localStorage.removeItem("level")
+					window.localStorage.removeItem('slelectGrade')
+					window.localStorage.removeItem('levelDesc')
+					window.localStorage.removeItem('levelRemarks')
+					//$comm.clearAllData();
+					$storage.setStorage('buy-vip-info', buyVIPInfo);
+					api.closeToWin({
+						name: 'indexHomePage'
+					});
+					api.sendEvent({
+						name: 'exit-App'
+					});
+				},
+				personalSel: function() {
+					$api.addCls($api.byId('personal'), 'sel');
+					$api.removeCls($api.byId('system'), 'sel');
+					$api.css($api.byId('systemSetup'), 'display:none');
+					$api.css($api.byId('personalData'), 'display:block');
+				},
+				systemSel: function() {
+					$api.addCls($api.byId('system'), 'sel');
+					$api.removeCls($api.byId('personal'), 'sel');
+					$api.css($api.byId('systemSetup'), 'display:block');
+					$api.css($api.byId('personalData'), 'display:none');
+				},
+				goPersonalitySignature: function() {
+					$api.css($api.byId('setMask'), 'display:block');
+					this.placeholder = this.userInfo.sign ? this.userInfo.sign : '请输入个性签名';
+				},
+				changePassWord: function() {
+					api.openWin({
+						name: 'modifyThePassword.html',
+						url: '../personalCenter/modifyThePassword.html',
+						//          pageParam: {},
+						bounces: false,
+						bgColor: '#fff',
+						slidBackEnabled: false,
+					});
+				},
+				editProfile: function() {
+					api.openWin({
+						name: 'editProfile',
+						url: '../personalCenter/editProfile.html',
+						bgColor: '#fff',
+						bounces: true,
+						reload: true,
+						slidBackEnabled: false,
+					});
+				},
+				espopupBtn: function() {
+					$api.css($api.byId('setMask'), 'display:none');
+				},
+				setSub: function() {
+					var that = this;
+					var itemKey = 'sign';
+					var itemValue = $api.byId('texts').value;
+					if (itemValue && itemValue.length > 20) {
+						// return that.toast.fail({
+						// 	title: '个性签名不得超过20字符'
+						// })
+						return api.toast({
+                  msg: "个性签名不得超过20字符",
+                  duration: 2000,
+                  location: 'middle'
+              });
+					}
+					if (itemValue && itemValue !== '' && $api.trim(itemValue) !== '') {
+						$myCenter.my_PersonInfoSetting(itemKey, itemValue, function(resp) {
+							if (resp.errCode == 0) {
+								$storage.setStorage('user-info', resp.user);
+								// that.toast.success({
+								// 	title: '签名修改成功！'
+								// });
+								api.toast({
+		                  msg: "个性签名不得超过20字符",
+		                  duration: 2000,
+		                  location: 'middle'
+		              });
+								that.userInfo = JSON.parse($storage.getStorage('user-info'));
+								$api.byId('setMask').style.display = "none";
+								that.loadUserInfo();
+								api.sendEvent({
+									name: 'change_userInfo'
+								});
+							} else {
+								// that.toast.fail({
+								// 	title: resp.errMsg
+								// })
+								api.toast({
+		                  msg: resp.errMsg,
+		                  duration: 2000,
+		                  location: 'middle'
+		              });
+							}
+						}, that.funErr)
+					} else {
+						// that.toast.fail({
+						// 	title: '请输入个性签名'
+						// })
+						api.toast({
+									msg: '请输入个性签名',
+									duration: 2000,
+									location: 'middle'
+							});
+					}
+				},
+				funErr: function() {
+					// this.toast.fail({
+					// 	title: "网络异常，请检查网络链接"
+					// });
+					api.toast({
+            msg: "网络异常，请检查网络链接",
+            duration: 2000,
+            location: 'middle'
+          });
+				}
+			}
+		});
+	};
+
+	function uploadHeadPhoto() {
+		getPicture(function(base64, param) {
+			//以图片中心剪裁为正方形,正方形边长512px
+			$comm.cutAndResizeImg(base64, 512, function(ret) {
+				var itemKey = 'headimgurl';
+				var itemValue = ret.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+				$myCenter.my_PersonInfoSetting(itemKey, itemValue, onPhotoUploadSucceed, function() {
+					// toast.fail({
+					// 	title: '网络异常'
+					// })
+					api.toast({
+              msg: "网络异常，请检查网络链接",
+              duration: 2000,
+              location: 'middle'
+            });
+				})
+			});
+		}, function(err, param) {
+			funErrPhoto(false);
+		}, function(param) {});
+	}
+
+	function onPhotoUploadSucceed(resp) {
+		if (resp && resp.errCode === 0) {
+			$storage.setStorage('user-info', resp.user);
+			sendEvent();
+			funErrPhoto(true);
+		} else {
+			// toast.fail({
+			// 	title: resp.errMsg
+			// })
+			api.toast({
+          msg: resp.errMsg,
+          duration: 2000,
+          location: 'middle'
+        });
+		}
+	}
+
+	function sendEvent() {
+		api.sendEvent({
+			name: 'change_userInfo'
+		});
+	}
+
+	function getPicture(onsuccess, onfailed, onpicload, param) {
+		var inputFile = document.getElementById('photoPicker');
+		//关联事件
+		if (!inputFile.onchange) {
+			inputFile.onchange = function() {
+				if (inputFile.files.length === 1) {
+					var file = inputFile.files[0];
+					var reader = new FileReader();
+					reader.onload = function() {
+						if (onpicload !== undefined && onpicload !== null) {
+							onpicload(param);
+						}
+						var base64 = this.result;
+						if (base64.indexOf("data:base64,") === 0) {
+							base64 = base64.replace(/^data:base64,/, "data:image/jpeg;base64,");
+						}
+						onsuccess(base64, param);
+						//取消事件
+						inputFile.onchange = undefined;
+					};
+					reader.readAsDataURL(file);
+				} else {
+					//取消事件
+					inputFile.onchange = undefined;
+				}
+			};
+		}
+		//执行click
+		inputFile.click();
+	}
+
+	function funErrPhoto(isErr) {
+		if (isErr) {
+			// toast.success({
+			// 	title: '头像修改成功！',
+			// 	duration: "2000"
+			// })
+			api.toast({
+          msg: '头像修改成功！',
+          duration: 2000,
+          location: 'middle'
+        });
+		} else {
+			// toast.fail({
+			// 	title: '头像修改失败！',
+			// 	duration: "2000"
+			// })
+			api.toast({
+        msg: '头像修改失败！',
+        duration: 2000,
+        location: 'middle'
+      });
+		}
+
+	}
+</script>
+
+</html>

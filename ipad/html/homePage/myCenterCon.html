@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>个人中心</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/homePageStyle/myCenter_frm.css">
+<style>
+.EvaluationSwitchBtn{
+  display: none;
+}
+</style>
+</head>
+
+<body>
+    <!-- <div id="myCenter" v-cloak> -->
+    <div id="myCenter" v-cloak>
+        <div class="head" >
+          <div @touchstart="clickTime($event)" @touchend="goEditProfile($event)">
+            <!-- ../../../common/image02/head.png -->
+              <img :src="imgUrl?imgUrl:userInfo.headImgUrl?resUrl+userInfo.headImgUrl:'../../../common/image02/head.png'">
+              <span class="edit">{{userInfo.sign?userInfo.sign:"编辑个人资料"}}</span>
+          </div>
+        </div>
+        <div class="list">
+            <div class="box" @touchstart="clickTime($event)" @touchend="goEvaluation($event)">
+                <div class="left">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-cs_"></use>
+                    </svg>
+                    <h5>阅读能力测评</h5>
+                </div>
+                <!-- :style="{display:(goEvaluationSwitch?'block':'none')}" -->
+                <div class="right" v-if="userInfo.level!=0?true:false">
+                    <h4>{{level}} <span>级</span></h4>
+                    <span class="smart">本季度剩余{{userInfo.testCount}}次</span>
+                </div>
+                <div class="right" v-if="userInfo.level==0?true:false">
+                    <button>去测评</button>
+                </div>
+            </div>
+        </div>
+        <div class="list">
+            <div class="box" style="display: none;">
+                <div class="left">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-VIP_"></use>
+                    </svg>
+                    <h5>会员卡</h5>
+                </div>
+                <div class="right">
+                    <h4>7 <span>天后过期</span></h4>
+                </div>
+            </div>
+            <div class="box" @touchstar="clickTime($event)" @touchend="goVip($event)">
+                <div class="left">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-vip-"></use>
+                    </svg>
+                    <h5>开通会员卡，享超级特权</h5>
+                </div>
+                <div class="right" @touchend="openVip">
+                    <button class="vip">开通</button>
+                </div>
+            </div>
+            <div class="box">
+                <div class="left">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-dh_-copy"></use>
+                    </svg>
+                    <h5 class="prohibit">水滴兑换</h5>
+                </div>
+                <div class="right">
+                    <h4 class="prohibit">{{userInfo.integral}} <span>水滴</span></h4>
+                </div>
+            </div>
+        </div>
+        <div class="list">
+            <div class="box" @touchstart="clickTime($event)" @touchend="goMyRead($event)">
+                <div class="left">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-wdld_"></use>
+                    </svg>
+                    <h5>我的朗读</h5>
+                </div>
+                <div class="right">
+                    <h4 >{{userInfo.totalReadingAloud}} <span>条</span></h4>
+                    <span class="smart">已分享{{userInfo.totalReadingAloudShare}}次</span>
+                </div>
+            </div>
+            <div class="box" style="display:none;">
+                <div class="left">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-lj_"></use>
+                    </svg>
+                    <h5>我的阅读理解</h5>
+                </div>
+                <div class="right">
+                    <h4>{{userInfo.totalChoice}} <span>条</span></h4>
+                    <span class="smart">正确率80%</span>
+                </div>
+            </div>
+        </div>
+        <div class="list">
+            <div class="box">
+                <div class="left">
+                    <svg class="icon" aria-hidden="true">
+                      <use xlink:href="#icon-dyr_-copy"></use>
+                    </svg>
+                    <h5 class="prohibit">邀请好友加入</h5>
+                </div>
+                <div class="right">
+                    <h4 class="prohibit"><span>已影响</span>  {{userInfo.totalInvite}} <span class="prohibit">人</span></h4>
+                    <span class="smart prohibit">为阅读代言，获取7天免费VIP</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var readingAloudTime = null;
+        var readingTime = null;
+        var app = new Vue({
+            el: '#myCenter',
+            data: {
+                userData: {
+                    todayintegrals: 0,
+                    todayreading: 0,
+                    serialreading: 0,
+                    serialreadblokc: 0,
+                    mycoupons: 0
+                },
+                goEvaluationSwitch:true,
+                level:null,
+                imgUrl:null,
+                resUrl:null,
+                userInfo: JSON.parse($storage.getStorage('user-info'))||{},
+                userVIPInfo: {},
+                x1:0,
+                y1:0
+            },
+            created: function() {
+                // FastClick.attach(document.body);
+                this.toast = new customToast();
+                // this.adaptationModel();
+                // this.loadUserData();
+                // this.bindEvent();
+            },
+            mounted() {
+                // this.pullDownFresh();
+                this.resUrl = $comm.resUri
+                this.upData()
+                this.imgUrl=null
+                this.getUserInfo()
+                this.addEvent()
+            },
+            methods: {
+              addEvent(){
+                api.addEventListener({
+                    name: 'backEvent'
+                }, (ret, err)=>{
+                  console.log("个人中心监听返回------")
+                  this.getUserInfo()
+                });
+              },
+              getUserInfo(){
+                var data = {
+                  loginType:1,
+                  VerCode:"",
+                  Pwd:"",
+                  Phone:"",
+                  token: this.userInfo.token
+                }
+                $comm.socket(1002,data,(res)=>{
+                  if(res){
+                    ret = JSON.parse(res)
+                    if(ret.error==0){
+                      console.log("token获取个人信息========"+res)
+                      Data = JSON.parse(ret.datas)
+                      //this.goEvaluationSwitch = Data.user.level!=0&&Data.user.level?true:false
+                      this.userInfo = Data.user
+                      this.$set(this.userInfo,"totalReadingAloud",Data.user.totalReadingAloud)
+                      this.level = Data.user.level
+                      $storage.setStorage('user-info', Data.user);
+                      $storage.setStorage('token', (Data.user).token);
+                    }else {
+                      api.toast({
+                          msg: ret.errorMsg,
+                          duration: 2000,
+                          location: 'middle'
+                      });
+                    }
+                  }
+                })
+              },
+              upData(){
+                api.addEventListener({
+                    name: 'updata'
+                }, (ret, err)=> {
+                    this.userInfo = JSON.parse($storage.getStorage('user-info'))
+                    this.imgUrl =  ret.value.imgUrl
+                });
+              },
+                clickTime(event){
+                  this.x1 = event.touches[0].pageX
+                  this.y1 = event.touches[0].pageY
+                },
+                goEvaluation(event) {
+                  var calX = event.changedTouches[0].pageX - this.x1||0
+                  var calY = event.changedTouches[0].pageY - this.y1||0
+                  if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+                    var link = this.userInfo.level!=0&&this.userInfo.level?'readingAbility02.html':'readingAbility01.html'
+                    api.openWin({
+                        name: 'readingAbility',
+                        url: '../gradingTest/'+link,
+                        bounces: false,
+                        reload:true,
+                        slidBackEnabled: false
+                    });
+                  }
+                },
+                goSet: function() {
+                    api.openWin({
+                        name: 'set',
+                        url: '../personalCenter/set.html',
+                        bounces: false,
+                        slidBackEnabled: false
+                    });
+                },
+                goVip: function(event) {
+                  var calX = event.changedTouches[0].pageX - this.x1||0
+                  var calY = event.changedTouches[0].pageY - this.y1||0
+                  if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+                    api.openWin({
+                        name: 'vip',
+                        url: '../personalCenter/vip.html',
+                        bounces: false,
+                        slidBackEnabled: false
+                    });
+                  }
+                },
+                goMyRead: function(event) {
+                  var calX = event.changedTouches[0].pageX - this.x1||0
+                  var calY = event.changedTouches[0].pageY - this.y1||0
+                  if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+                    api.openWin({
+                        name: 'myReadHead',
+                        url: '../personalCenter/myReadHead.html',
+                        slidBackEnabled: false,
+                        pageParam: {
+                            name: 'myRead'
+                        }
+                    });
+                  }
+                },
+                goEditProfile: function(event) {
+                  var calX = event.changedTouches[0].pageX - this.x1||0
+                  var calY = event.changedTouches[0].pageY - this.y1||0
+                  if(Math.sqrt(Math.pow(calX, 2) + Math.pow(calY, 2))==0){
+                    api.openWin({
+                          name: 'editProfile',
+                          url: '../personalCenter/editProfile.html',
+                          bounces: true,
+                          reload: true,
+                          bgColor: '#fff',
+                          slidBackEnabled: false
+                      });
+                  }
+                },
+                openVip(){
+                    // var User = $storage.getStorage('user-info')
+                    // User.level = 10
+                    // $storage.getStorage('user-info')
+                    // $storage.setStorage('user-info', User);
+                    // $storage.setStorage('level', 5);
+                  api.openWin({
+                      name: 'vip',
+                      url: '../personalCenter/vip.html',
+                       //url:'../gradingTest/interestSelectionHead.html',
+                      slidBackEnabled: false
+                  });
+
+                },
+                funErr: function() {
+                    // this.toast.fail({
+                    //     title: "网络异常，请检查网络链接"
+                    // })
+                    api.toast({
+                      msg: "网络异常，请检查网络链接",
+                      duration: 2000,
+                      location: 'middle'
+                    });
+                }
+            }
+
+        });
+    };
+</script>
+
+</html>

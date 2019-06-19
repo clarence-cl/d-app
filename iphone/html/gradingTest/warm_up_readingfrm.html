@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>$Title$</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/warm_up_readingfrm.css">
+</head>
+
+<body id="body" class="body">
+    <div id="exitWarmReading" class="icon-wrap">
+        <i class="iconfont font_family icon-btn">&#xe6fe;</i>
+    </div>
+    <div class="title-wrap">
+        <h1 class="text-title">请大声朗读下面的文字</h1>
+        <div class="header-bar-wrap">
+            <div class="header-bar" id="headerBar"></div>
+        </div>
+    </div>
+    <div class="reading-content">
+        <p class="read-text" id="refText">
+            傣族小姑娘喊凤，养了两只小孔雀。小孔雀的脖子又细又长，蓝绿蓝绿的绒毛，真可爱。 小孔雀慢慢地长大，越来越美丽。
+        </p>
+    </div>
+    <div id="btnRecord" class="btn-record">
+        <div class="btn-wrap-record" onclick="playRecording()">
+            <div class="icon-wrap-record" id="playIcon">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-dingjice_huifanganniu"></use>
+                </svg>
+            </div>
+            <h6 class="text-record" id="iconText">回放</h6>
+        </div>
+        <div class="btn-wrap-recordB" id="btnRecording">
+            <div class="icon-wrap-record" id="iconWrap">
+                <svg class="icon" aria-hidden="true">
+                    <use xlink:href="#icon-dingjiceluyin_moren"></use>
+                </svg>
+            </div>
+            <h6 id="recordText" class="text-record">点击话筒，开始录音</h6>
+        </div>
+        <div class="btn-wrap-recordC">
+            <div class="score-wrap">
+                <div id="scoreIcon" class="icon-wrap-record">
+                    <svg class="icon" aria-hidden="true">
+                        <use xlink:href="#icon-dingjice_weidefenanniu"></use>
+                    </svg>
+                </div>
+                <h6 id="scoreResult" class="score-text"></h6>
+            </div>
+            <h6 class="text-record">得分</h6>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="footer-icon-wrap">
+            <div class="icon-button-right">
+                <svg class="icon icon-right" aria-hidden="true">
+                    <use xlink:href="#icon-luyin_jinhangzhong"></use>
+                </svg>
+            </div>
+            <div class="icon-button">
+                <svg class="icon icon-right" aria-hidden="true">
+                    <use xlink:href="#icon-ceshidiyiti_weikaishi"></use>
+                </svg>
+            </div>
+        </div>
+        <div class="submit-btn-wrap">
+            <div id="subBtn" class="sub-btn">
+                继续
+            </div>
+        </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/readingTest-guide.js"></script> -->
+<script type="text/javascript">
+    var toast = new customToast();
+    var isRecord = false;
+    var demo = null;
+    var timer = null;
+    var audioResult = null;
+    var readText;
+    var isPlay = false;
+    apiready = function() {
+        if (api.systemType === 'android') {
+            audioResult = {};
+        } else {
+            demo = api.require('moduleChivox');
+        }
+        readText = $api.byId('refText').innerText;
+        adaptationModel();
+        create();
+        registChivoxCallback();
+        bindEvent();
+    };
+
+    function bindEvent() {
+
+        $analysis.bindEvent($api.byId('exitWarmReading'), 'touchend', function () {
+            goback();
+        }, '热身测-朗读测_关闭b');
+
+        $analysis.bindEvent($api.byId('btnRecording'), 'touchend', function () {
+            btnRecord();
+        }, '热身测-朗读测_朗读b');
+
+        $analysis.bindEvent($api.byId('subBtn'), 'touchend', function () {
+            continueTest();
+        }, '热身测-朗读测_继续b');
+
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+    }
+
+    function btnRecord() {
+        var privacy = api.require('privacy');
+        privacy.microphone(function(ret, err) {
+            if (ret.status) {
+                if (!isRecord) {
+                    isRecord = true;
+                    changBtnUI();
+                    start();
+                } else {
+                    stopRecordUI();
+                    stop();
+                }
+            } else {
+                toast.fail({
+                    title: '请开启麦克风权限'
+                });
+            }
+        });
+    }
+
+    function playRecording() {
+        if (isRecord) {
+            return;
+        }
+        if (!audioResult) {
+            return toast.fail({
+                title: '请先录音'
+            });
+        }
+        if (!isPlay) {
+            isPlay = true;
+            replay();
+            $api.html($api.byId('playIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_tingzhianniu"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('iconText'), '停止');
+        } else {
+            isPlay = false;
+            stopReplay();
+        }
+    }
+
+    function stopRecordUI() {
+        $api.removeCls($api.byId('headerBar'), 'count-down');
+        $api.addCls($api.byId('headerBar'), 'reload-count-down');
+        clearInterval(timer);
+        isRecord = false;
+        $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+            '                <use xlink:href="#icon-dingjice_kaishiluyinanniu"></use>\n' +
+            '            </svg>');
+        $api.html($api.byId('recordText'), '再读一次');
+    }
+
+    function changBtnUI() {
+        $api.html($api.byId('refText'), $api.byId('refText').innerText);
+        $api.addCls($api.byId('headerBar'), 'count-down');
+        $api.removeCls($api.byId('headerBar'), 'reload-count-down');
+        $api.html($api.byId('recordText'), '再次点击 结束录音');
+        var btn = false;
+        $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+            '                <use xlink:href="#icon-dingjiceluyin_kaishi"></use>\n' +
+            '            </svg>');
+        timer = setInterval(function() {
+            if (btn) {
+                $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+                    '                <use xlink:href="#icon-dingjiceluyin_moren"></use>\n' +
+                    '            </svg>');
+            } else {
+                $api.html($api.byId('iconWrap'), '<svg class="icon" aria-hidden="true">\n' +
+                    '                <use xlink:href="#icon-dingjiceluyin_kaishi"></use>\n' +
+                    '            </svg>');
+            }
+            btn = !btn;
+        }, 500)
+    }
+
+    function registChivoxCallback() {
+        //chivox全结果回调
+        api.addEventListener({
+            name: 'chivoxAllResult'
+        }, function(ret, err) {
+            if (ret) {
+                stopRecordUI();
+                if (ret.value.errId === 60010) {
+                    return toast.fail({
+                        title: '网络异常，请检查网络链接'
+                    });
+                }
+                reloadUI(ret);
+                audioResult = $chivox.parse(ret);
+            }
+        });
+        //chivox结束回放回调
+        api.addEventListener({
+            name: 'chivoxReplayFinished'
+        }, function(ret, err) {
+            if (ret) {
+                isPlay = false;
+                $api.html($api.byId('playIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                    '                    <use xlink:href="#icon-dingjice_huifanganniu"></use>\n' +
+                    '                </svg>');
+                $api.html($api.byId('iconText'), '回放');
+                $api.removeCls($api.byId('headerBar'), 'count-down');
+                $api.addCls($api.byId('headerBar'), 'reload-count-down');
+            }
+        });
+    }
+
+    function reloadUI(ret) {
+        var value = $chivox.parse(ret);
+        if (!value || !value.details) {
+            return;
+        }
+        var arrIndex = [];
+        var item;
+        for (var i = 0; i < value.details.length; i++) {
+            if (value.details[i].overall >= 80) {
+                item = {
+                    idx: i,
+                    type: 1
+                };
+                arrIndex.push(item)
+            } else if (value.details[i].overall >= 50 && value.details[i].overall < 80) {
+                item = {
+                    idx: i,
+                    type: 2
+                };
+                arrIndex.push(item)
+            } else if (value.details[i].overall < 50) {
+                item = {
+                    idx: i,
+                    type: 3
+                };
+                arrIndex.push(item)
+            }
+        }
+        $api.html($api.byId('refText'), $matchText($api.byId('refText').innerText, arrIndex));
+        // todo: 重新计算朗读得分规则
+        var readingScore = $chivox.calcTotalScore(ret, JSON.parse($storage.getStorage('user-info')).grade).totalscore;
+        if (readingScore >= 80) {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-1"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), Math.floor(readingScore));
+        } else if (80 > readingScore && readingScore >= 60) {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-2"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), Math.floor(readingScore));
+        } else {
+            $api.html($api.byId('scoreIcon'), ' <svg class="icon" aria-hidden="true">\n' +
+                '                    <use xlink:href="#icon-dingjice_-"></use>\n' +
+                '                </svg>');
+            $api.html($api.byId('scoreResult'), '');
+        }
+        $api.css($api.byId('subBtn'), 'background-color: #1adb96');
+    }
+
+    function create() {
+        if (demo) {
+            demo.creatCloudEngine({}, function(ret, err) {
+                if (ret) {
+                    chivoxEngineOn = true;
+                    $comm.debug('Chivox Engine Created:', JSON.stringify(ret), 'debug');
+                } else {
+                    chivoxEngineOn = false;
+                }
+            });
+        }
+    }
+
+    function destroy() {
+        if (demo) {
+            demo.deleteCloudEngine({}, function(ret, err) {
+                if (ret) {
+                    chivoxEngineOn = false;
+                    $comm.debug('Chivox Engine Destroyed:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+
+    function start() {
+        if (demo && chivoxEngineOn) {
+            var data = {
+                refText: $api.byId('refText').innerText
+            };
+            demo.start(data, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Starting:', JSON.stringify($comm.extend(ret, data)), 'debug');
+                }
+            });
+        }
+    }
+
+    function stop() {
+        if (demo) {
+            demo.stop({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Stoping:', JSON.stringify($comm.extend(ret)), 'debug');
+                }
+            });
+        }
+    }
+
+    function stopReplay() {
+        if (demo) {
+            demo.stopReplay({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine ReplayingStoping:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+
+    function replay() {
+        if (demo) {
+            demo.replay({}, function(ret, err) {
+                if (ret) {
+                    $comm.debug('Chivox Engine Replaying:', JSON.stringify(ret), 'debug');
+                }
+            });
+        }
+    }
+
+    function continueTest(grade, month) {
+        if (!audioResult) {
+            return toast.fail({
+                title: '请朗读文章...'
+            })
+        }
+        if (isRecord) {
+            return toast.fail({
+                title: '正在录音...'
+            })
+        }
+        stopReplay();
+        clearInterval(timer);
+        destroy();
+        api.openFrame({
+            name: 'warm_up_answerfrm',
+            url: './warm_up_answerfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'warm_up_answerfrm',
+                bookText: $api.byId('refText').innerText
+            },
+            bounces: false,
+            reload: true
+                // animation: {
+                //     type: "push",
+                //     subType: "from_right",
+                //     duration: 300
+                // }
+        });
+    }
+
+    function goback() {
+        toast.alert({
+            title: '确定要退出定级测试吗？',
+            msg: '退出以后下次需要从头开始，你确认要退出吗？',
+            buttons: [{
+                name: '继续测试',
+                onclick: function() {
+                    toast.hide();
+                }
+            }, {
+                name: '退出',
+                onclick: function() {
+                    toast.hide();
+                    destroy();
+                    clearInterval(timer);
+                    stopReplay();
+                    api.openFrame({
+                        name: 'index_start_test',
+                        url: './index_start_test.html',
+                        pageParam: {
+                            name: 'index_start_test'
+                        },
+                        bounces: false,
+                        reload: true
+                    });
+                }
+            }]
+        });
+    }
+</script>
+
+</html>

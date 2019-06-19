@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>正式朗读</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientHeight / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" href="../../css/myBookshelfStyle/unit_ReadingTest_frm.css">
+</head>
+<body id="body" class="body">
+    <div id="app" v-cloak>
+      <div id="popup" class="popup">
+        <div class="popup-t">
+            <img class="img-avatar" id="headImg" src="">
+            <span id="name" class="span01">{{ userInfo.userName }}</span>
+            <div class="popup-hard">
+                <i class="iconfont font_family">&#xe757;</i>
+                阅读能力等级 <span id="userGrade"></span>
+            </div>
+            <div class="ranking-list">排行榜</div>
+        </div>
+          <div class="content">
+              <div class="result">
+                  <p>内容选自《<span id="bookName">{{ bookName }}</span>》<span id="unitName">{{ chapterName }}</span></p>
+                  <img id="imagePlayer" src="../../../common/image/pause.png" @click="playerAgain">
+                  <h3>朗读得分</h3>
+                  <h1>{{ currentScore }}</h1>
+              </div>
+              <div class="achievement">
+                  <h4>各项成绩</h4>
+                  <div class="data-map">
+                      <div>
+                          <div class="data-results">
+                              <div id="integrity" class="data">
+                                  <svg class="icon icon-data" aria-hidden="true">
+                                      <use xlink:href="#icon-dingjice_zuizhongjieguoye_wanzhengduicon"></use>
+                                  </svg>
+                                  <h6 class="score" id="scoreIntegrity"></h6>
+                              </div>
+                          </div>
+                          <div class="desc-text">完整度</div>
+                      </div>
+                      <div>
+                          <div class="data-results">
+                              <div id="accuracy" class="data">
+                                  <svg class="icon icon-data" aria-hidden="true">
+                                      <use xlink:href="#icon-dingjice_zuizhongjieguoye_zhengqueduicon"></use>
+                                  </svg>
+                                  <h6 class="score" id="scoreAccuracy"></h6>
+                              </div>
+                          </div>
+                          <div class="desc-text">正确度</div>
+                      </div>
+                      <div>
+                          <div class="data-results">
+                              <div id="fluency" class="data">
+                                  <svg class="icon icon-data" aria-hidden="true">
+                                      <use xlink:href="#icon-dingjice_zuizhongjieguoye_liuliduicon"></use>
+                                  </svg>
+                                  <h6 class="score" id="scoreFluency"></h6>
+                              </div>
+                          </div>
+                          <div class="desc-text">流利度</div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="popup-f">
+              <div>
+                  <div id="btn01" class="btn btn-color01" @touchend="goBack">回书页</div>
+                  <div id="goToReading" class="btn btn-color02" @touchend="goToReading">进入默读</div>
+                  <div id="shareAloud" class="btn btn-color03" @touchend="shareAloud">分享</div>
+              </div>
+          </div>
+      </div>
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<link rel="stylesheet" type="text/css" href="../../css/lib-wechatShare.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-chivox.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-wechatShare.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-weChatShare-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-matchText.js"></script>
+<script type="text/javascript" src="../../newbieGuide/unitTestReading-guide.js"></script>
+<script type="text/javascript" src="../../newbieGuide/unitTestGoReading.js"></script>
+<script type="text/javascript" src="../../newbieGuide/unitTestResults-guide.js"></script>
+<script type="text/javascript">
+    var toast = new customToast();
+    apiready = function() {
+      var app = new Vue({
+        el:'#app',
+        data:{
+          chapterName:'',
+          bookName:'',
+          currentScore:'',
+          isPlay:false
+        },
+        created:function(){
+          this.pullDownFresh();
+          console.log(api.pageParam.currentScore)
+          this.getStorageInfo();
+          this.getBookInfo();
+          this.getBarInfo();
+        },
+        methods:{
+          //下拉刷新
+          pullDownFresh:function(){
+            var that = this;
+            // var bounce=true;
+            // api.setFrameAttr({
+            //     name: 'grow_up_frm',
+            //     bounces: true,
+            // });
+            api.setRefreshHeaderInfo({
+                  visible: true,
+                  // loadingImg: '../image/timg.gif',
+                  bgColor: '#fff',
+                  textColor: '#ccc',
+                  textDown: '下拉刷新...',
+                  textUp: '松开刷新...',
+                  showTime: true
+              }, function(ret, err) {
+                  // _this.taskListWait();
+                  console.log('下拉刷新')
+                  that.getStorageInfo();
+                  that.getBookInfo();
+                  that.getBarInfo();
+                  setTimeout('api.refreshHeaderLoadDone()', '500');
+                  // api.setFrameAttr({
+                  //     name: 'grow_up_frm',
+                  //     bounces: false,
+                  // });
+              });
+              setInterval(function(){
+
+              },1000)
+              // window.addEventListener("scroll",function(){
+              //   var t = document.documentElement.scrollTop || document.body.scrollTop;
+              //   if(t<=30){
+              //         if(!bounce){
+              //             console.log(123)
+              //             api.setFrameAttr({
+              //                 name: 'grow_up_frm',
+              //                 bounces: true,
+              //             });
+              //             bounce=true;
+              //         }
+              //     }else{
+              //         if(bounce){
+              //             console.log(456)
+              //             api.setFrameAttr({
+              //                 name: 'grow_up_frm',
+              //                 bounces: false,
+              //             });
+              //             bounce=false;
+              //         }
+              //     }
+              // })
+          },
+          //缓存录音地址
+          resetaudioUri:function(filePath) {
+              //'../image/demo.zip'
+              var path = filePath.replace(/fs:\/\//g, '');
+              path = 'file:///' + api.fsDir + '/' + path;
+              return path;
+          },
+          //获取用户缓存信息
+          getStorageInfo:function(){
+            var userInfo = JSON.parse($storage.getStorage('user-info'));
+            $api.html($api.byId('name'), userInfo.userName);
+            $api.byId('userGrade').innerText = userInfo.gradeScaleName.slice(0, userInfo.gradeScaleName.length - 1);
+            // 设置用户头像
+            if (userInfo.headimgUrl === '') {
+                $api.attr($api.byId('headImg'), 'src', userInfo.gender === 1 ? '../../../common/image/avatar.png' : '../../../common/image/avatar.png');
+            } else {
+                $api.attr($api.byId('headImg'), 'src', $comm.resUri + userInfo.headimgUrl);
+            }
+            $api.html($api.byId('name'), userInfo.userName)
+          },
+
+          //获取图书的信息
+          getBookInfo:function(){
+            var that = this;
+            api.pageParam.chapters.forEach(function(item, index) {
+                if (api.pageParam.bcid === item.bcid) {
+                    that.chapterName = item.bcname
+                }
+            });
+            that.bookName = api.pageParam.bookName;
+            that.currentScore = api.pageParam.currentScore
+          },
+
+          //播放录音
+          playerAgain:function(){
+            var that = this;
+            that.isPlay = !that.isPlay;
+            if(that.isPlay){
+              $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/play.png');
+              api.startPlay({
+                  path: this.resetaudioUri(api.pageParam.audioPath)
+              }, function(ret, err) {
+                // if (ret) {
+                //     alert('播放完成');
+                // } else {
+                //     alert(JSON.stringify(err));
+                // }
+                  if (ret) {
+                      that.isPlay = false;
+                      $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/pause.png');
+                  } else {
+                      that.isPlay = false;
+                      $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/pause.png');
+                      toast.fail({
+                          title: '你好像没有朗读哦～'
+                      });
+                      // alert('好像没有朗读')
+                  }
+              });
+            }else{
+              that.stopPlay();
+            }
+
+          },
+          //停止录音播放
+          stopPlay:function() {
+              this.isPlay = false;
+              $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/pause.png');
+              api.stopPlay();
+          },
+          //调用音频播放
+          audioPlayerStartDesc:function() {
+              $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/soundplay.png');
+              api.startPlay({
+                  path: resetaudioUri(audioPath)
+              }, function(ret, err) {
+                  if (ret) {
+                      isPlay = false;
+                      $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+                  } else {
+                      isPlay = false;
+                      $api.attr($api.byId('imagePlayer'), 'src', '../../../common/image/sound@3x.png');
+                      toast.fail({
+                          title: '你好像没有朗读哦～'
+                      });
+                  }
+              });
+          },
+          //完整度，流利度，正确度柱状高度
+          getBarInfo:function(){
+            var data = api.pageParam.totalData
+            var integrity = (data.complete > 35 ? data.complete : 35) + '%';
+            var accuracy = (data.correct > 35 ? data.correct : 35) + '%';
+            var fluency = (data.fluency > 35 ? data.fluency : 35) + '%';
+            $api.css($api.byId('integrity'), 'height:' + integrity + ';');
+            $api.css($api.byId('accuracy'), 'height:' + accuracy + ';');
+            $api.css($api.byId('fluency'), 'height:' + fluency + ';');
+            $api.html($api.byId('scoreIntegrity'), data.complete);
+            $api.html($api.byId('scoreAccuracy'), data.correct);
+            $api.html($api.byId('scoreFluency'), data.fluency);
+          },
+          //回书页
+          goBack:function(){
+            // api.closeToWin({
+            //   name:'bookInfo'
+            // });
+            console.log(api.pageParam.testId)
+            $homeService.readingFinishCurrent(api.pageParam.bcid, api.pageParam.testId, 1, function(resp){
+                api.sendEvent({
+                    name: 'turn-the-page'
+                });
+
+                api.closeToWin({
+                    name: 'bookInfo'
+                });
+
+            }, function(err){
+              console.log(4321)
+            });
+          },
+
+          //去读书
+          goToReading:function() {
+              var that = this;
+              var testId = api.pageParam.testId;
+              // console.log(testId)
+              var eventProperty = {
+                  // '用户朗读成绩': score,
+                  '是否VIP图书': api.pageParam.data.vipbook,
+                  '图书名称': api.pageParam.data.bname,
+                  '图书等级': api.pageParam.data.gradeScaleName,
+                  '作者': api.pageParam.data.author,
+                  '已读人数': api.pageParam.data.readingNumber,
+                  '图书分类': api.pageParam.data.categories && api.pageParam.data.categories.length > 0 ? api.pageParam.data.categories[0].tag : '',
+                  '图书标签': api.pageParam.data.tags && api.pageParam.data.tags.length > 0 ? api.pageParam.data.tags[0].tag : ''
+              };
+              // $analysis.bindZhuge('单元朗读去阅读', eventProperty);
+              api.pageParam.chapters.forEach(function(item, index) {
+                  if (api.pageParam.bcid === item.bcid) {
+                      cfi = item.cfiFrom
+                  }
+              });
+
+              console.log(cfi)
+              // destroy();
+              // clearInterval(interval);
+              $homeService.startReading(testId, that.funSucStartReading, that.funErr);
+          },
+          //openWin ————>>进入的是读书页面
+          funSucStartReading:function(resp) {
+              // var that = this;
+              console.log('呵呵呵')
+              // console.log(resp.errCode);
+              if (resp.errCode === 0) {
+                  // api.closeWin({
+                  //   name:'readingTest'
+                  // });
+
+                  // console.log(api.pageParam.bookchaptersData)
+                  // api.closeWin({
+                  //     name: 'unit_ReadAloud'
+                  // });
+                  var obj = {
+                    bookPath: $storage.getStorage(api.pageParam.data.bid),
+                    cfi: cfi,
+                    bcid: api.pageParam.bcid,
+                    data: api.pageParam.data,
+                    bookchaptersData: api.pageParam.bookchaptersData,
+                    chapters: api.pageParam.chapters,
+                    testId: api.pageParam.testId,
+                    timeCount: api.pageParam.timeCount
+                  }
+                  // console.log(JSON.stringify(obj))
+                  api.openWin({
+                      name: 'readBook',
+                      url: './readBooks_frm.html',
+                      rect: {
+                          x: 0,
+                          y: 0,
+                          w: 'auto',
+                          h: 'auto'
+                      },
+                      bounces: false,
+                      reload: true,
+                      slidBackEnabled:false,
+                      pageParam: {
+                          bookPath: $storage.getStorage(api.pageParam.data.bid),
+                          cfi: cfi,
+                          bcid: api.pageParam.bcid,
+                          data: api.pageParam.data,
+                          bookchaptersData: api.pageParam.bookchaptersData,
+                          chapters: api.pageParam.chapters,
+                          testId: api.pageParam.testId,
+                          timeCount: api.pageParam.timeCount
+                      }
+                  });
+              }
+          },
+          funErr: function () {
+              this.toast.fail({
+                  title: '网络异常，请检查网络链接'
+              })
+          },
+          //炫耀一下
+          shareAloud:function(){
+            var testId = api.pageParam.testId;
+            console.log(testId)
+            console.log('分享')
+            var that = this;
+            // $analysis.bindEvent($api.byId('shareAloud'), 'touchstart', function () {
+                $weChatShare.shareReadBlockScore(testId, that.funSucReadBlock, that.funErr)
+            // }, '分享-朗读结果页')
+          },
+          funSucReadBlock:function(resp) {
+            console.log('haode')
+              if (resp.errCode === 0) {
+                  var params = {
+                      desc: resp.Description,
+                      url: resp.ShareUrl,
+                      shareQrcode: resp.ShareQrcode
+                  };
+                  $wechatShareAlert.show(params, function (type, ret) {
+                      if (ret.status) {
+                          toast.success({
+                              title: '分享成功'
+                          })
+                      } else {
+                          toast.fail({
+                              title: '分享失败'
+                          })
+                      }
+                  })
+              } else {
+                  toast.fail({
+                      title: resp.errMsg
+                  })
+              }
+          },
+
+
+        }
+      })
+    };
+</script>
+
+</html>

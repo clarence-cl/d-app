@@ -1,0 +1,58 @@
+.icon {
+    width: 1em; height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+    font-size: 3rem;
+}
+.tab-bar {
+    width: 100%;
+    height: 12rem;
+    border: 1px solid #e5e5e5;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+.tab-bar-row {
+    display: flex;
+    flex-direction: row;
+    /*width: 50%;*/
+    width: 37.5%;
+    height: 100%;
+    align-items: center;
+    z-index: 9;
+}
+.tab-item {
+    /*width: 25%;*/
+    width: 33.33%;
+    display: flex;
+    flex-direction: column;
+    height: 7rem;
+    border-radius: 2rem;
+    align-items: center;
+    justify-content: center;
+}
+.icon-footer {
+    font-size: 3rem;
+    margin-bottom: 0.6rem;
+}
+.tab-text {
+    font-family: PingFangSC-Regular;
+    font-size: 1.6rem;
+    color: #666;
+}
+.tab-text-block {
+    color: #1adb96;
+}
+.map{
+    position: absolute;
+    top:0;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    display: none;
+}

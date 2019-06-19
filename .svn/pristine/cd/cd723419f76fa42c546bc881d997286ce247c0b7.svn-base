@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+	<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+	<title>介绍自己</title>
+	<link rel="stylesheet" type="text/css" href="../../css/api.css" />
+	<link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+	<script src="../../../common/fontclass02/iconfont.js"></script>
+	<script>
+		document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+	</script>
+	<link rel="stylesheet" href="../../css/personalCenterStyle/self.css">
+</head>
+
+<body>
+	<div id="app">
+		<!-- 返回 -->
+		<div class="top">
+			<div class="return" @click="exit">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon-fh_"></use>
+					 </svg>
+			</div>
+			<h1>介绍自己</h1>
+			<div class="return">
+				<svg class="icon" aria-hidden="true">
+							 <use xlink:href="#icon"></use>
+					 </svg>
+			</div>
+		</div>
+		<div class="content">
+			<div class="introduction">
+				<input type="text" v-model="introduction" :placeholder="placeholder" maxlength="30">
+				<svg class="icon" aria-hidden="true" @click="clear">
+						<use xlink:href="#icon-dengluzhuce_guanbianniu_moren"></use>
+				</svg>
+			</div>
+			<span>最多可输入30字</span>
+			<button @click="setSub">确定</button>
+		</div>
+	</div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css" />
+<link rel="stylesheet" type="text/css" href="../../css/lib-actionSheet.css" />
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-actionSheet.js"></script>
+<script type="text/javascript">
+	var toast = new customToast();
+	apiready = function() {
+		var app = new Vue({
+			el: '#app',
+			data: {
+				userInfo: JSON.parse($storage.getStorage('user-info')),
+				introduction: api.pageParam.introductionCon,
+				placeholder: "打个招呼吧！"
+			},
+			mounted: function() {
+				FastClick.attach(document.body);
+				this.toast = new customToast();
+				this.bindEvent();
+			},
+			methods: {
+				clear: function() {
+					this.introduction = ""
+				},
+				bindEvent: function() {
+					var that = this;
+					api.addEventListener({
+						name: 'change_userInfo'
+					}, function() {});
+				},
+				exit: function() {
+					api.closeWin({
+					});
+				},
+				setSub: function() {
+					$myCenter.changeUserInfo({sign:this.introduction},(res)=>{
+						if(res){
+							res = JSON.parse(res);
+							ret = JSON.parse(res.datas)
+							if(ret.sucessce){
+								this.$set(this.userInfo, 'sign', this.introduction)
+								$storage.setStorage('user-info', this.userInfo);
+								api.sendEvent({
+								    name: 'updata'
+								});
+								api.closeWin({})
+
+								// api.openWin({
+								// 		name: 'editProfile',
+								// 		url: '../personalCenter/editProfile.html',
+								// 		bounces: false,
+								// 		bgColor: '#fff',
+								// 		reload: true,
+								// 		slidBackEnabled: false
+								// });
+							}
+						}
+
+
+					})
+					// var that = this;
+					// var itemKey = 'sign';
+					// var itemValue = $api.byId('texts').value;
+					// if (itemValue && itemValue.length > 20) {
+					//     return that.toast.fail({
+					//         title: '个性签名不得超过20字符'
+					//     })
+					// }
+					// if (itemValue && itemValue !== '' && $api.trim(itemValue) !== '') {
+					// 	$myCenter.my_PersonInfoSetting(itemKey, itemValue, function(resp) {
+					// 		if (resp.errCode == 0) {
+					// 			$storage.setStorage('user-info', resp.user);
+					// 			that.toast.success({
+					// 				title: '签名修改成功！'
+					// 			});
+					// 			that.userInfo = JSON.parse($storage.getStorage('user-info'));
+					// 			$api.byId('setMask').style.display = "none";
+					// 			that.loadUserInfo();
+					// 			api.sendEvent({
+					// 				name: 'change_userInfo'
+					// 			});
+					// 		} else {
+					// 			that.toast.fail({
+					// 				title: resp.errMsg
+					// 			})
+					// 		}
+					// 	}, that.funErr)
+					// } else {
+					// 	that.toast.fail({
+					// 		title: '请输入个性签名'
+					// 	})
+					// }
+				},
+				funErr: function() {
+					// this.toast.fail({
+					// 	title: "网络异常，请检查网络链接"
+					// });
+					api.toast({
+              msg: "网络异常，请检查网络链接",
+              duration: 2000,
+              location: 'middle'
+            });
+				}
+			}
+		});
+	};
+</script>
+
+</html>

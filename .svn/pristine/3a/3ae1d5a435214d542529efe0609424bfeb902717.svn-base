@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>$Title$</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" tyoe="text/css" href="../../../common/fontclass/iconfont.css">
+    <script src="../../../common/fontclass/iconfont.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/warm_up_answerfrm.css">
+</head>
+
+<body id="body" class="body">
+    <div class="icon-wrap" onclick="goback()">
+        <i class="iconfont font_family icon-btn">&#xe6fe;</i>
+    </div>
+    <div class="title-wrap">
+        <div class="header-bar-wrap">
+            <div class="header-bar" id="headerBar"></div>
+        </div>
+    </div>
+    <div class="icon-wrap-right" onclick="goToLookBook()">
+        <svg class="icon iconfont-btn" aria-hidden="true">
+            <use xlink:href="#icon-dingjice_guanbiyuanwenanniu_moren"></use>
+        </svg>
+        <span class="text-btn">查看原文</span>
+    </div>
+    <div class="reading-content" id="optionWrap">
+        <h1 class="answer-name">喊凤是那个民族?</h1>
+        <button class="option">回族</button>
+        <button class="option">满族</button>
+        <button class="option">傣族</button>
+        <button class="option">哈尼族</button>
+    </div>
+    <div class="footer">
+        <div class="footer-icon-wrap">
+            <div class="icon-button-right">
+                <svg class="icon icon-right" aria-hidden="true">
+                    <use xlink:href="#icon-luyin_yiwancheng"></use>
+                </svg>
+            </div>
+            <div class="icon-button">
+                <svg class="icon icon-right" aria-hidden="true">
+                    <use xlink:href="#icon-ceshidiyiti_jinhangzhong"></use>
+                </svg>
+            </div>
+        </div>
+        <div class="submit-btn-wrap">
+            <div id="subBtn" class="sub-btn">
+                提交
+            </div>
+        </div>
+    </div>
+    <div class="answer-alert" id="answerAlert">
+    </div>
+</body>
+<link rel="stylesheet" type="text/css" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-analysis.js"></script>
+<!-- <script type="text/javascript" src="../../newbieGuide/answerTest-guide.js"></script> -->
+<script type="text/javascript">
+    var toast = new customToast();
+    var isResult;
+    var submitted;
+    apiready = function() {
+        adaptationModel();
+        bindEvent()
+    };
+    function bindEvent() {
+        $api.byId('optionWrap').addEventListener('touchend', function(e) {
+            if (submitted){
+                return;
+            }
+            if (e.target && e.target.nodeName.toLowerCase() === 'button') {
+                $api.css($api.byId('subBtn'), 'background-color: #1adb96');
+                activeOption(e.target);
+            }
+        });
+        $analysis.bindEvent($api.byId('subBtn'), 'touchend', function () {
+            submit()
+        }, '热身测-阅读测_继续b');
+    }
+
+    function adaptationModel() {
+        $api.css($api.byId('body'), 'height:' + api.frameHeight + 'px');
+        $api.css($api.byId('body'), 'width:' + api.frameWidth + 'px');
+        var fontSize = api.frameHeight / 768 * 10 + 'px';
+        document.documentElement.style.fontSize = fontSize;
+        $api.css($api.byId('headerBar'), 'width: 0%;');
+    }
+
+    function activeOption(el) {
+        var allButtons = $api.domAll($api.byId('optionWrap'), 'button');
+        for (var i = 0; i < allButtons.length; i++) {
+            if (allButtons[i].innerText === el.innerText) {
+                isResult = el.innerText;
+                $api.addCls(allButtons[i], 'selected');
+            } else {
+                $api.removeCls(allButtons[i], 'selected');
+            }
+        }
+    }
+
+    function goToLookBook() {
+        api.openFrame({
+            name: 'look_bookfrm',
+            url: './look_bookfrm.html',
+            rect: {
+                x: 0,
+                y: 0,
+                w: 'auto',
+                h: 'auto'
+            },
+            pageParam: {
+                name: 'look_bookfrm',
+                bookText: api.pageParam.bookText
+            },
+            bounces: false,
+            animation: {
+                type: "curl",
+                subType: "from_right",
+                duration: 300
+            }
+        });
+    }
+
+    function submit() {
+        if (!isResult) {
+            return toast.fail({
+                title: '请选择答案'
+            })
+        }
+        submitted = true;
+        if (isResult === '傣族') {
+            $api.css($api.byId('answerAlert'), 'height: 20rem; width: 50rem');
+            $api.byId('answerAlert').innerText = '正确';
+        } else {
+            $api.css($api.byId('answerAlert'), 'height: 20rem; width: 50rem; background-color: red');
+            $api.html($api.byId('answerAlert'), '<h1 class="title-warn">回答错误</h1>\n' +
+                '    <h4>正确答案: 傣族</h4>');
+        }
+        setTimeout(function () {
+            api.openFrame({
+                name: 'test_process',
+                url: './test_process_frm.html',
+                rect: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                pageParam: {
+                    name: 'test_process'
+                },
+                bounces: false,
+                reload: true
+            });
+        }, 1500);
+    }
+
+    function goback() {
+        // $analysis.bindZhuge('热身测-阅读测_关闭b');
+        toast.alert({
+            title: '确定要退出定级测试吗？',
+            msg: '退出以后下次需要从头开始，你确认要退出吗？',
+            buttons: [{
+                name: '继续测试',
+                onclick: function() {
+                    toast.hide();
+                }
+            }, {
+                name: '退出',
+                onclick: function() {
+                    toast.hide();
+                    api.openFrame({
+                        name: 'index_start_test',
+                        url: './index_start_test.html',
+                        pageParam: {
+                            name: 'index_start_test'
+                        },
+                        bounces: false,
+                        reload: true
+                    });
+                }
+            }]
+        });
+    }
+</script>
+
+</html>

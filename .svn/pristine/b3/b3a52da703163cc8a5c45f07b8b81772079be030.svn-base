@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, initial-scale=1.0, width=device-width" />
+    <meta name="format-detection" content="telephone=no, email=no, date=no, address=no">
+    <title>开始测试</title>
+    <link rel="stylesheet" type="text/css" href="../../css/api.css" />
+    <link rel="stylesheet" type="text/css" href="../../../common/fontclass02/iconfont.css" />
+    <script src="../../../common/fontclass02/iconfont.js"></script>
+    <script>
+        document.documentElement.style.fontSize = document.documentElement.clientWidth / 768 * 10 + 'px';
+    </script>
+    <link rel="stylesheet" type="text/css" href="../../css/gradingTestStyle/startTest.css">
+</head>
+<body>
+    <!-- <div id="app" v-cloak> -->
+    <div id="app">
+      <div class="mask">
+        <!-- 返回 -->
+        <div class="top">
+            <div class="return" @touchend="exit">
+               <svg class="icon" aria-hidden="true">
+                   <use xlink:href="#icon-zuoyoujiantou-2"></use>
+               </svg>
+            </div>
+        </div>
+        <div class="tip">
+          <h1>精准评估阅读能力<br>开启智能阅读计划</h1>
+          <h3>小提示：</h3>
+          <ul>
+            <li>1.测试时长需要20-30分钟</li>
+            <li>2.阶段不同，题型和题量不同</li>
+            <li>3.有朗读测试，请在安静的环境中进行</li>
+            <li>4.请确保网络环境良好</li>
+          </ul>
+        </div>
+        <div class="start">
+          <div class="list">
+            <div>
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-cp-"></use>
+              </svg>
+              <span>10余年专业<br>AI中文分级</span>
+            </div>
+            <div>
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-cp-1"></use>
+              </svg>
+              <span>融合课标<br>国际标准</span>
+            </div>
+            <div>
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-cp-2"></use>
+              </svg>
+              <span>海量数据<br>模型分析</span>
+            </div>
+            <div>
+              <svg class="icon" aria-hidden="true">
+                  <use xlink:href="#icon-cp-3"></use>
+              </svg>
+              <span>实时匹配<br>精准定级</span>
+            </div>
+          </div>
+          <div class="btn">
+            <button @touchend="sucFn(1)">热身</button>
+            <button class="test" @touchend="sucFn(2)">立刻开始</button>
+          </div>
+          <span class="number">已经有18623568人完成了测试</span>
+        </div>
+      </div>
+    </div>
+</body>
+<link rel="stylesheet" href="../../css/custom-toast.css">
+<script type="text/javascript" src="../../../common/script/custom-toast.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/fastclick.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-storage.js"></script>
+<script type="text/javascript" src="../../../common/script/api.js"></script>
+<script type="text/javascript" src="../../../common/script/vue.js"></script>
+<script type="text/javascript" src="../../../common/script/lib-common.js"></script>
+<script type="text/javascript" src="../../../common/script/services/lib-homePage-service.js"></script>
+<script src="../../../common/script/services/lib-myCenter_frm-service.js"></script>
+<!-- <script src="../../../common/script/lib-analysis.js"></script> -->
+<script src="../../../common/script/public.js"></script>
+<script type="text/javascript">
+apiready = function() {
+    var readingAloudTime = null;
+    var readingTime = null;
+    var app = new Vue ({
+        el: '#app',
+        data: {
+        },
+        created: function () {
+        },
+        methods: {
+            exit: function() {
+                api.sendEvent({
+                  name:"backEvent"
+                })
+               api.closeWin({})
+            },
+            // warmUp(){
+            //   var id = this.sucFn()
+            //   console.log(id)
+            //   return
+            //   api.openWin({
+            //       name: 'gradReadTest',
+            //       url: './gradReadTest.html',
+            //       pageParam:{
+            //
+            //       }
+            //   });
+            // },
+            sucFn(type){
+              var link = type==1?'gradReadTest.html':'./information.html'
+              var name = type==1?'gradReadTest':'information'
+              var data = {
+                testType:type
+              }
+              $comm.socket(8001,data,(res)=>{
+                let ret = res?JSON.parse(res):{}
+                  if(ret.error==0){
+                    Data = JSON.parse(ret.datas)
+                    api.closeWin({
+                      name: 'interestSelection', //关闭上一次兴趣选择页面
+                    })
+                    api.openWin({
+                        name: name,
+                        url: link,
+                        slidBackEnabled: false,
+                        reload:true,
+                        pageParam:{
+                          testId:Data.testID,
+                          testType:type
+                        }
+                    });
+                  }
+              })
+            },
+            // start(){
+            //   api.openWin({
+            //       name: 'information',
+            //       url: './information.html'
+            //   });
+            // },
+            funErr: function () {
+                // this.toast.fail({
+                //     title: "网络异常，请检查网络链接"
+                // })
+                api.toast({
+                  msg: "网络异常，请检查网络链接",
+                  duration: 2000,
+                  location: 'middle'
+                });
+            }
+        }
+
+    });
+};
+</script>
+
+</html>
